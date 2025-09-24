@@ -1,0 +1,61 @@
+{
+  "version": "v4.2.0",
+  "name": "Tick0",
+  "bytecode": "06024023407301000101040fd318865117b3ce00411341937ba00016001fa100a000a001a002a003020100020401402cd345196325b317021602ce00417a4b07181602ce0016003ecc411341937ba0041600201601a004202105264c07a00417031600a1041603024a0aa00416010e0dce00a0043ecc010102",
+  "codeHash": "85d196e2aa3d746c4cf09346ebdf60eb30f3bbb02aaed69f2c224a5417bc6d92",
+  "fieldsSig": {
+    "names": [
+      "pool",
+      "data",
+      "next"
+    ],
+    "types": [
+      "ByteVec",
+      "TickData0",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "update",
+      "paramNames": [
+        "delta"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "TickData0"
+      ]
+    },
+    {
+      "name": "insert",
+      "paramNames": [
+        "index",
+        "index2"
+      ],
+      "paramTypes": [
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

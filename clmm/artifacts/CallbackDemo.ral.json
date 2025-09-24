@@ -1,0 +1,75 @@
+{
+  "version": "v4.2.0",
+  "name": "CallbackDemo",
+  "bytecode": "010340324054406d010202030012d376074af7b217021601a100160213c40de0b6b3a7640000a216010d0c1600d431036cd0a0000c2f13414d7b010002040110d3a590b275b113016413006417031702b4471600160216031601c202010703030009d356c7e2fe160016021601aca00016012ba100",
+  "codeHash": "ccea404352d9040d880c3bca3efd36bb1bb9c1eca6bf2121b216739c6603d7be",
+  "fieldsSig": {
+    "names": [
+      "locked"
+    ],
+    "types": [
+      "U256"
+    ],
+    "isMutable": [
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "run",
+      "paramNames": [
+        "callback",
+        "amount"
+      ],
+      "paramTypes": [
+        "Callback",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createCallback",
+      "paramNames": [
+        "callbackTemplate",
+        "amount"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Callback"
+      ]
+    },
+    {
+      "name": "pay",
+      "paramNames": [
+        "payer",
+        "amount",
+        "tokenId"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

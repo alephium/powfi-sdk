@@ -1,0 +1,28 @@
+{
+  "version": "v4.2.0",
+  "name": "FlashTest",
+  "bytecodeTemplate": "0101030002000f{1}0d0e{0}010017011700b41601a216010d0c16000101",
+  "fieldsSig": {
+    "names": [
+      "t",
+      "data"
+    ],
+    "types": [
+      "FlashPool",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

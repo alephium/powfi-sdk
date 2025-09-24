@@ -1,0 +1,125 @@
+{
+  "version": "v4.2.0",
+  "name": "BitmapWord",
+  "bytecode": "020540d641c941e7429442aa0000010201406516000c301340967b0c1701160013cd0100000000000000000000000000000000344c0816001340803c170016011340802a1701160013c5010000000000000000344c0816001340403c170016011340402a1701160013c10100000000344c08160013203c1700160113202a170116001380010000344c08160013103c1700160113102a17011600134100344c08160013083c1700160113082a170116001310344c081600103c17001601102a1701160010344c0816000e3c170016010e2a170116000e344c0416010d2a17011601020000010201407c16000c301340977b1340ff1701160013ccffffffffffffffffffffffffffffffff380c334c0516011340802b17014a0416001340803c1700160013c4ffffffffffffffff380c334c0516011340402b17014a0416001340403c1700160013c0ffffffff380c334c05160113202b17014a04160013203c17001600138000ffff380c334c05160113102b17014a04160013103c170016001340ff380c334c05160113082b17014a04160013083c17001600130f380c334c051601102b17014a041600103c170016000f380c334c0516010e2b17014a0416000e3c170016000d380c334c0416010d2b170116010201000101000dd3ff38d2a3ce00b4451341937ba0000d160000043b3aa1000100030f024064d327ef6f9f16014c40301600000417030d16033b0d2b0d16033b2a1704a000160438170516050c30170616064c0e16001603160500002b3f20160221170716071606024a0a160016033f20160221170816081606024a40311600000417090d16093b0d2b0c0d363a170aa000160a38170b160b0c30170c160c4c0e1600160b000116092b3f1f160221170d160d160c024a0c16001240ff16093f201f160221170e160e160c020000010101091600124100231241001f124100233d02",
+  "codeHash": "69fd344eb51899a9bdc30ae94beeb2dcfeb2fc312d39116ebe9d208a55293edd",
+  "fieldsSig": {
+    "names": [
+      "parent",
+      "value"
+    ],
+    "types": [
+      "Address",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "mostSignificantBit",
+      "paramNames": [
+        "x"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "leastSignificantBit",
+      "paramNames": [
+        "x"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "flip",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "getNext",
+      "paramNames": [
+        "compressed",
+        "zeroForOne",
+        "tickSpacing"
+      ],
+      "paramTypes": [
+        "I256",
+        "Bool",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256",
+        "Bool"
+      ]
+    },
+    {
+      "name": "getBitPos",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "BitMathError",
+      "fields": [
+        {
+          "name": "NoMostSignificantBit",
+          "value": {
+            "type": "U256",
+            "value": "150"
+          }
+        },
+        {
+          "name": "NoLeastSignificantBit",
+          "value": {
+            "type": "U256",
+            "value": "151"
+          }
+        }
+      ]
+    }
+  ]
+}

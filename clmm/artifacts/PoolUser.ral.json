@@ -1,0 +1,82 @@
+{
+  "version": "v4.2.0",
+  "name": "PoolUser",
+  "bytecode": "0701416501000811074098d39471365d16000c304c08a000a001a002a003a004a005a00602b21301640c1301641709170814010016051608160913c41bc16d674ec800001601c9a10014010116051608160913c41bc16d674ec800001601c9a10114010216051608160913c41bc16d674ec800001601c9a102b2160216031604160516071306640c130164170b170a1401031606160a160bc1170c06134bb80c0f0d160c0103170da00071a00171334c06a000170ea001a100160ea101a00171a00271334c06a001170fa002a101160fa102a00071a00171334c06a0001710a001a1001610a101cda000160d13c901000000000000000000000000100d160c0104a103a000a001160d13c901000000000000000000000000100d160c0104a104a000a002160d13c901000000000000000000000000100d160c0104a105a001a002160d13c901000000000000000000000000100d160c0104a106a000a001a002a003a004a005a00602",
+  "codeHash": "0c197ca0ddd1295e5a061f65b23ba56dd826452c22214fd3d1257ab9e334af0b",
+  "fieldsSig": {
+    "names": [
+      "token0",
+      "token1",
+      "token2",
+      "pool0",
+      "pool1",
+      "pool2",
+      "pool3"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "Pool",
+      "Pool",
+      "Pool",
+      "Pool"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "deploy",
+      "paramNames": [
+        "counter",
+        "payer",
+        "pool_",
+        "position_",
+        "tick_",
+        "word_",
+        "factory_",
+        "config_"
+      ],
+      "paramTypes": [
+        "U256",
+        "Address",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "Pool",
+        "Pool",
+        "Pool",
+        "Pool"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

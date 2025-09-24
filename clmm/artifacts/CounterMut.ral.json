@@ -1,0 +1,38 @@
+{
+  "version": "v4.2.0",
+  "name": "CounterMut",
+  "bytecode": "0102111f010000000005d36283db4ca0000d2aa100010000000103d3f36cd8e4a00002",
+  "codeHash": "86d6bceac34cd6dae4f2b7546fd02c3387b0eb96c643687900b3ecda0d455c3c",
+  "fieldsSig": {
+    "names": [
+      "value"
+    ],
+    "types": [
+      "U256"
+    ],
+    "isMutable": [
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "inc",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "get",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

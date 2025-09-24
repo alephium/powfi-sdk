@@ -1,0 +1,354 @@
+{
+  "version": "v4.0.0",
+  "name": "Router",
+  "bytecode": "0007405840b340ef4119416c41bd42060000060802403316000c2f7a4c041816010c2f4c031602160302160216012c16002d170616061603324c081606160534130e7b1602160602160316002c16012d170716071604347a4c04181607160232130d7b16071603020103070e03402fd3c2b1ca2116065634130c7b0c0e16000107170817070c0e16000108170a17091609160a16021603160416050000170c170b16017a1607160ba31608160ca31601160b160c0f0d1600010e170d160b160c160d0201030608021fd3b9fb57ea16055634130c7b160116001602a3160116020e0e1600010f170717061606160334130d7b1607160434130e7b16061607020000020502160c0e16000108170317020c0e1600010718170416011604414c03160216030216031602020103070b004029d364342a1916065634130c7b160016020003170817071343e516032c1709160916082c16091343e816072c2a2d170a160a16043413097b160116021603a316001601160516021603160a00060103070a004029d31937d61916065634130c7b16001602000317081707160716042c1343e82c160816042b1343e52c2d0d2a17091609160332130a7b160116021609a31600160116051602160916040006000306070040270c0e1600010718170616031606414c0f160116031604a31601160216040c0c160513060c160001104a0e160116031604a3160116020c160416050c13060c16000110",
+  "codeHash": "e1ef7a11988dd23f3815d376e474266e3e9f69c9ad289974b9c45ed4ad986a6d",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "addLiquidity_",
+      "paramNames": [
+        "reserve0",
+        "reserve1",
+        "amount0Desired",
+        "amount1Desired",
+        "amount0Min",
+        "amount1Min"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "addLiquidity",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "amount0Desired",
+        "amount1Desired",
+        "amount0Min",
+        "amount1Min",
+        "deadline"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "removeLiquidity",
+      "paramNames": [
+        "tokenPairId",
+        "sender",
+        "liquidity",
+        "amount0Min",
+        "amount1Min",
+        "deadline"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "Address",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "getReserveInAndReserveOut",
+      "paramNames": [
+        "tokenPair",
+        "tokenInId"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "swapExactTokenForToken",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "tokenInId",
+        "amountIn",
+        "amountOutMin",
+        "to",
+        "deadline"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256",
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swapTokenForExactToken",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "tokenInId",
+        "amountInMax",
+        "amountOut",
+        "to",
+        "deadline"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256",
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swap",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "to",
+        "tokenInId",
+        "amountIn",
+        "amountOut"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "ReserveOverflow",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "InsufficientInitLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityMinted",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityBurned",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "InvalidToAddress",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        },
+        {
+          "name": "InsufficientLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "5"
+          }
+        },
+        {
+          "name": "InvalidTokenInId",
+          "value": {
+            "type": "U256",
+            "value": "6"
+          }
+        },
+        {
+          "name": "InvalidCalleeId",
+          "value": {
+            "type": "U256",
+            "value": "7"
+          }
+        },
+        {
+          "name": "InvalidK",
+          "value": {
+            "type": "U256",
+            "value": "8"
+          }
+        },
+        {
+          "name": "InsufficientOutputAmount",
+          "value": {
+            "type": "U256",
+            "value": "9"
+          }
+        },
+        {
+          "name": "InsufficientInputAmount",
+          "value": {
+            "type": "U256",
+            "value": "10"
+          }
+        },
+        {
+          "name": "IdenticalTokenIds",
+          "value": {
+            "type": "U256",
+            "value": "11"
+          }
+        },
+        {
+          "name": "Expired",
+          "value": {
+            "type": "U256",
+            "value": "12"
+          }
+        },
+        {
+          "name": "InsufficientToken0Amount",
+          "value": {
+            "type": "U256",
+            "value": "13"
+          }
+        },
+        {
+          "name": "InsufficientToken1Amount",
+          "value": {
+            "type": "U256",
+            "value": "14"
+          }
+        },
+        {
+          "name": "TokenNotExist",
+          "value": {
+            "type": "U256",
+            "value": "15"
+          }
+        },
+        {
+          "name": "InvalidCaller",
+          "value": {
+            "type": "U256",
+            "value": "16"
+          }
+        },
+        {
+          "name": "FeeCollectorNotEnabled",
+          "value": {
+            "type": "U256",
+            "value": "17"
+          }
+        }
+      ]
+    }
+  ]
+}

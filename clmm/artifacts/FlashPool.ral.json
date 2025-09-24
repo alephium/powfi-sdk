@@ -1,0 +1,55 @@
+{
+  "version": "v4.2.0",
+  "name": "FlashPool",
+  "bytecode": "000240ab40ba0102010c024050d396fb6cdd1600430c2f4c03b10c02140114160043404416004417011402144013204044b14417021403000401170314070101030002000f170414020d0e17051412010017011700b41601a216010d0c160001011706804017077f401708160316044416014416054416024416064416074416084416004417090516095e16094e170a05160a5e58160a411341f57b13c3038d7ea4c68000170bb4160ba8b1160b0e2c02010701010004d3d385e15cb41600a9",
+  "codeHash": "7a7b1308613d9fd65fd3c18e77d5a64f94b2f81ea6c71090ed4614d64af1f59b",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [
+    {
+      "name": "LogBytes",
+      "fieldNames": [
+        "x"
+      ],
+      "fieldTypes": [
+        "ByteVec"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "flashBorrow",
+      "paramNames": [
+        "utxos"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "U256"
+      ]
+    },
+    {
+      "name": "deposit",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

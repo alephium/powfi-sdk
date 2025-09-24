@@ -1,0 +1,650 @@
+{
+  "version": "v4.2.0",
+  "name": "Account0",
+  "bytecode": "0a181740284035404c4064408d40af40db411a414b419741d34241427742f74310437c43df448c44f0453e459a45fc461c010004040109d3ada7a38b16011600160285d61603450200000e0e0108160016073e4416083e4402000001010105ce001600cc770200020102000cb2170116017fd01601ce007716007f2ba700000505010a160400031600160116021603ce0077000602000004050116a0030c3017040ca10316047a4b04181600a002314c02055da0001601160216030000020000050501111603a001411341f47b160356404450a1011600160116021604000502010005060013d301eb959c0c1601160216031304645017051600160516041601160200041341937b1603a10001000608001ed3285d1df21116011602160316041305645017061600160616051601160200041341937bce001603cc17071600a000a0041604100c16070109010204050019d3c4108e88160100021704b41604451341937ba0030c307a4b04181600a002314c02055d160416021603ab01000709004023d3ff24a73b130616011602160316041305645017071600160716051601160300041341937bce001604cc17081600ce01a0001601160216031604160613080d1608010ba1000100080b011bd39fa836bd130716031604160516061305645017081601000217091600160816071604160900061341937ba000170a1602a100160a020102080b004039d392a1d99b0d160116021603160416051306645017081600160816061601160200041341937b1607430c2f4c0d1603631709160949191341f47b160916041605ab4a14ce001603cc170ab216041605a31600ce0116011602160316041605160713080c160a010d0107080a0019d37f4038190e16021603160416051606130664501708160100021709160016081607160900051341937bb416051606ac01021012004041d39ee365070f16021603160416051606160716081609160a160b160c160d160e130e6450171016001610160f1602160300041341937b1601160516061607130364cc1711b27a7a1605160ba31606160ca31604a21600ce0116021603160416051606160716081609160a160b160c160d160e130f0c1611010600000202020c160071160171314c031600160102160116000201020b0f004035d3d54ca4eb130c160216031604160516061607160813086450170b1600160b16091602160300041341937b16041605000f170d170c1601160c160d1606130364cc170eb216041607a31600ce011602160316041605160616071608160a3f130a0c160e010701020b0d004030d3727e278b130d1602160316041605160616071608160913096450170b1600160b160a1602160300041341937b1601160416051607130364cc170cb216061608a31600ce0116021603160416051606160716081609130a0c160c010901020f1100405ed3fcb82bb7b3ce00411341937ba0021600327a4c0418a0030c301341f47b16030d307a4b0418a0031600321341f47b1603a0062c0003a0070d2ba1071601160516061607130364cc170fb27a1605160ba31606160ca31600ce0116021603160416051606160716081609160a160b160c160d160e130f0c160f0106ce0116021603160416051606160716081609160a160b160c160d160e00011710160f1610ccc5191341f47b01070407004035d3d2154b2ab3ce00411341937ba0001601411341f47ba0030c2f1341f47b1600138000ea602aa10216034313202d17040c170516051604314c161603160513202c16050d2a13202c6217061602160616021606a5ac16050d2a17054a2601070404004025d32e498237b3ce00411341937ba0030c2f1341f47b160149191341f47b16001385265c002aa1031600138000ea602aa102160116021603a107a106a105a005a006a0072c0e2ca901020305004033d3b923ceb7b417031603ce0077451341937ba0021600327a4c0418a0030c301341f47b16011603457a4b0418a0031600321341f47ba0051602a517041602cd414c081604a006a0072c0e2c2b1704a00516021604ab01020f1000402fd3a589d5681016021603160416051606160716081609160a160b160c160d130d6450170f1600160f160e1602160300041341937bb21604a21600ce0116021603160416051606160716081609160a160b160c160d130e0c1601010201000101000ed379b4d7b0b3ce00411341937ba004430c2f1341f47b1600a104",
+  "codeHash": "908c5febe8e4ce7bca70b9a49f84b6c38a537c3ae0ee9bb75e758ad4fd6bb45e",
+  "fieldsSig": {
+    "names": [
+      "bridge",
+      "id",
+      "key",
+      "nonce",
+      "lockedUntil",
+      "leaving",
+      "ownerOf",
+      "closing"
+    ],
+    "types": [
+      "Bridge0",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "ByteVec",
+      "ForceClose"
+    ],
+    "isMutable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "Unsafe",
+      "fieldNames": [],
+      "fieldTypes": []
+    }
+  ],
+  "functions": [
+    {
+      "name": "statelessVerify",
+      "paramNames": [
+        "k",
+        "data",
+        "sig",
+        "caller"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "Address"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "positionPath",
+      "paramNames": [
+        "x",
+        "p"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ModifyPosition"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "accountAddress",
+      "paramNames": [
+        "at"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "Address"
+      ]
+    },
+    {
+      "name": "pay",
+      "paramNames": [
+        "gas"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "verifyAndPay",
+      "paramNames": [
+        "time",
+        "data",
+        "sig",
+        "nonce2",
+        "gas"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "verify",
+      "paramNames": [
+        "time",
+        "data",
+        "sig",
+        "caller"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "Address"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "verifyNonce",
+      "paramNames": [
+        "time",
+        "data",
+        "sig",
+        "nonce2",
+        "caller"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "Address"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "rekey",
+      "paramNames": [
+        "time",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "Rekey",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "clawback",
+      "paramNames": [
+        "time",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "Clawback",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "clawback2",
+      "paramNames": [
+        "time",
+        "id2",
+        "tokenId",
+        "amount"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "exchange",
+      "paramNames": [
+        "time",
+        "p",
+        "sig",
+        "sig2"
+      ],
+      "paramTypes": [
+        "U256",
+        "Exchange",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "exchange2",
+      "paramNames": [
+        "time",
+        "id2",
+        "key2",
+        "p",
+        "sig2"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "Exchange",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "transfer",
+      "paramNames": [
+        "time",
+        "p",
+        "sig",
+        "sig2"
+      ],
+      "paramTypes": [
+        "U256",
+        "Transfer",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "receive",
+      "paramNames": [
+        "time",
+        "id2",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "Transfer",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "modifyPosition",
+      "paramNames": [
+        "time",
+        "dex",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "Dex0",
+        "ModifyPosition",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "sortTokens",
+      "paramNames": [
+        "t0",
+        "t1"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "swap",
+      "paramNames": [
+        "time",
+        "dex",
+        "p",
+        "sig",
+        "priceLimit"
+      ],
+      "paramTypes": [
+        "U256",
+        "Dex0",
+        "Swap",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "donate",
+      "paramNames": [
+        "time",
+        "dex",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "Dex0",
+        "Donate",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "closePosition",
+      "paramNames": [
+        "time",
+        "dex",
+        "p"
+      ],
+      "paramTypes": [
+        "U256",
+        "Dex0",
+        "ModifyPosition"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "deposit",
+      "paramNames": [
+        "time",
+        "key2",
+        "caller",
+        "tokens"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "Address",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "forceClose",
+      "paramNames": [
+        "time",
+        "p"
+      ],
+      "paramTypes": [
+        "U256",
+        "ForceClose"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "asyncTransfer",
+      "paramNames": [
+        "time",
+        "p"
+      ],
+      "paramTypes": [
+        "U256",
+        "AsyncTransfer"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createPair",
+      "paramNames": [
+        "time",
+        "dex",
+        "p",
+        "sig"
+      ],
+      "paramTypes": [
+        "U256",
+        "Dex0",
+        "CreatePool",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setOwnerOf",
+      "paramNames": [
+        "tokenId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "Msg",
+      "fields": [
+        {
+          "name": "Rekey",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "Transfer",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "Receive",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "ModifyPosition",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "CreatePool",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        },
+        {
+          "name": "Clawback",
+          "value": {
+            "type": "U256",
+            "value": "5"
+          }
+        },
+        {
+          "name": "Exchange",
+          "value": {
+            "type": "U256",
+            "value": "6"
+          }
+        },
+        {
+          "name": "Exchange2",
+          "value": {
+            "type": "U256",
+            "value": "7"
+          }
+        },
+        {
+          "name": "ExitPosition",
+          "value": {
+            "type": "U256",
+            "value": "8"
+          }
+        },
+        {
+          "name": "Deposit",
+          "value": {
+            "type": "U256",
+            "value": "9"
+          }
+        },
+        {
+          "name": "ForceClose",
+          "value": {
+            "type": "U256",
+            "value": "10"
+          }
+        },
+        {
+          "name": "AsyncTransfer",
+          "value": {
+            "type": "U256",
+            "value": "11"
+          }
+        },
+        {
+          "name": "Swap",
+          "value": {
+            "type": "U256",
+            "value": "12"
+          }
+        },
+        {
+          "name": "Donate",
+          "value": {
+            "type": "U256",
+            "value": "13"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,638 @@
+[
+  {
+    "name": "Transfer",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "id",
+      "tokenId",
+      "amount"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Clawback",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "id",
+      "amount"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Rekey",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "key"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Exchange",
+    "fieldNames": [
+      "nonce",
+      "nonce2",
+      "gas",
+      "id"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ForceClose",
+    "fieldNames": [
+      "caller",
+      "maxGas",
+      "txCount"
+    ],
+    "fieldTypes": [
+      "Address",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "AsyncTransfer",
+    "fieldNames": [
+      "caller",
+      "tokenId"
+    ],
+    "fieldTypes": [
+      "Address",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Deposit",
+    "fieldNames": [
+      "salt",
+      "caller"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Swap",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "token0",
+      "token1",
+      "fee",
+      "amount0",
+      "amount1"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Donate",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "token0",
+      "token1",
+      "tokenId",
+      "fee",
+      "amount",
+      "at"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ModifyPosition",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "deposit",
+      "token0",
+      "token1",
+      "fee",
+      "lower",
+      "upper",
+      "liquidity",
+      "amount0",
+      "amount1",
+      "ref1",
+      "ref2"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "I256",
+      "I256",
+      "I256",
+      "U256",
+      "U256",
+      "I256",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "CreatePool",
+    "fieldNames": [
+      "nonce",
+      "gas",
+      "deposit",
+      "token0",
+      "token1",
+      "token2",
+      "fee",
+      "lowerPrice",
+      "upperPrice",
+      "price",
+      "liquidity",
+      "spacing"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "U256",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ClosePosition",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "caller"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ModifyLiquidityParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "tickLower",
+      "tickUpper",
+      "amount0Desired",
+      "amount1Desired",
+      "amount0Min",
+      "amount1Min"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Slot0",
+    "fieldNames": [
+      "sqrtPriceX96",
+      "tick",
+      "feeProtocol"
+    ],
+    "fieldTypes": [
+      "U256",
+      "I256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "SwapParams",
+    "fieldNames": [
+      "payer",
+      "recipient",
+      "token",
+      "payToken",
+      "toPay",
+      "withdrawToken",
+      "toWithdraw",
+      "data"
+    ],
+    "fieldTypes": [
+      "Address",
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ModifyPositionParams",
+    "fieldNames": [
+      "owner",
+      "tickLower",
+      "tickUpper",
+      "liquidityDelta"
+    ],
+    "fieldTypes": [
+      "Address",
+      "I256",
+      "I256",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "SwapCache",
+    "fieldNames": [
+      "liquidityStart",
+      "feeProtocol"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  {
+    "name": "SwapState",
+    "fieldNames": [
+      "amountSpecifiedRemaining",
+      "amountCalculated",
+      "sqrtPriceX96",
+      "tick",
+      "feeGrowthGlobalX128",
+      "liquidity",
+      "protocolFee"
+    ],
+    "fieldTypes": [
+      "I256",
+      "I256",
+      "U256",
+      "I256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "StepComputations",
+    "fieldNames": [
+      "sqrtPriceStartX96",
+      "tickNext",
+      "initialized",
+      "sqrtPriceNextX96",
+      "amountIn",
+      "amountOut",
+      "feeAmount"
+    ],
+    "fieldTypes": [
+      "U256",
+      "I256",
+      "Bool",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "Reward",
+    "fieldNames": [
+      "lastUpdateTimestamp",
+      "openTime",
+      "endTime",
+      "emmisionsPerSecond",
+      "rewardGrowthGlobal",
+      "rewardTotalEmissioned"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "ProtocolFees",
+    "fieldNames": [
+      "token0",
+      "token1"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true
+    ]
+  },
+  {
+    "name": "Config",
+    "fieldNames": [
+      "tickSpacing",
+      "fee",
+      "feeProtocol"
+    ],
+    "fieldTypes": [
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "DecreaseLiquidityParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "tickLower",
+      "tickUpper",
+      "amount0Min",
+      "amount1Min"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "CollectParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "recipient",
+      "tickLower",
+      "tickUpper",
+      "amount0Max",
+      "amount1Max"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "TickData0",
+    "fieldNames": [
+      "liquidity",
+      "feeGrowth"
+    ],
+    "fieldTypes": [
+      "I256",
+      "[I256;3]"
+    ],
+    "isMutable": [
+      true,
+      true
+    ]
+  }
+]

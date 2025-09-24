@@ -1,0 +1,158 @@
+{
+  "version": "v4.2.0",
+  "name": "Ticks0",
+  "bytecode": "4067054045407640b442e3458e01000303014023d352d1b33c160212c901000000000000000000000000211601160020217a7a16013a7a05294b033a224a023a907a7a16003a7a05294b033a224a023a9002010003030114d3feea063d16021601160020217a7a12c9010000000000000000000000003a7a05294b033a224a023a9002000008090440290c170816080f314c1e16087a0f314d0d2a7816087a0f314d112a782016087a0f314d0d2a7916080d2a17084a7fde160016011602160302010012402205414cd393c7111bb3ce00411341937b16061607261341f47b16063d171216073d171316127a1319314d102cc316081f16127a1319314d102cc416137a1319314d102cc316081f16137a1319314d102cc4a000a001a002a003a004a005a006a007a008a009a00aa00ba00ca00da00ea00fa010a011a012a013a014a015a016a017a018a019a01aa01ba01ca01da01ea01fa020a021a022a023a024a025a026a027a028a029a02aa02ba02ca02da02ea02fa030a031a032a033a034a035a036a037a038a039a03aa03ba03ca03da03ea03fa040a041a042a043a044a045a046a047a048a049a04aa04ba04ca04da04ea04fa050a051a052a053a054a055a056a057a058a059a05aa05ba05ca05da05ea05fa060a061a062a06313193f1714ce02ce0120171516061615217a7a16143a7a05294b033a904a023a22171616071615217a7a16143a7a05294b033a904a023a22171716127a1319314d102cc316127a1319314d0c2c0f2a172016127a1319314d102c0d2a172116210c2ac316210d2ac316210e2ac3171b171a1719171816137a1319314d102cc316137a1319314d0c2c0f2a172016137a1319314d102c0d2a172116210c2ac316210d2ac316210e2ac3171f171e171d171c16111616294c0a160d160e160f161016181619161a161b00024a0416181619161a161b1710170f170e170d16111617264c0a160d160e160f1610161c161d161e161f00024a04161c161d161e161f1710170f170e170d16161617160e160f16100201000a1f074194d3cf77f2cdb4170a160ace0077451341937ba000a001a002a003a004a005a006a007a008a009a00aa00ba00ca00da00ea00fa010a011a012a013a014a015a016a017a018a019a01aa01ba01ca01da01ea01fa020a021a022a023a024a025a026a027a028a029a02aa02ba02ca02da02ea02fa030a031a032a033a034a035a036a037a038a039a03aa03ba03ca03da03ea03fa040a041a042a043a044a045a046a047a048a049a04aa04ba04ca04da04ea04fa050a051a052a053a054a055a056a057a058a059a05aa05ba05ca05da05ea05fa060a061a062a06313193f170bce02ce0120170c16064c02054a0106170d16064c020b4a0106170e04170f1604ce0120160b217a7a160c3a7a05294b033a904a023a22160d1f1710160f4b40f316103d7a1319314d102cc316103d7a1319314d0c2c0f2a171c16103d7a1319314d102c0d2a171d161d0c2ac3161d0d2ac3161d0e2ac317141713171217111610160d160b2124170f161105257a4b0218160f4c40b11610160c217a7a160b3a7a05294b033a904a023a2217151609161520160e210527171616164c0216094a011615171716064c0516171604160000004a041604161716000001171816064c08161716041600057c2000014a07160416171600057c2000001719161812800f424016051f217a7a12800f42403a7a05294b033a224a023a90171a160d3d171e161e7a0f314d0d2a78161a1618201f161e7a0f314d0d2a791607161a201707160816191f170816164c081600160116021603160916071608021617170416064c051611057c204a011611171b1600161b1f170016001601160216031611161216131614000216103d7a1319314d102c0d2a171d161d0e2ac4161d0d2ac4161d0c2ac416103d7a1319314d102cc41610160e1f17104a7f0b160016011602160316041607160802",
+  "codeHash": "a0866a813c178f52c0b28b5807b751719546f47fa17ee41fb3fa12df1d38e3ba",
+  "fieldsSig": {
+    "names": [
+      "pool",
+      "lower",
+      "upper",
+      "ticks"
+    ],
+    "types": [
+      "ByteVec",
+      "I256",
+      "I256",
+      "[TickData0;25]"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "delta0",
+      "paramNames": [
+        "p0",
+        "p1",
+        "liq"
+      ],
+      "paramTypes": [
+        "I256",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "delta1",
+      "paramNames": [
+        "p0",
+        "p1",
+        "liq"
+      ],
+      "paramTypes": [
+        "I256",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "subTicks",
+      "paramNames": [
+        "tick",
+        "t"
+      ],
+      "paramTypes": [
+        "TickData0",
+        "TickData0"
+      ],
+      "paramIsMutable": [
+        true,
+        false
+      ],
+      "returnTypes": [
+        "TickData0"
+      ]
+    },
+    {
+      "name": "update",
+      "paramNames": [
+        "p",
+        "tick",
+        "price"
+      ],
+      "paramTypes": [
+        "ModifyPosition",
+        "TickData0",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        true,
+        false
+      ],
+      "returnTypes": [
+        "I256",
+        "I256",
+        "[I256;3]"
+      ]
+    },
+    {
+      "name": "swap",
+      "paramNames": [
+        "tick",
+        "price",
+        "fee",
+        "zeroForOne",
+        "amount0",
+        "amount1",
+        "priceLimit"
+      ],
+      "paramTypes": [
+        "TickData0",
+        "I256",
+        "I256",
+        "Bool",
+        "I256",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+        false
+      ],
+      "returnTypes": [
+        "TickData0",
+        "I256",
+        "I256",
+        "I256"
+      ]
+    }
+  ],
+  "constants": [
+    {
+      "name": "I96",
+      "value": {
+        "type": "I256",
+        "value": "79228162514264337593543950336"
+      }
+    }
+  ],
+  "enums": []
+}

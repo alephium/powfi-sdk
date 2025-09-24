@@ -1,0 +1,32 @@
+{
+  "version": "v4.2.0",
+  "name": "CounterImm",
+  "bytecode": "00020f4022010200000005d36283db4cb2b10dbd010200000109d3f36cd8e40c0d36b2b1a52b02",
+  "codeHash": "b23abd303e965f6525c89b2096c308d88b2e1617827bd47a7c7b09149767e63d",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "inc",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "get",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

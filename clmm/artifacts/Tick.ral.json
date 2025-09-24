@@ -1,0 +1,169 @@
+{
+  "version": "v4.2.0",
+  "name": "Tick",
+  "bytecode": "060640514075409940af40d340e10100030601402ad344ba8eddb4ce00451343217ba000170316033f16011f1704160405291343237b16043d170516051600321343227b1605a10016024c04a0011601204a03a00116011fa10116050c2f02010003030210d3d3e883281600ce01294c04a002a003024a071601a0022b1602a0032b02010003030210d364c6879c1600ce01264c04a002a003024a071601a0022b1602a0032b02010201010008d3b0cd421fb4ce00451343217b1600b0010002020110d37ae9deb2b4ce00451343217b1600a0022ba1021601a0032ba103a00102010000000103d3602bc55da00102",
+  "codeHash": "a8a1f0a17ec2129e611bee6390332642647e78faa4f2fb0744d520a432004ad5",
+  "fieldsSig": {
+    "names": [
+      "parent",
+      "tick",
+      "liquidityGross",
+      "liquidityNet",
+      "feeGrowthOutside0X128",
+      "feeGrowthOutside1X128"
+    ],
+    "types": [
+      "Address",
+      "I256",
+      "U256",
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "update",
+      "paramNames": [
+        "maxLiquidity",
+        "liquidityDelta",
+        "upper"
+      ],
+      "paramTypes": [
+        "U256",
+        "I256",
+        "Bool"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "feeGrowthBelow",
+      "paramNames": [
+        "tickCurrent",
+        "feeGrowthGlobal0X128",
+        "feeGrowthGlobal1X128"
+      ],
+      "paramTypes": [
+        "I256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "feeGrowthAbove",
+      "paramNames": [
+        "tickCurrent",
+        "feeGrowthGlobal0X128",
+        "feeGrowthGlobal1X128"
+      ],
+      "paramTypes": [
+        "I256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "clear",
+      "paramNames": [
+        "payer"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "cross",
+      "paramNames": [
+        "feeGrowthGlobal0X128",
+        "feeGrowthGlobal1X128"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "getLiquidityNet",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "I256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "TickError",
+      "fields": [
+        {
+          "name": "NotParent",
+          "value": {
+            "type": "U256",
+            "value": "801"
+          }
+        },
+        {
+          "name": "LO",
+          "value": {
+            "type": "U256",
+            "value": "802"
+          }
+        },
+        {
+          "name": "LS",
+          "value": {
+            "type": "U256",
+            "value": "803"
+          }
+        }
+      ]
+    }
+  ]
+}

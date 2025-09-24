@@ -1,0 +1,209 @@
+{
+  "version": "v4.2.0",
+  "name": "PoolFactory",
+  "bytecode": "07061a4030409b40e7419c41c300000305010c1602130164170316001603cc17041601160444020000030401091600160116020000170316001603cc020000010401403a12bff276187a7a16003a7a05294b033a224a023a90160021170112800d89e87a7a16003a7a05294b033a904a023a22160021170216021601207a7a16003a7a05294b033a904a023a223d0d2a170313ccffffffffffffffffffffffffffffffff16032d0201000307014028d31c03e050b4ce00451341937b16001601160213036413006417041703a0001705a0004017061606ce0516031604c118a0000d2aa1000516055e071601160016056016050201000419014065d30b76af44160071160171311342bd7b160240cb17040c0f1604010017071706170516050002170816030d0dce0101011709160316090c170c170b170a0c0c0c0c0c0c1716171517141713171217110c0c17181717b1ce02ce03ce0416001601160616051608130964160a160b160c0c0c0c0c16111612161316141615161616171618130f64170e170db1160016014416020000170f160fce01160d160ec1171006161016001601160261161002010004050012d32d2d48cdb4ce00451341937bb1160216034416010001170416000d0c1604012d",
+  "codeHash": "15aa3579a8f829d49fbe4394d1226ea07ce9f1c896e4e04abfda8e8baccc7bf2",
+  "fieldsSig": {
+    "names": [
+      "owner",
+      "poolTemplate",
+      "positionTemplate",
+      "tickTemplate",
+      "wordTemplate",
+      "poolConfigTemplate",
+      "nextConfigIndex"
+    ],
+    "types": [
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "ConfigCreated",
+      "fieldNames": [
+        "index"
+      ],
+      "fieldTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "PoolCreated",
+      "fieldNames": [
+        "id",
+        "token0",
+        "token1",
+        "configIndex"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ]
+    },
+    {
+      "name": "FeeTierEnabled",
+      "fieldNames": [
+        "fee",
+        "tickSpacing",
+        "index"
+      ],
+      "fieldTypes": [
+        "U256",
+        "I256",
+        "U256"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "poolPath",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "poolContractId",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "tickSpacingToMaxLiquidityPerTick",
+      "paramNames": [
+        "tickSpacing"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "createConfig",
+      "paramNames": [
+        "config"
+      ],
+      "paramTypes": [
+        "Config"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "create",
+      "paramNames": [
+        "token0",
+        "token1",
+        "configIndex",
+        "sqrtPriceX96"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Pool"
+      ]
+    },
+    {
+      "name": "collectProtocolFees",
+      "paramNames": [
+        "recipient",
+        "configIndex",
+        "token0",
+        "token1"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "FactoryError",
+      "fields": [
+        {
+          "name": "InvalidTokenOrder",
+          "value": {
+            "type": "U256",
+            "value": "701"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "version": "v4.2.0",
+  "name": "PoolConfig",
+  "bytecode": "030112010000000305d3bda4d814ce00ce01ce0202",
+  "codeHash": "aa0838a7a189126cf0627d909b65ba3cfc692813db3d5ccd950763a87d52a0d6",
+  "fieldsSig": {
+    "names": [
+      "config"
+    ],
+    "types": [
+      "Config"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "get",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "Config"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}
