@@ -19,12 +19,14 @@ import type {
   RemoveLiquidity,
   SimulateSwap,
   ClmmSwapParams,
+  ClmmPoolState,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
 import { Pool, PoolFactory, PositionManager } from '../../clmm/artifacts/ts';
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
+import { PoolNotFoundError } from '../common';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -44,6 +46,33 @@ export class ClmmModule extends ModuleBase {
     const configPath = binToHex(rawIndex);
     const group = this.config.groupIndex;
     return subContractId(this.config.factoryId, configPath, group);
+  }
+
+  async getPoolState(poolId: string): Promise<ClmmPoolState> {
+    try {
+      const poolAddress = addressFromContractId(poolId);
+      const pool = Pool.at(poolAddress);
+      const state = await pool.fetchState();
+      const token0Info = await this.scope.token.getTokenById(state.fields.token0);
+      const token1Info = await this.scope.token.getTokenById(state.fields.token1);
+
+      return {
+        poolId,
+        token0Info,
+        token1Info,
+        liquidity: state.fields.liquidity,
+        tradingFee: state.fields.fee,
+        protocolFee: state.fields.slot0.feeProtocol,
+        tick: state.fields.slot0.tick,
+        tickSpacing: state.fields.tickSpacing,
+        sqrtPriceX96: state.fields.slot0.sqrtPriceX96,
+      };
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new PoolNotFoundError(poolId);
+      }
+      this.logAndThrowError(`Failed to fetch CLMM pool state on ${poolId}`, error);
+    }
   }
 
   getPoolId(token0: string, token1: string, configIndex: bigint): string {

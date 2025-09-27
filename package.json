@@ -1,6 +1,6 @@
 {
   "name": "@zetamarket/typescript-sdk",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -24,7 +24,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "lint": "eslint --max-warnings=0 . --ext .ts",
+    "lint": "node ./node_modules/eslint/bin/eslint.js --max-warnings=0 . --ext .ts",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf lib",
