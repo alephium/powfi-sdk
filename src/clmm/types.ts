@@ -93,3 +93,10 @@ export interface ClmmPoolState {
   tick: bigint;
   tickSpacing: bigint;
 }
+
+export interface ClmmPoolConfig {
+  configIndex: bigint;
+  tickSpacing: bigint;
+  tradingFee: bigint;
+  protocolFee: bigint;
+}

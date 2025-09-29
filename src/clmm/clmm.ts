@@ -3,9 +3,9 @@ import {
   addressFromContractId,
   binToHex,
   DUST_AMOUNT,
-  encodePrimitiveValues,
   MINIMAL_CONTRACT_DEPOSIT,
   subContractId,
+  codec,
 } from '@alephium/web3';
 import { loadDeployments } from '../../clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -20,9 +20,10 @@ import type {
   SimulateSwap,
   ClmmSwapParams,
   ClmmPoolState,
+  ClmmPoolConfig,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
-import { Pool, PoolFactory, PositionManager } from '../../clmm/artifacts/ts';
+import { Pool, PoolConfig, PoolFactory, PositionManager } from '../../clmm/artifacts/ts';
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
@@ -30,6 +31,7 @@ import { PoolNotFoundError } from '../common';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
+  private configsByIndex = new Map<bigint, ClmmPoolConfig>();
 
   constructor(scope: Zeta) {
     super({ scope, moduleName: 'ClmmModule' });
@@ -41,11 +43,59 @@ export class ClmmModule extends ModuleBase {
     return this.config;
   }
 
-  getConfigId(configIndex: bigint): string {
-    const rawIndex = encodePrimitiveValues([{ type: 'U256', value: configIndex }]);
+  getPoolConfigId(configIndex: bigint): string {
+    const rawIndex = codec.u256Codec.encode(configIndex);
     const configPath = binToHex(rawIndex);
     const group = this.config.groupIndex;
     return subContractId(this.config.factoryId, configPath, group);
+  }
+
+  async getAllPoolConfigs(): Promise<ClmmPoolConfig[]> {
+    const factoryAddress = addressFromContractId(this.config.factoryId);
+    const factory = PoolFactory.at(factoryAddress);
+    const state = await factory.fetchState();
+    const nextConfigIndex = state.fields.nextConfigIndex;
+
+    const configs: ClmmPoolConfig[] = [];
+    for (let i = 0n; i < nextConfigIndex; i++) {
+      let config = this.configsByIndex.get(i);
+      if (!config) {
+        config = await this.fetchConfigFromChain(i);
+        this.configsByIndex.set(i, config);
+      }
+      configs.push(config);
+    }
+
+    return configs;
+  }
+
+  async getPoolConfig(configIndex: bigint): Promise<ClmmPoolConfig | undefined> {
+    const cached = this.configsByIndex.get(configIndex);
+    if (cached) {
+      return cached;
+    }
+
+    try {
+      const config = await this.fetchConfigFromChain(configIndex);
+      this.configsByIndex.set(configIndex, config);
+      return config;
+    } catch (error) {
+      this.logWarning(`Failed to fetch config ${configIndex.toString()}`, error);
+      return undefined;
+    }
+  }
+
+  private async fetchConfigFromChain(configIndex: bigint): Promise<ClmmPoolConfig> {
+    const poolConfigId = this.getPoolConfigId(configIndex);
+    const poolConfigAddress = addressFromContractId(poolConfigId);
+    const poolConfig = PoolConfig.at(poolConfigAddress);
+    const poolConfigState = await poolConfig.fetchState();
+    return {
+      configIndex,
+      tickSpacing: poolConfigState.fields.config.tickSpacing,
+      tradingFee: poolConfigState.fields.config.fee,
+      protocolFee: poolConfigState.fields.config.feeProtocol,
+    };
   }
 
   async getPoolState(poolId: string): Promise<ClmmPoolState> {
@@ -78,7 +128,7 @@ export class ClmmModule extends ModuleBase {
   getPoolId(token0: string, token1: string, configIndex: bigint): string {
     const group = this.config.groupIndex;
     const factoryId = this.config.factoryId;
-    const configId = this.getConfigId(configIndex);
+    const configId = this.getPoolConfigId(configIndex);
     const path = token0 + token1 + configId;
     return subContractId(factoryId, path, group);
   }
