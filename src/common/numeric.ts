@@ -17,11 +17,17 @@ export class NumericUtils {
   }
 
   static decimalToString(value: Decimal): string {
-    return value.toString();
+    if (!value.isFinite()) {
+      return value.toString();
+    }
+    return value.toFixed(value.decimalPlaces());
   }
 
   static scaleDecimal(value: NumericLike, decimals: number): Decimal {
-    if (decimals <= 0) {
+    if (decimals < 0) {
+      throw new Error('Decimals must be non-negative');
+    }
+    if (decimals === 0) {
       return this.decimalFrom(value);
     }
     return this.decimalFrom(value).div(new Decimal(10).pow(decimals));
@@ -33,5 +39,26 @@ export class NumericUtils {
 
   static numericToString(value: NumericLike): string {
     return this.decimalToString(this.decimalFrom(value));
+  }
+
+  static numericToBigInt(value: NumericLike): bigint {
+    if (value === undefined || value === null) {
+      return 0n;
+    }
+    if (typeof value === 'bigint') {
+      return value;
+    }
+
+    const decimalValue = this.decimalFrom(value);
+
+    if (!decimalValue.isFinite()) {
+      throw new Error('Cannot convert non-finite value to bigint');
+    }
+
+    if (!decimalValue.isInteger()) {
+      throw new Error('Cannot convert non-integer value to bigint');
+    }
+
+    return BigInt(decimalValue.toFixed(0));
   }
 }
