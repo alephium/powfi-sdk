@@ -33,36 +33,46 @@ import {
   encodeContractFields,
   Narrow,
 } from "@alephium/web3";
-import { default as CallbackDemoContractJson } from "../CallbackDemo.ral.json";
+import { default as DexAccountContractJson } from "../DexAccount.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
-export namespace CallbackDemoTypes {
+export namespace DexAccountTypes {
   export type Fields = {
-    locked: bigint;
+    parent: HexString;
+    owner: Address;
+    refferer: Address;
+    counter: bigint;
   };
 
   export type State = ContractState<Fields>;
 
   export interface CallMethodTable {
-    run: {
-      params: CallContractParams<{ callback: HexString; amount: bigint }>;
+    deposit: {
+      params: CallContractParams<{ tokenId: HexString; amount: bigint }>;
       result: CallContractResult<null>;
     };
-    createCallback: {
-      params: CallContractParams<{
-        callbackTemplate: HexString;
-        amount: bigint;
-      }>;
-      result: CallContractResult<HexString>;
+    asRef: {
+      params: CallContractParams<{ defaultRef: Address }>;
+      result: CallContractResult<Address>;
     };
-    pay: {
-      params: CallContractParams<{
-        payer: Address;
-        amount: bigint;
-        tokenId: HexString;
-      }>;
+    refer: {
+      params: CallContractParams<{ user: Address; ref: Address; n: bigint }>;
       result: CallContractResult<null>;
     };
   }
@@ -83,25 +93,22 @@ export namespace CallbackDemoTypes {
   };
 
   export interface SignExecuteMethodTable {
-    run: {
+    deposit: {
       params: SignExecuteContractMethodParams<{
-        callback: HexString;
-        amount: bigint;
-      }>;
-      result: SignExecuteScriptTxResult;
-    };
-    createCallback: {
-      params: SignExecuteContractMethodParams<{
-        callbackTemplate: HexString;
-        amount: bigint;
-      }>;
-      result: SignExecuteScriptTxResult;
-    };
-    pay: {
-      params: SignExecuteContractMethodParams<{
-        payer: Address;
-        amount: bigint;
         tokenId: HexString;
+        amount: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    asRef: {
+      params: SignExecuteContractMethodParams<{ defaultRef: Address }>;
+      result: SignExecuteScriptTxResult;
+    };
+    refer: {
+      params: SignExecuteContractMethodParams<{
+        user: Address;
+        ref: Address;
+        n: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -113,50 +120,50 @@ export namespace CallbackDemoTypes {
 }
 
 class Factory extends ContractFactory<
-  CallbackDemoInstance,
-  CallbackDemoTypes.Fields
+  DexAccountInstance,
+  DexAccountTypes.Fields
 > {
-  encodeFields(fields: CallbackDemoTypes.Fields) {
+  encodeFields(fields: DexAccountTypes.Fields) {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
-  at(address: string): CallbackDemoInstance {
-    return new CallbackDemoInstance(address);
+  at(address: string): DexAccountInstance {
+    return new DexAccountInstance(address);
   }
 
   tests = {
-    run: async (
+    deposit: async (
       params: TestContractParamsWithoutMaps<
-        CallbackDemoTypes.Fields,
-        { callback: HexString; amount: bigint }
+        DexAccountTypes.Fields,
+        { tokenId: HexString; amount: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
-      return testMethod(this, "run", params, getContractByCodeHash);
+      return testMethod(this, "deposit", params, getContractByCodeHash);
     },
-    createCallback: async (
+    asRef: async (
       params: TestContractParamsWithoutMaps<
-        CallbackDemoTypes.Fields,
-        { callbackTemplate: HexString; amount: bigint }
+        DexAccountTypes.Fields,
+        { defaultRef: Address }
       >
-    ): Promise<TestContractResultWithoutMaps<HexString>> => {
-      return testMethod(this, "createCallback", params, getContractByCodeHash);
+    ): Promise<TestContractResultWithoutMaps<Address>> => {
+      return testMethod(this, "asRef", params, getContractByCodeHash);
     },
-    pay: async (
+    refer: async (
       params: TestContractParamsWithoutMaps<
-        CallbackDemoTypes.Fields,
-        { payer: Address; amount: bigint; tokenId: HexString }
+        DexAccountTypes.Fields,
+        { user: Address; ref: Address; n: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
-      return testMethod(this, "pay", params, getContractByCodeHash);
+      return testMethod(this, "refer", params, getContractByCodeHash);
     },
   };
 
   stateForTest(
-    initFields: CallbackDemoTypes.Fields,
+    initFields: DexAccountTypes.Fields,
     asset?: Asset,
     address?: string
   ) {
@@ -165,56 +172,56 @@ class Factory extends ContractFactory<
 }
 
 // Use this object to test and deploy the contract
-export const CallbackDemo = new Factory(
+export const DexAccount = new Factory(
   Contract.fromJson(
-    CallbackDemoContractJson,
+    DexAccountContractJson,
     "",
-    "ccea404352d9040d880c3bca3efd36bb1bb9c1eca6bf2121b216739c6603d7be",
-    types.AllStructs
+    "76be29f13ad97873ef403efdd77837f6bbcb83d23e7a3bd8f6d15751f2b8abe8",
+    AllStructs
   )
 );
-registerContract(CallbackDemo);
+registerContract(DexAccount);
 
 // Use this class to interact with the blockchain
-export class CallbackDemoInstance extends ContractInstance {
+export class DexAccountInstance extends ContractInstance {
   constructor(address: Address) {
     super(address);
   }
 
-  async fetchState(): Promise<CallbackDemoTypes.State> {
-    return fetchContractState(CallbackDemo, this);
+  async fetchState(): Promise<DexAccountTypes.State> {
+    return fetchContractState(DexAccount, this);
   }
 
   view = {
-    run: async (
-      params: CallbackDemoTypes.CallMethodParams<"run">
-    ): Promise<CallbackDemoTypes.CallMethodResult<"run">> => {
+    deposit: async (
+      params: DexAccountTypes.CallMethodParams<"deposit">
+    ): Promise<DexAccountTypes.CallMethodResult<"deposit">> => {
       return callMethod(
-        CallbackDemo,
+        DexAccount,
         this,
-        "run",
+        "deposit",
         params,
         getContractByCodeHash
       );
     },
-    createCallback: async (
-      params: CallbackDemoTypes.CallMethodParams<"createCallback">
-    ): Promise<CallbackDemoTypes.CallMethodResult<"createCallback">> => {
+    asRef: async (
+      params: DexAccountTypes.CallMethodParams<"asRef">
+    ): Promise<DexAccountTypes.CallMethodResult<"asRef">> => {
       return callMethod(
-        CallbackDemo,
+        DexAccount,
         this,
-        "createCallback",
+        "asRef",
         params,
         getContractByCodeHash
       );
     },
-    pay: async (
-      params: CallbackDemoTypes.CallMethodParams<"pay">
-    ): Promise<CallbackDemoTypes.CallMethodResult<"pay">> => {
+    refer: async (
+      params: DexAccountTypes.CallMethodParams<"refer">
+    ): Promise<DexAccountTypes.CallMethodResult<"refer">> => {
       return callMethod(
-        CallbackDemo,
+        DexAccount,
         this,
-        "pay",
+        "refer",
         params,
         getContractByCodeHash
       );
@@ -222,36 +229,36 @@ export class CallbackDemoInstance extends ContractInstance {
   };
 
   transact = {
-    run: async (
-      params: CallbackDemoTypes.SignExecuteMethodParams<"run">
-    ): Promise<CallbackDemoTypes.SignExecuteMethodResult<"run">> => {
-      return signExecuteMethod(CallbackDemo, this, "run", params);
+    deposit: async (
+      params: DexAccountTypes.SignExecuteMethodParams<"deposit">
+    ): Promise<DexAccountTypes.SignExecuteMethodResult<"deposit">> => {
+      return signExecuteMethod(DexAccount, this, "deposit", params);
     },
-    createCallback: async (
-      params: CallbackDemoTypes.SignExecuteMethodParams<"createCallback">
-    ): Promise<CallbackDemoTypes.SignExecuteMethodResult<"createCallback">> => {
-      return signExecuteMethod(CallbackDemo, this, "createCallback", params);
+    asRef: async (
+      params: DexAccountTypes.SignExecuteMethodParams<"asRef">
+    ): Promise<DexAccountTypes.SignExecuteMethodResult<"asRef">> => {
+      return signExecuteMethod(DexAccount, this, "asRef", params);
     },
-    pay: async (
-      params: CallbackDemoTypes.SignExecuteMethodParams<"pay">
-    ): Promise<CallbackDemoTypes.SignExecuteMethodResult<"pay">> => {
-      return signExecuteMethod(CallbackDemo, this, "pay", params);
+    refer: async (
+      params: DexAccountTypes.SignExecuteMethodParams<"refer">
+    ): Promise<DexAccountTypes.SignExecuteMethodResult<"refer">> => {
+      return signExecuteMethod(DexAccount, this, "refer", params);
     },
   };
 
-  async multicall<Calls extends CallbackDemoTypes.MultiCallParams>(
+  async multicall<Calls extends DexAccountTypes.MultiCallParams>(
     calls: Calls
-  ): Promise<CallbackDemoTypes.MultiCallResults<Calls>>;
-  async multicall<Callss extends CallbackDemoTypes.MultiCallParams[]>(
+  ): Promise<DexAccountTypes.MultiCallResults<Calls>>;
+  async multicall<Callss extends DexAccountTypes.MultiCallParams[]>(
     callss: Narrow<Callss>
-  ): Promise<CallbackDemoTypes.MulticallReturnType<Callss>>;
+  ): Promise<DexAccountTypes.MulticallReturnType<Callss>>;
   async multicall<
     Callss extends
-      | CallbackDemoTypes.MultiCallParams
-      | CallbackDemoTypes.MultiCallParams[]
+      | DexAccountTypes.MultiCallParams
+      | DexAccountTypes.MultiCallParams[]
   >(callss: Callss): Promise<unknown> {
     return await multicallMethods(
-      CallbackDemo,
+      DexAccount,
       this,
       callss,
       getContractByCodeHash

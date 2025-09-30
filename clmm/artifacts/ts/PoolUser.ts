@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as PoolUserContractJson } from "../PoolUser.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PoolUserTypes {
@@ -62,6 +76,7 @@ export namespace PoolUserTypes {
         word_: HexString;
         factory_: HexString;
         config_: HexString;
+        dexAccount_: HexString;
       }>;
       result: CallContractResult<
         [
@@ -103,6 +118,7 @@ export namespace PoolUserTypes {
         word_: HexString;
         factory_: HexString;
         config_: HexString;
+        dexAccount_: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -118,7 +134,7 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -139,6 +155,7 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
           word_: HexString;
           factory_: HexString;
           config_: HexString;
+          dexAccount_: HexString;
         }
       >
     ): Promise<
@@ -172,8 +189,8 @@ export const PoolUser = new Factory(
   Contract.fromJson(
     PoolUserContractJson,
     "",
-    "0c197ca0ddd1295e5a061f65b23ba56dd826452c22214fd3d1257ab9e334af0b",
-    types.AllStructs
+    "c399b2c0ac5021d1a8b6ca3c10d3d439ed853a994e7ec2bab617e5e9e8309985",
+    AllStructs
   )
 );
 registerContract(PoolUser);

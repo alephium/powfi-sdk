@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as TickContractJson } from "../Tick.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace TickTypes {
@@ -44,8 +58,7 @@ export namespace TickTypes {
     tick: bigint;
     liquidityGross: bigint;
     liquidityNet: bigint;
-    feeGrowthOutside0X128: bigint;
-    feeGrowthOutside1X128: bigint;
+    feeGrowthsOutside: [bigint, bigint, bigint];
   };
 
   export type State = ContractState<Fields>;
@@ -62,18 +75,16 @@ export namespace TickTypes {
     feeGrowthBelow: {
       params: CallContractParams<{
         tickCurrent: bigint;
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
       }>;
-      result: CallContractResult<[bigint, bigint]>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     feeGrowthAbove: {
       params: CallContractParams<{
         tickCurrent: bigint;
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
       }>;
-      result: CallContractResult<[bigint, bigint]>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     clear: {
       params: CallContractParams<{ payer: Address }>;
@@ -81,8 +92,9 @@ export namespace TickTypes {
     };
     cross: {
       params: CallContractParams<{
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
+        zeroForOne: boolean;
+        feeGrowthGlobalX128: bigint;
       }>;
       result: CallContractResult<bigint>;
     };
@@ -119,16 +131,14 @@ export namespace TickTypes {
     feeGrowthBelow: {
       params: SignExecuteContractMethodParams<{
         tickCurrent: bigint;
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
       }>;
       result: SignExecuteScriptTxResult;
     };
     feeGrowthAbove: {
       params: SignExecuteContractMethodParams<{
         tickCurrent: bigint;
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -138,8 +148,9 @@ export namespace TickTypes {
     };
     cross: {
       params: SignExecuteContractMethodParams<{
-        feeGrowthGlobal0X128: bigint;
-        feeGrowthGlobal1X128: bigint;
+        globalGrowths: [bigint, bigint, bigint];
+        zeroForOne: boolean;
+        feeGrowthGlobalX128: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -159,7 +170,7 @@ class Factory extends ContractFactory<TickInstance, TickTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -187,25 +198,17 @@ class Factory extends ContractFactory<TickInstance, TickTypes.Fields> {
     feeGrowthBelow: async (
       params: TestContractParamsWithoutMaps<
         TickTypes.Fields,
-        {
-          tickCurrent: bigint;
-          feeGrowthGlobal0X128: bigint;
-          feeGrowthGlobal1X128: bigint;
-        }
+        { tickCurrent: bigint; globalGrowths: [bigint, bigint, bigint] }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "feeGrowthBelow", params, getContractByCodeHash);
     },
     feeGrowthAbove: async (
       params: TestContractParamsWithoutMaps<
         TickTypes.Fields,
-        {
-          tickCurrent: bigint;
-          feeGrowthGlobal0X128: bigint;
-          feeGrowthGlobal1X128: bigint;
-        }
+        { tickCurrent: bigint; globalGrowths: [bigint, bigint, bigint] }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "feeGrowthAbove", params, getContractByCodeHash);
     },
     clear: async (
@@ -219,7 +222,11 @@ class Factory extends ContractFactory<TickInstance, TickTypes.Fields> {
     cross: async (
       params: TestContractParamsWithoutMaps<
         TickTypes.Fields,
-        { feeGrowthGlobal0X128: bigint; feeGrowthGlobal1X128: bigint }
+        {
+          globalGrowths: [bigint, bigint, bigint];
+          zeroForOne: boolean;
+          feeGrowthGlobalX128: bigint;
+        }
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(this, "cross", params, getContractByCodeHash);
@@ -244,8 +251,8 @@ export const Tick = new Factory(
   Contract.fromJson(
     TickContractJson,
     "",
-    "a8a1f0a17ec2129e611bee6390332642647e78faa4f2fb0744d520a432004ad5",
-    types.AllStructs
+    "1373551ca890d886980b8d33277d7ed7a2c9f7665d77a1e893a1f2554d10d4b1",
+    AllStructs
   )
 );
 registerContract(Tick);

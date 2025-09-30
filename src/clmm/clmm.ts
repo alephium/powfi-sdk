@@ -170,6 +170,7 @@ export class ClmmModule extends ModuleBase {
       args: {
         token0,
         token1,
+        rewardToken: '',
         configIndex,
         sqrtPriceX96,
       },

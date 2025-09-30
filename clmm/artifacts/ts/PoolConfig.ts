@@ -35,12 +35,26 @@ import {
 } from "@alephium/web3";
 import { default as PoolConfigContractJson } from "../PoolConfig.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PoolConfigTypes {
   export type Fields = {
-    config: types.Config;
+    config: Config;
   };
 
   export type State = ContractState<Fields>;
@@ -48,7 +62,7 @@ export namespace PoolConfigTypes {
   export interface CallMethodTable {
     get: {
       params: Omit<CallContractParams<{}>, "args">;
-      result: CallContractResult<types.Config>;
+      result: CallContractResult<Config>;
     };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
@@ -87,7 +101,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -101,7 +115,7 @@ class Factory extends ContractFactory<
         TestContractParamsWithoutMaps<PoolConfigTypes.Fields, never>,
         "args"
       >
-    ): Promise<TestContractResultWithoutMaps<types.Config>> => {
+    ): Promise<TestContractResultWithoutMaps<Config>> => {
       return testMethod(this, "get", params, getContractByCodeHash);
     },
   };
@@ -121,7 +135,7 @@ export const PoolConfig = new Factory(
     PoolConfigContractJson,
     "",
     "aa0838a7a189126cf0627d909b65ba3cfc692813db3d5ccd950763a87d52a0d6",
-    types.AllStructs
+    AllStructs
   )
 );
 registerContract(PoolConfig);

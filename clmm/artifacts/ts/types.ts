@@ -5,21 +5,6 @@
 import { Address, HexString, Val, Struct } from "@alephium/web3";
 import { default as allStructsJson } from "../structs.ral.json";
 export const AllStructs = allStructsJson.map((json) => Struct.fromJson(json));
-export interface AsyncTransfer extends Record<string, Val> {
-  caller: Address;
-  tokenId: HexString;
-}
-export interface Clawback extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  id: HexString;
-  amount: bigint;
-}
-export interface ClosePosition extends Record<string, Val> {
-  token0: HexString;
-  token1: HexString;
-  caller: Address;
-}
 export interface CollectParams extends Record<string, Val> {
   token0: HexString;
   token1: HexString;
@@ -36,20 +21,6 @@ export interface Config extends Record<string, Val> {
   fee: bigint;
   feeProtocol: bigint;
 }
-export interface CreatePool extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  deposit: bigint;
-  token0: HexString;
-  token1: HexString;
-  token2: HexString;
-  fee: bigint;
-  lowerPrice: bigint;
-  upperPrice: bigint;
-  price: bigint;
-  liquidity: bigint;
-  spacing: bigint;
-}
 export interface DecreaseLiquidityParams extends Record<string, Val> {
   token0: HexString;
   token1: HexString;
@@ -59,31 +30,6 @@ export interface DecreaseLiquidityParams extends Record<string, Val> {
   tickUpper: bigint;
   amount0Min: bigint;
   amount1Min: bigint;
-}
-export interface Deposit extends Record<string, Val> {
-  salt: HexString;
-  caller: Address;
-}
-export interface Donate extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  token0: HexString;
-  token1: HexString;
-  tokenId: HexString;
-  fee: bigint;
-  amount: bigint;
-  at: bigint;
-}
-export interface Exchange extends Record<string, Val> {
-  nonce: HexString;
-  nonce2: HexString;
-  gas: bigint;
-  id: HexString;
-}
-export interface ForceClose extends Record<string, Val> {
-  caller: Address;
-  maxGas: bigint;
-  txCount: bigint;
 }
 export interface ModifyLiquidityParams extends Record<string, Val> {
   token0: HexString;
@@ -97,21 +43,6 @@ export interface ModifyLiquidityParams extends Record<string, Val> {
   amount0Min: bigint;
   amount1Min: bigint;
 }
-export interface ModifyPosition extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  deposit: bigint;
-  token0: HexString;
-  token1: HexString;
-  fee: bigint;
-  lower: bigint;
-  upper: bigint;
-  liquidity: bigint;
-  amount0: bigint;
-  amount1: bigint;
-  ref1: bigint;
-  ref2: bigint;
-}
 export interface ModifyPositionParams extends Record<string, Val> {
   owner: Address;
   tickLower: bigint;
@@ -122,18 +53,10 @@ export interface ProtocolFees extends Record<string, Val> {
   token0: bigint;
   token1: bigint;
 }
-export interface Rekey extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  key: HexString;
-}
 export interface Reward extends Record<string, Val> {
-  lastUpdateTimestamp: bigint;
-  openTime: bigint;
+  nextOpenTime: bigint;
   endTime: bigint;
-  emmisionsPerSecond: bigint;
-  rewardGrowthGlobal: bigint;
-  rewardTotalEmissioned: bigint;
+  amount: bigint;
 }
 export interface Slot0 extends Record<string, Val> {
   sqrtPriceX96: bigint;
@@ -148,15 +71,6 @@ export interface StepComputations extends Record<string, Val> {
   amountIn: bigint;
   amountOut: bigint;
   feeAmount: bigint;
-}
-export interface Swap extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  token0: HexString;
-  token1: HexString;
-  fee: bigint;
-  amount0: bigint;
-  amount1: bigint;
 }
 export interface SwapCache extends Record<string, Val> {
   liquidityStart: bigint;
@@ -180,15 +94,4 @@ export interface SwapState extends Record<string, Val> {
   feeGrowthGlobalX128: bigint;
   liquidity: bigint;
   protocolFee: bigint;
-}
-export interface TickData0 extends Record<string, Val> {
-  liquidity: bigint;
-  feeGrowth: [bigint, bigint, bigint];
-}
-export interface Transfer extends Record<string, Val> {
-  nonce: HexString;
-  gas: bigint;
-  id: HexString;
-  tokenId: HexString;
-  amount: bigint;
 }

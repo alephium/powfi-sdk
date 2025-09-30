@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as LiquidityManagmentTestContractJson } from "../LiquidityManagmentTest.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace LiquidityManagmentTestTypes {
@@ -47,10 +61,7 @@ export namespace LiquidityManagmentTestTypes {
 
   export interface CallMethodTable {
     addLiquidity: {
-      params: CallContractParams<{
-        payer: Address;
-        p: types.ModifyLiquidityParams;
-      }>;
+      params: CallContractParams<{ payer: Address; p: ModifyLiquidityParams }>;
       result: CallContractResult<[bigint, bigint, bigint, HexString]>;
     };
     getLiquidityForAmount0: {
@@ -113,7 +124,7 @@ export namespace LiquidityManagmentTestTypes {
     };
     positionPath: {
       params: CallContractParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -122,7 +133,7 @@ export namespace LiquidityManagmentTestTypes {
     positionContractId: {
       params: CallContractParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -157,7 +168,7 @@ export namespace LiquidityManagmentTestTypes {
     addLiquidity: {
       params: SignExecuteContractMethodParams<{
         payer: Address;
-        p: types.ModifyLiquidityParams;
+        p: ModifyLiquidityParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -229,7 +240,7 @@ export namespace LiquidityManagmentTestTypes {
     };
     positionPath: {
       params: SignExecuteContractMethodParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -238,7 +249,7 @@ export namespace LiquidityManagmentTestTypes {
     positionContractId: {
       params: SignExecuteContractMethodParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -267,7 +278,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -296,7 +307,7 @@ class Factory extends ContractFactory<
     addLiquidity: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        { payer: Address; p: types.ModifyLiquidityParams }
+        { payer: Address; p: ModifyLiquidityParams }
       >
     ): Promise<
       TestContractResultWithoutMaps<[bigint, bigint, bigint, HexString]>
@@ -401,7 +412,7 @@ class Factory extends ContractFactory<
     positionPath: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        { owner: Address; tickLower: bigint; tickUpper: bigint }
+        { o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "positionPath", params, getContractByCodeHash);
@@ -409,12 +420,7 @@ class Factory extends ContractFactory<
     positionContractId: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        {
-          pool: HexString;
-          owner: Address;
-          tickLower: bigint;
-          tickUpper: bigint;
-        }
+        { pool: HexString; o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(
@@ -466,8 +472,8 @@ export const LiquidityManagmentTest = new Factory(
   Contract.fromJson(
     LiquidityManagmentTestContractJson,
     "",
-    "9f7de708499bf489b051e7bb60e7f934f409ee1cfa978cbfe7207bf9681bc64d",
-    types.AllStructs
+    "290f85d5d15b8e04e9fcfc93944a827db482802e6196d8bac169ca97d480863e",
+    AllStructs
   )
 );
 registerContract(LiquidityManagmentTest);

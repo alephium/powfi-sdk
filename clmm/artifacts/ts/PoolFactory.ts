@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as PoolFactoryContractJson } from "../PoolFactory.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PoolFactoryTypes {
@@ -46,6 +60,8 @@ export namespace PoolFactoryTypes {
     tickTemplate: HexString;
     wordTemplate: HexString;
     poolConfigTemplate: HexString;
+    dexAccountTemplate: HexString;
+    minSwapCount: bigint;
     nextConfigIndex: bigint;
   };
 
@@ -86,7 +102,7 @@ export namespace PoolFactoryTypes {
       result: CallContractResult<bigint>;
     };
     createConfig: {
-      params: CallContractParams<{ config: types.Config }>;
+      params: CallContractParams<{ config: Config }>;
       result: CallContractResult<bigint>;
     };
     create: {
@@ -95,6 +111,7 @@ export namespace PoolFactoryTypes {
         token1: HexString;
         configIndex: bigint;
         sqrtPriceX96: bigint;
+        rewardToken: HexString;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -105,6 +122,24 @@ export namespace PoolFactoryTypes {
         token0: HexString;
         token1: HexString;
       }>;
+      result: CallContractResult<null>;
+    };
+    setRewardParams: {
+      params: CallContractParams<{
+        configIndex: bigint;
+        token0: HexString;
+        token1: HexString;
+        payer: Address;
+        tokenId: HexString;
+        index: bigint;
+        openTime: bigint;
+        endTime: bigint;
+        amount: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
+    createAccount: {
+      params: CallContractParams<{ refferer: Address }>;
       result: CallContractResult<null>;
     };
   }
@@ -146,7 +181,7 @@ export namespace PoolFactoryTypes {
       result: SignExecuteScriptTxResult;
     };
     createConfig: {
-      params: SignExecuteContractMethodParams<{ config: types.Config }>;
+      params: SignExecuteContractMethodParams<{ config: Config }>;
       result: SignExecuteScriptTxResult;
     };
     create: {
@@ -155,6 +190,7 @@ export namespace PoolFactoryTypes {
         token1: HexString;
         configIndex: bigint;
         sqrtPriceX96: bigint;
+        rewardToken: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -165,6 +201,24 @@ export namespace PoolFactoryTypes {
         token0: HexString;
         token1: HexString;
       }>;
+      result: SignExecuteScriptTxResult;
+    };
+    setRewardParams: {
+      params: SignExecuteContractMethodParams<{
+        configIndex: bigint;
+        token0: HexString;
+        token1: HexString;
+        payer: Address;
+        tokenId: HexString;
+        index: bigint;
+        openTime: bigint;
+        endTime: bigint;
+        amount: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
+    createAccount: {
+      params: SignExecuteContractMethodParams<{ refferer: Address }>;
       result: SignExecuteScriptTxResult;
     };
   }
@@ -182,12 +236,18 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
   eventIndex = { ConfigCreated: 0, PoolCreated: 1, FeeTierEnabled: 2 };
-  consts = { FactoryError: { InvalidTokenOrder: BigInt("701") } };
+  consts = {
+    FactoryError: {
+      InvalidTokenOrder: BigInt("701"),
+      UnauthorizedRewardSender: BigInt("702"),
+      UnauthorizedFeeCollector: BigInt("703"),
+    },
+  };
 
   at(address: string): PoolFactoryInstance {
     return new PoolFactoryInstance(address);
@@ -226,7 +286,7 @@ class Factory extends ContractFactory<
     createConfig: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
-        { config: types.Config }
+        { config: Config }
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(this, "createConfig", params, getContractByCodeHash);
@@ -239,6 +299,7 @@ class Factory extends ContractFactory<
           token1: HexString;
           configIndex: bigint;
           sqrtPriceX96: bigint;
+          rewardToken: HexString;
         }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
@@ -262,6 +323,32 @@ class Factory extends ContractFactory<
         getContractByCodeHash
       );
     },
+    setRewardParams: async (
+      params: TestContractParamsWithoutMaps<
+        PoolFactoryTypes.Fields,
+        {
+          configIndex: bigint;
+          token0: HexString;
+          token1: HexString;
+          payer: Address;
+          tokenId: HexString;
+          index: bigint;
+          openTime: bigint;
+          endTime: bigint;
+          amount: bigint;
+        }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "setRewardParams", params, getContractByCodeHash);
+    },
+    createAccount: async (
+      params: TestContractParamsWithoutMaps<
+        PoolFactoryTypes.Fields,
+        { refferer: Address }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "createAccount", params, getContractByCodeHash);
+    },
   };
 
   stateForTest(
@@ -278,8 +365,8 @@ export const PoolFactory = new Factory(
   Contract.fromJson(
     PoolFactoryContractJson,
     "",
-    "15aa3579a8f829d49fbe4394d1226ea07ce9f1c896e4e04abfda8e8baccc7bf2",
-    types.AllStructs
+    "f61bd2f20dd86f5d2641ca1a5ca101592ca7d1d85464698bf09e39ced266e757",
+    AllStructs
   )
 );
 registerContract(PoolFactory);
@@ -422,6 +509,28 @@ export class PoolFactoryInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    setRewardParams: async (
+      params: PoolFactoryTypes.CallMethodParams<"setRewardParams">
+    ): Promise<PoolFactoryTypes.CallMethodResult<"setRewardParams">> => {
+      return callMethod(
+        PoolFactory,
+        this,
+        "setRewardParams",
+        params,
+        getContractByCodeHash
+      );
+    },
+    createAccount: async (
+      params: PoolFactoryTypes.CallMethodParams<"createAccount">
+    ): Promise<PoolFactoryTypes.CallMethodResult<"createAccount">> => {
+      return callMethod(
+        PoolFactory,
+        this,
+        "createAccount",
+        params,
+        getContractByCodeHash
+      );
+    },
   };
 
   transact = {
@@ -468,6 +577,16 @@ export class PoolFactoryInstance extends ContractInstance {
         "collectProtocolFees",
         params
       );
+    },
+    setRewardParams: async (
+      params: PoolFactoryTypes.SignExecuteMethodParams<"setRewardParams">
+    ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"setRewardParams">> => {
+      return signExecuteMethod(PoolFactory, this, "setRewardParams", params);
+    },
+    createAccount: async (
+      params: PoolFactoryTypes.SignExecuteMethodParams<"createAccount">
+    ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"createAccount">> => {
+      return signExecuteMethod(PoolFactory, this, "createAccount", params);
     },
   };
 

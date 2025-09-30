@@ -12,17 +12,22 @@ import {
   HexString,
 } from "@alephium/web3";
 import { getContractByCodeHash } from "./contracts";
-import { default as FlashTestScriptJson } from "../FlashTest.ral.json";
 import { default as PoolRouterDemoScriptJson } from "../PoolRouterDemo.ral.json";
-import * as types from "./types";
-
-export const FlashTest = new ExecutableScript<{
-  t: HexString;
-  data: HexString;
-}>(
-  Script.fromJson(FlashTestScriptJson, "", types.AllStructs),
-  getContractByCodeHash
-);
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 export const PoolRouterDemo = new ExecutableScript<{
   pool_: HexString;
@@ -32,8 +37,9 @@ export const PoolRouterDemo = new ExecutableScript<{
   factory_: HexString;
   user_: HexString;
   config_: HexString;
+  dexAccount_: HexString;
   counter: bigint;
 }>(
-  Script.fromJson(PoolRouterDemoScriptJson, "", types.AllStructs),
+  Script.fromJson(PoolRouterDemoScriptJson, "", AllStructs),
   getContractByCodeHash
 );

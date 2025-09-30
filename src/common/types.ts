@@ -41,7 +41,6 @@ export const defaultNetworks: Network[] = [
   },
   DEVNET,
 ];
-
 export type NetworkOverrides = Partial<Omit<Network, 'id'>>;
 
 export interface ZetaLoadParams {
@@ -60,7 +59,6 @@ export interface PoolStatsItem {
   priceMax: number;
   rewardApr: number[];
 }
-
 export interface PoolStats {
   feeRate: number;
   openTime: string;
@@ -75,3 +73,5 @@ export type PoolState = CpmmPoolState | ClmmPoolState;
 export type CpmmPoolStateWithStats = CpmmPoolState & PoolStats & { type: 'Standard' };
 export type ClmmPoolStateWithStats = ClmmPoolState & PoolStats & { type: 'Concentrated' };
 export type PoolStateWithStats = CpmmPoolStateWithStats | ClmmPoolStateWithStats;
+
+

@@ -1,62 +1,6 @@
 {
   "constants": [
     {
-      "name": "DEPOSIT_LOCK",
-      "value": {
-        "type": "U256",
-        "value": "60000"
-      }
-    },
-    {
-      "name": "LEAVE_LOCK",
-      "value": {
-        "type": "U256",
-        "value": "86400000"
-      }
-    },
-    {
-      "name": "TIME_RANGE",
-      "value": {
-        "type": "U256",
-        "value": "3600000"
-      }
-    },
-    {
-      "name": "REWARD_PERIOD",
-      "value": {
-        "type": "U256",
-        "value": "604800000"
-      }
-    },
-    {
-      "name": "TICKS_LEN",
-      "value": {
-        "type": "U256",
-        "value": "25"
-      }
-    },
-    {
-      "name": "MAX_REWARDS",
-      "value": {
-        "type": "U256",
-        "value": "3"
-      }
-    },
-    {
-      "name": "MAX_FEE",
-      "value": {
-        "type": "I256",
-        "value": "1000000"
-      }
-    },
-    {
-      "name": "I128",
-      "value": {
-        "type": "I256",
-        "value": "340282366920938463463374607431768211456"
-      }
-    },
-    {
       "name": "MIN_TICK",
       "value": {
         "type": "I256",
@@ -124,6 +68,13 @@
       "value": {
         "type": "U256",
         "value": "1461501637330902918203684832716283019655932542976"
+      }
+    },
+    {
+      "name": "MAX_REWARDS",
+      "value": {
+        "type": "U256",
+        "value": "3"
       }
     }
   ]

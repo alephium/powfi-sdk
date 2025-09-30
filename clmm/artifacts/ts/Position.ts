@@ -35,22 +35,43 @@ import {
 } from "@alephium/web3";
 import { default as PositionContractJson } from "../Position.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PositionTypes {
   export type Fields = {
     parent: Address;
+    nftIndex: bigint;
     liquidity: bigint;
-    tokensOwed0: bigint;
-    tokensOwed1: bigint;
-    feeGrowthInside0LastX128: bigint;
-    feeGrowthInside1LastX128: bigint;
+    growthsInside: [bigint, bigint, bigint];
+    tokensOwed: [bigint, bigint, bigint];
   };
 
   export type State = ContractState<Fields>;
 
   export interface CallMethodTable {
+    getTokenUri: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<HexString>;
+    };
+    getCollectionIndex: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<[HexString, bigint]>;
+    };
     mulDiv: {
       params: CallContractParams<{ a: bigint; b: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
@@ -62,8 +83,7 @@ export namespace PositionTypes {
     update: {
       params: CallContractParams<{
         liquidityDelta: bigint;
-        feeGrowthInside0X128: bigint;
-        feeGrowthInside1X128: bigint;
+        growths: [bigint, bigint, bigint];
       }>;
       result: CallContractResult<null>;
     };
@@ -96,6 +116,14 @@ export namespace PositionTypes {
   };
 
   export interface SignExecuteMethodTable {
+    getTokenUri: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    getCollectionIndex: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
     mulDiv: {
       params: SignExecuteContractMethodParams<{
         a: bigint;
@@ -115,8 +143,7 @@ export namespace PositionTypes {
     update: {
       params: SignExecuteContractMethodParams<{
         liquidityDelta: bigint;
-        feeGrowthInside0X128: bigint;
-        feeGrowthInside1X128: bigint;
+        growths: [bigint, bigint, bigint];
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -146,7 +173,7 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -160,6 +187,27 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
   }
 
   tests = {
+    getTokenUri: async (
+      params: Omit<
+        TestContractParamsWithoutMaps<PositionTypes.Fields, never>,
+        "args"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "getTokenUri", params, getContractByCodeHash);
+    },
+    getCollectionIndex: async (
+      params: Omit<
+        TestContractParamsWithoutMaps<PositionTypes.Fields, never>,
+        "args"
+      >
+    ): Promise<TestContractResultWithoutMaps<[HexString, bigint]>> => {
+      return testMethod(
+        this,
+        "getCollectionIndex",
+        params,
+        getContractByCodeHash
+      );
+    },
     mulDiv: async (
       params: TestContractParamsWithoutMaps<
         PositionTypes.Fields,
@@ -184,11 +232,7 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
     update: async (
       params: TestContractParamsWithoutMaps<
         PositionTypes.Fields,
-        {
-          liquidityDelta: bigint;
-          feeGrowthInside0X128: bigint;
-          feeGrowthInside1X128: bigint;
-        }
+        { liquidityDelta: bigint; growths: [bigint, bigint, bigint] }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "update", params, getContractByCodeHash);
@@ -225,8 +269,8 @@ export const Position = new Factory(
   Contract.fromJson(
     PositionContractJson,
     "",
-    "9207f547eb97b32671747776b342417a01ca84e0ab46c4d93b55a22bf02f5ff3",
-    types.AllStructs
+    "a80cc7f0178f00c65bb654bd3ce7b442ff398fd22a59325c7a8f56869ca85430",
+    AllStructs
   )
 );
 registerContract(Position);
@@ -242,6 +286,28 @@ export class PositionInstance extends ContractInstance {
   }
 
   view = {
+    getTokenUri: async (
+      params?: PositionTypes.CallMethodParams<"getTokenUri">
+    ): Promise<PositionTypes.CallMethodResult<"getTokenUri">> => {
+      return callMethod(
+        Position,
+        this,
+        "getTokenUri",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
+    getCollectionIndex: async (
+      params?: PositionTypes.CallMethodParams<"getCollectionIndex">
+    ): Promise<PositionTypes.CallMethodResult<"getCollectionIndex">> => {
+      return callMethod(
+        Position,
+        this,
+        "getCollectionIndex",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
     mulDiv: async (
       params: PositionTypes.CallMethodParams<"mulDiv">
     ): Promise<PositionTypes.CallMethodResult<"mulDiv">> => {
@@ -300,6 +366,16 @@ export class PositionInstance extends ContractInstance {
   };
 
   transact = {
+    getTokenUri: async (
+      params: PositionTypes.SignExecuteMethodParams<"getTokenUri">
+    ): Promise<PositionTypes.SignExecuteMethodResult<"getTokenUri">> => {
+      return signExecuteMethod(Position, this, "getTokenUri", params);
+    },
+    getCollectionIndex: async (
+      params: PositionTypes.SignExecuteMethodParams<"getCollectionIndex">
+    ): Promise<PositionTypes.SignExecuteMethodResult<"getCollectionIndex">> => {
+      return signExecuteMethod(Position, this, "getCollectionIndex", params);
+    },
     mulDiv: async (
       params: PositionTypes.SignExecuteMethodParams<"mulDiv">
     ): Promise<PositionTypes.SignExecuteMethodResult<"mulDiv">> => {
