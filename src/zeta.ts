@@ -24,7 +24,10 @@ export class Zeta {
       throw new Error(`Network ${params.networkId} not found`);
     }
 
-    this._network = network;
+    const overrides = params.networkOverrides ?? {};
+    const networkConfig: Network = { ...network, ...overrides };
+
+    this._network = networkConfig;
     this._nodeProvider = new NodeProvider(this._network.nodeUrl);
     this._explorerProvider = new ExplorerProvider(this._network.explorerApiUrl);
     this._tokenListUrl = this._network.tokenListUrl;

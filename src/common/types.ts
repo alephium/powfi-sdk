@@ -42,9 +42,12 @@ export const defaultNetworks: Network[] = [
   DEVNET,
 ];
 
+export type NetworkOverrides = Partial<Omit<Network, 'id'>>;
+
 export interface ZetaLoadParams {
   networkId: NetworkId;
   signer?: SignerProvider;
+  networkOverrides?: NetworkOverrides;
 }
 
 export interface PoolStatsItem {
