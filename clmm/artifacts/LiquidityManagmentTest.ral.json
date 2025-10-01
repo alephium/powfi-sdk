@@ -174,7 +174,7 @@
       "paramNames": [
         "factory",
         "tokens",
-        "configIndex"
+        "configIndex_"
       ],
       "paramTypes": [
         "PoolFactory",
@@ -195,7 +195,7 @@
       "paramNames": [
         "factory",
         "tokens",
-        "configIndex"
+        "configIndex_"
       ],
       "paramTypes": [
         "PoolFactory",

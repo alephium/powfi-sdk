@@ -85,7 +85,7 @@ export namespace PoolFactoryTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -93,7 +93,7 @@ export namespace PoolFactoryTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -142,6 +142,10 @@ export namespace PoolFactoryTypes {
       params: CallContractParams<{ refferer: Address }>;
       result: CallContractResult<null>;
     };
+    setDexAccountsParams: {
+      params: CallContractParams<{ nextMinSwapCount: bigint }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -164,7 +168,7 @@ export namespace PoolFactoryTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -172,7 +176,7 @@ export namespace PoolFactoryTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -221,6 +225,10 @@ export namespace PoolFactoryTypes {
       params: SignExecuteContractMethodParams<{ refferer: Address }>;
       result: SignExecuteScriptTxResult;
     };
+    setDexAccountsParams: {
+      params: SignExecuteContractMethodParams<{ nextMinSwapCount: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
   }
   export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
     SignExecuteMethodTable[T]["params"];
@@ -246,6 +254,8 @@ class Factory extends ContractFactory<
       InvalidTokenOrder: BigInt("701"),
       UnauthorizedRewardSender: BigInt("702"),
       UnauthorizedFeeCollector: BigInt("703"),
+      AccountAddressIsContract: BigInt("704"),
+      UnauthorizedDexAccountsParams: BigInt("705"),
     },
   };
 
@@ -257,7 +267,7 @@ class Factory extends ContractFactory<
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -265,7 +275,7 @@ class Factory extends ContractFactory<
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);
@@ -349,6 +359,19 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "createAccount", params, getContractByCodeHash);
     },
+    setDexAccountsParams: async (
+      params: TestContractParamsWithoutMaps<
+        PoolFactoryTypes.Fields,
+        { nextMinSwapCount: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(
+        this,
+        "setDexAccountsParams",
+        params,
+        getContractByCodeHash
+      );
+    },
   };
 
   stateForTest(
@@ -365,7 +388,7 @@ export const PoolFactory = new Factory(
   Contract.fromJson(
     PoolFactoryContractJson,
     "",
-    "f61bd2f20dd86f5d2641ca1a5ca101592ca7d1d85464698bf09e39ced266e757",
+    "e86939ec58138b7ea72d2bba4377575d2a5b9b77c57013edf5bbac6e723607c5",
     AllStructs
   )
 );
@@ -531,6 +554,17 @@ export class PoolFactoryInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    setDexAccountsParams: async (
+      params: PoolFactoryTypes.CallMethodParams<"setDexAccountsParams">
+    ): Promise<PoolFactoryTypes.CallMethodResult<"setDexAccountsParams">> => {
+      return callMethod(
+        PoolFactory,
+        this,
+        "setDexAccountsParams",
+        params,
+        getContractByCodeHash
+      );
+    },
   };
 
   transact = {
@@ -587,6 +621,18 @@ export class PoolFactoryInstance extends ContractInstance {
       params: PoolFactoryTypes.SignExecuteMethodParams<"createAccount">
     ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"createAccount">> => {
       return signExecuteMethod(PoolFactory, this, "createAccount", params);
+    },
+    setDexAccountsParams: async (
+      params: PoolFactoryTypes.SignExecuteMethodParams<"setDexAccountsParams">
+    ): Promise<
+      PoolFactoryTypes.SignExecuteMethodResult<"setDexAccountsParams">
+    > => {
+      return signExecuteMethod(
+        PoolFactory,
+        this,
+        "setDexAccountsParams",
+        params
+      );
     },
   };
 

@@ -61,6 +61,7 @@ export namespace PoolUserTypes {
     pool1: HexString;
     pool2: HexString;
     pool3: HexString;
+    factory: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -80,6 +81,7 @@ export namespace PoolUserTypes {
       }>;
       result: CallContractResult<
         [
+          HexString,
           HexString,
           HexString,
           HexString,
@@ -167,6 +169,7 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
           HexString,
           HexString,
           HexString,
+          HexString,
           HexString
         ]
       >
@@ -189,7 +192,7 @@ export const PoolUser = new Factory(
   Contract.fromJson(
     PoolUserContractJson,
     "",
-    "c399b2c0ac5021d1a8b6ca3c10d3d439ed853a994e7ec2bab617e5e9e8309985",
+    "961334da677cf49732dff79add2cad84c2b20673a23067c5c3a3f4f33ffc279f",
     AllStructs
   )
 );

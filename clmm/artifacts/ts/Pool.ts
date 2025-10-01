@@ -59,6 +59,7 @@ export namespace PoolTypes {
     dexAccountTemplate: HexString;
     tickTemplate: HexString;
     wordTemplate: HexString;
+    configIndex: bigint;
     token0: HexString;
     token1: HexString;
     token2: HexString;
@@ -287,7 +288,7 @@ export namespace PoolTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -295,7 +296,7 @@ export namespace PoolTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -653,7 +654,7 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -661,7 +662,7 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -903,6 +904,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
       NFTByIndexNotSupported: BigInt("110"),
       UnauthorizedRewardSender: BigInt("111"),
       InvalidRewardParams: BigInt("112"),
+      DexAccountNotFound: BigInt("113"),
     },
   };
 
@@ -1198,7 +1200,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -1206,7 +1208,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);
@@ -1457,7 +1459,7 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "1c57e75ab5c4c7d6c08e789ad97e4b539bc94f9ebfc627b5fafb52278dd9a418",
+    "b4cfcb08f3c572130a146703d1339ad46dcb16861951f7d0fb8a008cc2fd33bb",
     AllStructs
   )
 );

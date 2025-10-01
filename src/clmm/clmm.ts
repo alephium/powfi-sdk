@@ -161,6 +161,7 @@ export class ClmmModule extends ModuleBase {
     configIndex: bigint,
     token0: string,
     token1: string,
+    rewardToken: string,
     sqrtPriceX96: bigint,
   ): Promise<{ poolAddress: string; result: SignExecuteScriptTxResult }> {
     const factoryAddress = addressFromContractId(this.config.factoryId);
@@ -170,7 +171,7 @@ export class ClmmModule extends ModuleBase {
       args: {
         token0,
         token1,
-        rewardToken: '',
+        rewardToken,
         configIndex,
         sqrtPriceX96,
       },

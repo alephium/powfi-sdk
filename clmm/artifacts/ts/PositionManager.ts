@@ -110,7 +110,7 @@ export namespace PositionManagerTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -118,7 +118,7 @@ export namespace PositionManagerTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -247,7 +247,7 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -255,7 +255,7 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -437,7 +437,7 @@ class Factory extends ContractFactory<
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -445,7 +445,7 @@ class Factory extends ContractFactory<
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);

@@ -110,7 +110,7 @@ export namespace LiquidityManagmentTestTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -118,7 +118,7 @@ export namespace LiquidityManagmentTestTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -226,7 +226,7 @@ export namespace LiquidityManagmentTestTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -234,7 +234,7 @@ export namespace LiquidityManagmentTestTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -396,7 +396,7 @@ class Factory extends ContractFactory<
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -404,7 +404,7 @@ class Factory extends ContractFactory<
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);

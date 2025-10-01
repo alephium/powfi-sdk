@@ -64,7 +64,11 @@ export namespace DexAccountTypes {
 
   export interface CallMethodTable {
     deposit: {
-      params: CallContractParams<{ tokenId: HexString; amount: bigint }>;
+      params: CallContractParams<{
+        tokenId: HexString;
+        amount: bigint;
+        path: HexString;
+      }>;
       result: CallContractResult<null>;
     };
     asRef: {
@@ -97,6 +101,7 @@ export namespace DexAccountTypes {
       params: SignExecuteContractMethodParams<{
         tokenId: HexString;
         amount: bigint;
+        path: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -139,7 +144,7 @@ class Factory extends ContractFactory<
     deposit: async (
       params: TestContractParamsWithoutMaps<
         DexAccountTypes.Fields,
-        { tokenId: HexString; amount: bigint }
+        { tokenId: HexString; amount: bigint; path: HexString }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "deposit", params, getContractByCodeHash);
@@ -175,8 +180,8 @@ class Factory extends ContractFactory<
 export const DexAccount = new Factory(
   Contract.fromJson(
     DexAccountContractJson,
-    "",
-    "76be29f13ad97873ef403efdd77837f6bbcb83d23e7a3bd8f6d15751f2b8abe8",
+    "=6-2+55=2-2+6e=2-2+c6=11-1+f=30+160416031604777e040a706172656e7449643a20092063616c6c65723a20012000=288",
+    "430e42026eff21944006c7411e8ba0b006680ed3f7c5d781e0e8b20522fab7a2",
     AllStructs
   )
 );

@@ -12,6 +12,7 @@ import {
   HexString,
 } from "@alephium/web3";
 import { getContractByCodeHash } from "./contracts";
+import { default as CreateLiquidPoolScriptJson } from "../CreateLiquidPool.ral.json";
 import { default as PoolRouterDemoScriptJson } from "../PoolRouterDemo.ral.json";
 import {
   CollectParams,
@@ -28,6 +29,21 @@ import {
   SwapState,
   AllStructs,
 } from "./types";
+
+export const CreateLiquidPool = new ExecutableScript<{
+  factory: HexString;
+  token0: HexString;
+  token1: HexString;
+  configIndex: bigint;
+  sqrtPriceX96: bigint;
+  rewardToken: HexString;
+  tickLower: bigint;
+  tickUpper: bigint;
+  liquidity: bigint;
+}>(
+  Script.fromJson(CreateLiquidPoolScriptJson, "", AllStructs),
+  getContractByCodeHash
+);
 
 export const PoolRouterDemo = new ExecutableScript<{
   pool_: HexString;
