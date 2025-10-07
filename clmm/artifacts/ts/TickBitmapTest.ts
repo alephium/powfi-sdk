@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as TickBitmapTestContractJson } from "../TickBitmapTest.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace TickBitmapTestTypes {
@@ -69,7 +83,7 @@ export namespace TickBitmapTestTypes {
     };
     positionPath: {
       params: CallContractParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -78,7 +92,7 @@ export namespace TickBitmapTestTypes {
     positionContractId: {
       params: CallContractParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -139,7 +153,7 @@ export namespace TickBitmapTestTypes {
     };
     positionPath: {
       params: SignExecuteContractMethodParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -148,7 +162,7 @@ export namespace TickBitmapTestTypes {
     positionContractId: {
       params: SignExecuteContractMethodParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -181,7 +195,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -252,7 +266,7 @@ class Factory extends ContractFactory<
     positionPath: async (
       params: TestContractParamsWithoutMaps<
         TickBitmapTestTypes.Fields,
-        { owner: Address; tickLower: bigint; tickUpper: bigint }
+        { o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "positionPath", params, getContractByCodeHash);
@@ -260,12 +274,7 @@ class Factory extends ContractFactory<
     positionContractId: async (
       params: TestContractParamsWithoutMaps<
         TickBitmapTestTypes.Fields,
-        {
-          pool: HexString;
-          owner: Address;
-          tickLower: bigint;
-          tickUpper: bigint;
-        }
+        { pool: HexString; o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(
@@ -308,7 +317,7 @@ export const TickBitmapTest = new Factory(
     TickBitmapTestContractJson,
     "",
     "5cb6cce5c5b8adb88a18a993227d51465e3e54b5a34936cafc51100725724b54",
-    types.AllStructs
+    AllStructs
   )
 );
 registerContract(TickBitmapTest);

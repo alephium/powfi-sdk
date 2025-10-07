@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as PoolUserContractJson } from "../PoolUser.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PoolUserTypes {
@@ -47,6 +61,7 @@ export namespace PoolUserTypes {
     pool1: HexString;
     pool2: HexString;
     pool3: HexString;
+    factory: HexString;
   };
 
   export type State = ContractState<Fields>;
@@ -62,9 +77,11 @@ export namespace PoolUserTypes {
         word_: HexString;
         factory_: HexString;
         config_: HexString;
+        dexAccount_: HexString;
       }>;
       result: CallContractResult<
         [
+          HexString,
           HexString,
           HexString,
           HexString,
@@ -103,6 +120,7 @@ export namespace PoolUserTypes {
         word_: HexString;
         factory_: HexString;
         config_: HexString;
+        dexAccount_: HexString;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -118,7 +136,7 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -139,11 +157,13 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
           word_: HexString;
           factory_: HexString;
           config_: HexString;
+          dexAccount_: HexString;
         }
       >
     ): Promise<
       TestContractResultWithoutMaps<
         [
+          HexString,
           HexString,
           HexString,
           HexString,
@@ -172,8 +192,8 @@ export const PoolUser = new Factory(
   Contract.fromJson(
     PoolUserContractJson,
     "",
-    "0c197ca0ddd1295e5a061f65b23ba56dd826452c22214fd3d1257ab9e334af0b",
-    types.AllStructs
+    "961334da677cf49732dff79add2cad84c2b20673a23067c5c3a3f4f33ffc279f",
+    AllStructs
   )
 );
 registerContract(PoolUser);

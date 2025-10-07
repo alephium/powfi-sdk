@@ -1,8 +1,8 @@
 {
-  "version": "v4.2.0",
+  "version": "v4.0.1",
   "name": "PoolFactory",
-  "bytecode": "07061a4030409b40e7419c41c300000305010c1602130164170316001603cc17041601160444020000030401091600160116020000170316001603cc020000010401403a12bff276187a7a16003a7a05294b033a224a023a90160021170112800d89e87a7a16003a7a05294b033a904a023a22160021170216021601207a7a16003a7a05294b033a904a023a223d0d2a170313ccffffffffffffffffffffffffffffffff16032d0201000307014028d31c03e050b4ce00451341937b16001601160213036413006417041703a0001705a0004017061606ce0516031604c118a0000d2aa1000516055e071601160016056016050201000419014065d30b76af44160071160171311342bd7b160240cb17040c0f1604010017071706170516050002170816030d0dce0101011709160316090c170c170b170a0c0c0c0c0c0c1716171517141713171217110c0c17181717b1ce02ce03ce0416001601160616051608130964160a160b160c0c0c0c0c16111612161316141615161616171618130f64170e170db1160016014416020000170f160fce01160d160ec1171006161016001601160261161002010004050012d32d2d48cdb4ce00451341937bb1160216034416010001170416000d0c1604012d",
-  "codeHash": "15aa3579a8f829d49fbe4394d1226ea07ce9f1c896e4e04abfda8e8baccc7bf2",
+  "bytecode": "09091a4030409b40e741c741ee42224244425b00000305010c1602130164170316001603cc17041601160444020000030401091600160116020000170316001603cc020000010401403a12bff276187a7a16003a7a05294b033a224a023a90160021170112800d89e87a7a16003a7a05294b033a904a023a22160021170216021601207a7a16003a7a05294b033a904a023a223d0d2a170313ccffffffffffffffffffffffffffffffff16032d0201000307014028d31c03e050b4ce00451341937b16001601160213036413006417041703a0011705a0014017061606ce0516031604c118a0010d2aa1010516055e07160116001605601605020100054020014079d3530365c2160071160171311342bd7b160240cb17050c0f1605010017081707170616060002170916030d0dce010105170a1603160a0c170d170c170b0c0c0c0c0c0c0c0c0c171a171917181717171617151714171317120c0c0c171d171c171b0c0c171f171eb1ce02ce06ce03ce0416021600160116041607160616091406414c50480002130d640c160b160c160d0c16121613161416151616161716181619161a161b161c161d161e161f131364170f170eb116001601441602000017101610ce01160e160fc1171106161116001601160261161102010004050012d32d2d48cdb4ce00451342bf7bb1160216034416010001170416000d0c160401320103090a0019d3132dd93db4ce00451342be7bb11601160244160000011709160316041608a31605160616071608100c1609013101000102000fd365b302f9b41701160149191342c07b16011600a0000f0cce060102010001010008d39ecf0ff5b4ce00451342c17b1600a100",
+  "codeHash": "e86939ec58138b7ea72d2bba4377575d2a5b9b77c57013edf5bbac6e723607c5",
   "fieldsSig": {
     "names": [
       "owner",
@@ -11,6 +11,8 @@
       "tickTemplate",
       "wordTemplate",
       "poolConfigTemplate",
+      "dexAccountTemplate",
+      "minSwapCount",
       "nextConfigIndex"
     ],
     "types": [
@@ -20,6 +22,8 @@
       "ByteVec",
       "ByteVec",
       "ByteVec",
+      "ByteVec",
+      "U256",
       "U256"
     ],
     "isMutable": [
@@ -29,6 +33,8 @@
       false,
       false,
       false,
+      false,
+      true,
       true
     ]
   },
@@ -77,7 +83,7 @@
       "paramNames": [
         "factory",
         "tokens",
-        "configIndex"
+        "configIndex_"
       ],
       "paramTypes": [
         "PoolFactory",
@@ -98,7 +104,7 @@
       "paramNames": [
         "factory",
         "tokens",
-        "configIndex"
+        "configIndex_"
       ],
       "paramTypes": [
         "PoolFactory",
@@ -150,15 +156,18 @@
         "token0",
         "token1",
         "configIndex",
-        "sqrtPriceX96"
+        "sqrtPriceX96",
+        "rewardToken"
       ],
       "paramTypes": [
         "ByteVec",
         "ByteVec",
         "U256",
-        "U256"
+        "U256",
+        "ByteVec"
       ],
       "paramIsMutable": [
+        false,
         false,
         false,
         false,
@@ -189,6 +198,69 @@
         false
       ],
       "returnTypes": []
+    },
+    {
+      "name": "setRewardParams",
+      "paramNames": [
+        "configIndex",
+        "token0",
+        "token1",
+        "payer",
+        "tokenId",
+        "index",
+        "openTime",
+        "endTime",
+        "amount"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createAccount",
+      "paramNames": [
+        "refferer"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setDexAccountsParams",
+      "paramNames": [
+        "nextMinSwapCount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
     }
   ],
   "constants": [],
@@ -201,6 +273,34 @@
           "value": {
             "type": "U256",
             "value": "701"
+          }
+        },
+        {
+          "name": "UnauthorizedRewardSender",
+          "value": {
+            "type": "U256",
+            "value": "702"
+          }
+        },
+        {
+          "name": "UnauthorizedFeeCollector",
+          "value": {
+            "type": "U256",
+            "value": "703"
+          }
+        },
+        {
+          "name": "AccountAddressIsContract",
+          "value": {
+            "type": "U256",
+            "value": "704"
+          }
+        },
+        {
+          "name": "UnauthorizedDexAccountsParams",
+          "value": {
+            "type": "U256",
+            "value": "705"
           }
         }
       ]

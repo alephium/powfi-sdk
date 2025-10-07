@@ -2,14 +2,6 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export const DEPOSIT_LOCK = BigInt("60000");
-export const LEAVE_LOCK = BigInt("86400000");
-export const TIME_RANGE = BigInt("3600000");
-export const REWARD_PERIOD = BigInt("604800000");
-export const TICKS_LEN = BigInt("25");
-export const MAX_REWARDS = BigInt("3");
-export const MAX_FEE = BigInt("1000000");
-export const I128 = BigInt("340282366920938463463374607431768211456");
 export const MIN_TICK = BigInt("-887272");
 export const MAX_TICK = BigInt("887272");
 export const MIN_SQRT_RATIO = BigInt("4295128739");
@@ -22,3 +14,4 @@ export const Q64 = BigInt("18446744073709551616");
 export const Q32 = BigInt("4294967296");
 export const Q96 = BigInt("79228162514264337593543950336");
 export const Q160 = BigInt("1461501637330902918203684832716283019655932542976");
+export const MAX_REWARDS = BigInt("3");

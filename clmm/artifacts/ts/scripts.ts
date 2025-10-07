@@ -12,15 +12,36 @@ import {
   HexString,
 } from "@alephium/web3";
 import { getContractByCodeHash } from "./contracts";
-import { default as FlashTestScriptJson } from "../FlashTest.ral.json";
+import { default as CreateLiquidPoolScriptJson } from "../CreateLiquidPool.ral.json";
 import { default as PoolRouterDemoScriptJson } from "../PoolRouterDemo.ral.json";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
-export const FlashTest = new ExecutableScript<{
-  t: HexString;
-  data: HexString;
+export const CreateLiquidPool = new ExecutableScript<{
+  factory: HexString;
+  token0: HexString;
+  token1: HexString;
+  configIndex: bigint;
+  sqrtPriceX96: bigint;
+  rewardToken: HexString;
+  tickLower: bigint;
+  tickUpper: bigint;
+  liquidity: bigint;
 }>(
-  Script.fromJson(FlashTestScriptJson, "", types.AllStructs),
+  Script.fromJson(CreateLiquidPoolScriptJson, "", AllStructs),
   getContractByCodeHash
 );
 
@@ -32,8 +53,9 @@ export const PoolRouterDemo = new ExecutableScript<{
   factory_: HexString;
   user_: HexString;
   config_: HexString;
+  dexAccount_: HexString;
   counter: bigint;
 }>(
-  Script.fromJson(PoolRouterDemoScriptJson, "", types.AllStructs),
+  Script.fromJson(PoolRouterDemoScriptJson, "", AllStructs),
   getContractByCodeHash
 );

@@ -18,6 +18,8 @@ import {
   BitmapWordInstance,
   PoolConfig,
   PoolConfigInstance,
+  DexAccount,
+  DexAccountInstance,
   PoolFactory,
   PoolFactoryInstance,
   PositionManager,
@@ -33,6 +35,7 @@ export type Deployments = {
     Tick: DeployContractExecutionResult<TickInstance>;
     BitmapWord: DeployContractExecutionResult<BitmapWordInstance>;
     PoolConfig: DeployContractExecutionResult<PoolConfigInstance>;
+    DexAccount: DeployContractExecutionResult<DexAccountInstance>;
     PoolFactory: DeployContractExecutionResult<PoolFactoryInstance>;
     PositionManager: DeployContractExecutionResult<PositionManagerInstance>;
   };
@@ -68,6 +71,12 @@ function toDeployments(json: any): Deployments {
       ...json.contracts["PoolConfig"],
       contractInstance: PoolConfig.at(
         json.contracts["PoolConfig"].contractInstance.address
+      ),
+    },
+    DexAccount: {
+      ...json.contracts["DexAccount"],
+      contractInstance: DexAccount.at(
+        json.contracts["DexAccount"].contractInstance.address
       ),
     },
     PoolFactory: {

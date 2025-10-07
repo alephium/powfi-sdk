@@ -1,29 +1,26 @@
 {
-  "version": "v4.2.0",
+  "version": "v4.0.1",
   "name": "Tick",
-  "bytecode": "060640514075409940af40d340e10100030601402ad344ba8eddb4ce00451343217ba000170316033f16011f1704160405291343237b16043d170516051600321343227b1605a10016024c04a0011601204a03a00116011fa10116050c2f02010003030210d3d3e883281600ce01294c04a002a003024a071601a0022b1602a0032b02010003030210d364c6879c1600ce01264c04a002a003024a071601a0022b1602a0032b02010201010008d3b0cd421fb4ce00451343217b1600b0010002020110d37ae9deb2b4ce00451343217b1600a0022ba1021601a0032ba103a00102010000000103d3602bc55da00102",
-  "codeHash": "a8a1f0a17ec2129e611bee6390332642647e78faa4f2fb0744d520a432004ad5",
+  "bytecode": "0706405140a340f5410b416541730100030601402ad344ba8eddb4ce00451343217ba000170316033f16011f1704160405291343237b16043d170516051600321343227b1605a10016024c04a0011601204a03a00116011fa10116050c2f0201000405034032d3cfc5e9a41600ce01294c05a002a003a004024a40280c170416040f314c1e16047a0f314d0d2a7816047a0f314d0e2ac32b16047a0f314d0d2a7916040d2a17044a7fde1601160216030201000405034032d36efb0f181600ce01264c05a002a003a004024a40280c170416040f314c1e16047a0f314d0d2a7816047a0f314d0e2ac32b16047a0f314d0d2a7916040d2a17044a7fde16011602160302010201010008d3b0cd421fb4ce00451343217b1600b001000506014035d336cb1526b4ce00451343217b16034c03160417004a02160417010c170516050f314c1a16057a0f314d7816057a0f314d0e2ac32b16057a0f314d7916050d2a17054a22160016011602a104a103a102a00102010000000103d3602bc55da00102",
+  "codeHash": "1373551ca890d886980b8d33277d7ed7a2c9f7665d77a1e893a1f2554d10d4b1",
   "fieldsSig": {
     "names": [
       "parent",
       "tick",
       "liquidityGross",
       "liquidityNet",
-      "feeGrowthOutside0X128",
-      "feeGrowthOutside1X128"
+      "feeGrowthsOutside"
     ],
     "types": [
       "Address",
       "I256",
       "U256",
       "I256",
-      "U256",
-      "U256"
+      "[U256;3]"
     ],
     "isMutable": [
       false,
       false,
-      true,
       true,
       true,
       true
@@ -56,44 +53,36 @@
       "name": "feeGrowthBelow",
       "paramNames": [
         "tickCurrent",
-        "feeGrowthGlobal0X128",
-        "feeGrowthGlobal1X128"
+        "globalGrowths"
       ],
       "paramTypes": [
         "I256",
-        "U256",
-        "U256"
+        "[U256;3]"
       ],
       "paramIsMutable": [
         false,
-        false,
-        false
+        true
       ],
       "returnTypes": [
-        "U256",
-        "U256"
+        "[U256;3]"
       ]
     },
     {
       "name": "feeGrowthAbove",
       "paramNames": [
         "tickCurrent",
-        "feeGrowthGlobal0X128",
-        "feeGrowthGlobal1X128"
+        "globalGrowths"
       ],
       "paramTypes": [
         "I256",
-        "U256",
-        "U256"
+        "[U256;3]"
       ],
       "paramIsMutable": [
         false,
-        false,
-        false
+        true
       ],
       "returnTypes": [
-        "U256",
-        "U256"
+        "[U256;3]"
       ]
     },
     {
@@ -112,14 +101,17 @@
     {
       "name": "cross",
       "paramNames": [
-        "feeGrowthGlobal0X128",
-        "feeGrowthGlobal1X128"
+        "globalGrowths",
+        "zeroForOne",
+        "feeGrowthGlobalX128"
       ],
       "paramTypes": [
-        "U256",
+        "[U256;3]",
+        "Bool",
         "U256"
       ],
       "paramIsMutable": [
+        true,
         false,
         false
       ],

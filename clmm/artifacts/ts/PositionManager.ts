@@ -35,7 +35,21 @@ import {
 } from "@alephium/web3";
 import { default as PositionManagerContractJson } from "../PositionManager.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PositionManagerTypes {
@@ -47,10 +61,7 @@ export namespace PositionManagerTypes {
 
   export interface CallMethodTable {
     addLiquidity: {
-      params: CallContractParams<{
-        payer: Address;
-        p: types.ModifyLiquidityParams;
-      }>;
+      params: CallContractParams<{ payer: Address; p: ModifyLiquidityParams }>;
       result: CallContractResult<[bigint, bigint, bigint, HexString]>;
     };
     getLiquidityForAmount0: {
@@ -99,7 +110,7 @@ export namespace PositionManagerTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -107,13 +118,13 @@ export namespace PositionManagerTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
     positionPath: {
       params: CallContractParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -122,24 +133,21 @@ export namespace PositionManagerTypes {
     positionContractId: {
       params: CallContractParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
     increaseLiquidity: {
-      params: CallContractParams<{
-        payer: Address;
-        p: types.ModifyLiquidityParams;
-      }>;
+      params: CallContractParams<{ payer: Address; p: ModifyLiquidityParams }>;
       result: CallContractResult<null>;
     };
     decreaseLiquidity: {
       params: CallContractParams<{
         operator: Address;
         liquidity: bigint;
-        p: types.DecreaseLiquidityParams;
+        p: DecreaseLiquidityParams;
       }>;
       result: CallContractResult<null>;
     };
@@ -147,7 +155,7 @@ export namespace PositionManagerTypes {
       params: CallContractParams<{
         operator: Address;
         liquidity: bigint;
-        p: types.CollectParams;
+        p: CollectParams;
       }>;
       result: CallContractResult<null>;
     };
@@ -181,7 +189,7 @@ export namespace PositionManagerTypes {
     addLiquidity: {
       params: SignExecuteContractMethodParams<{
         payer: Address;
-        p: types.ModifyLiquidityParams;
+        p: ModifyLiquidityParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -239,7 +247,7 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -247,13 +255,13 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
     positionPath: {
       params: SignExecuteContractMethodParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -262,7 +270,7 @@ export namespace PositionManagerTypes {
     positionContractId: {
       params: SignExecuteContractMethodParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -271,7 +279,7 @@ export namespace PositionManagerTypes {
     increaseLiquidity: {
       params: SignExecuteContractMethodParams<{
         payer: Address;
-        p: types.ModifyLiquidityParams;
+        p: ModifyLiquidityParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -279,7 +287,7 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         operator: Address;
         liquidity: bigint;
-        p: types.DecreaseLiquidityParams;
+        p: DecreaseLiquidityParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -287,7 +295,7 @@ export namespace PositionManagerTypes {
       params: SignExecuteContractMethodParams<{
         operator: Address;
         liquidity: bigint;
-        p: types.CollectParams;
+        p: CollectParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -315,7 +323,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -340,7 +348,7 @@ class Factory extends ContractFactory<
     addLiquidity: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { payer: Address; p: types.ModifyLiquidityParams }
+        { payer: Address; p: ModifyLiquidityParams }
       >
     ): Promise<
       TestContractResultWithoutMaps<[bigint, bigint, bigint, HexString]>
@@ -429,7 +437,7 @@ class Factory extends ContractFactory<
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -437,7 +445,7 @@ class Factory extends ContractFactory<
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);
@@ -445,7 +453,7 @@ class Factory extends ContractFactory<
     positionPath: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { owner: Address; tickLower: bigint; tickUpper: bigint }
+        { o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "positionPath", params, getContractByCodeHash);
@@ -453,12 +461,7 @@ class Factory extends ContractFactory<
     positionContractId: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        {
-          pool: HexString;
-          owner: Address;
-          tickLower: bigint;
-          tickUpper: bigint;
-        }
+        { pool: HexString; o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(
@@ -471,7 +474,7 @@ class Factory extends ContractFactory<
     increaseLiquidity: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { payer: Address; p: types.ModifyLiquidityParams }
+        { payer: Address; p: ModifyLiquidityParams }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(
@@ -484,11 +487,7 @@ class Factory extends ContractFactory<
     decreaseLiquidity: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        {
-          operator: Address;
-          liquidity: bigint;
-          p: types.DecreaseLiquidityParams;
-        }
+        { operator: Address; liquidity: bigint; p: DecreaseLiquidityParams }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(
@@ -501,7 +500,7 @@ class Factory extends ContractFactory<
     collect: async (
       params: TestContractParamsWithoutMaps<
         PositionManagerTypes.Fields,
-        { operator: Address; liquidity: bigint; p: types.CollectParams }
+        { operator: Address; liquidity: bigint; p: CollectParams }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "collect", params, getContractByCodeHash);
@@ -542,8 +541,8 @@ export const PositionManager = new Factory(
   Contract.fromJson(
     PositionManagerContractJson,
     "",
-    "fe6cd27a9c9407b64a1f362dd4d591ebc62a9f0efc4c0e5401733f9fe8026090",
-    types.AllStructs
+    "c53a7c9c39758b74563321f4f91f4a6a95048e8f84b885eb197433cef69d2904",
+    AllStructs
   )
 );
 registerContract(PositionManager);

@@ -2,31 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 
-export * from "./Account0";
 export * from "./BitmapWord";
 export * from "./BitmapWordDeployer";
-export * from "./Bridge0";
-export * from "./CallbackDemo";
-export * from "./CallbackInstance";
-export * from "./CounterFactory";
-export * from "./CounterImm";
-export * from "./CounterMut";
-export * from "./CounterMut2";
-export * from "./Dex0";
-export * from "./FlashPool";
+export * from "./DexAccount";
 export * from "./LiquidityAmountsTest";
 export * from "./LiquidityManagmentTest";
 export * from "./Pool";
-export * from "./Pool0";
 export * from "./PoolConfig";
 export * from "./PoolFactory";
 export * from "./PoolUser";
 export * from "./Position";
-export * from "./Position0";
 export * from "./PositionManager";
 export * from "./Tick";
-export * from "./Tick0";
 export * from "./TickBitmapTest";
-export * from "./Ticks0";
 export * from "./contracts";
 export * from "./scripts";

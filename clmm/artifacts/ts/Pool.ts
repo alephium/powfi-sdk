@@ -35,27 +35,43 @@ import {
 } from "@alephium/web3";
 import { default as PoolContractJson } from "../Pool.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
+import {
+  CollectParams,
+  Config,
+  DecreaseLiquidityParams,
+  ModifyLiquidityParams,
+  ModifyPositionParams,
+  ProtocolFees,
+  Reward,
+  Slot0,
+  StepComputations,
+  SwapCache,
+  SwapParams,
+  SwapState,
+  AllStructs,
+} from "./types";
 
 // Custom types for the contract
 export namespace PoolTypes {
   export type Fields = {
     parent: HexString;
     positionTemplate: HexString;
+    dexAccountTemplate: HexString;
     tickTemplate: HexString;
     wordTemplate: HexString;
+    configIndex: bigint;
     token0: HexString;
     token1: HexString;
+    token2: HexString;
     fee: bigint;
     tickSpacing: bigint;
     maxLiquidityPerTick: bigint;
-    slot0: types.Slot0;
+    nextNftIndex: bigint;
+    slot0: Slot0;
     liquidity: bigint;
-    feeGrowthGlobal0X128: bigint;
-    feeGrowthGlobal1X128: bigint;
-    currentTimestamp: bigint;
-    rewards: [types.Reward];
-    protocolFees: types.ProtocolFees;
+    rewardInfos: [Reward, Reward, Reward];
+    feeGrowths: [bigint, bigint, bigint];
+    protocolFees: ProtocolFees;
   };
 
   export type State = ContractState<Fields>;
@@ -115,6 +131,22 @@ export namespace PoolTypes {
   }>;
 
   export interface CallMethodTable {
+    getCollectionUri: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<HexString>;
+    };
+    totalSupply: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<bigint>;
+    };
+    nftByIndex: {
+      params: CallContractParams<{ index: bigint }>;
+      result: CallContractResult<HexString>;
+    };
+    validateNFT: {
+      params: CallContractParams<{ nftId: HexString; nftIndex: bigint }>;
+      result: CallContractResult<null>;
+    };
     getSqrtRatioAtTick: {
       params: CallContractParams<{ tick: bigint }>;
       result: CallContractResult<bigint>;
@@ -237,7 +269,7 @@ export namespace PoolTypes {
     };
     positionPath: {
       params: CallContractParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -246,7 +278,7 @@ export namespace PoolTypes {
     positionContractId: {
       params: CallContractParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -256,7 +288,7 @@ export namespace PoolTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -264,7 +296,7 @@ export namespace PoolTypes {
       params: CallContractParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: CallContractResult<HexString>;
     };
@@ -305,7 +337,7 @@ export namespace PoolTypes {
         tickLower: HexString;
         tickUpper: HexString;
       }>;
-      result: CallContractResult<[bigint, bigint]>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     updatePosition: {
       params: CallContractParams<{
@@ -320,7 +352,7 @@ export namespace PoolTypes {
     modifyPosition: {
       params: CallContractParams<{
         position: HexString;
-        params: types.ModifyPositionParams;
+        params: ModifyPositionParams;
       }>;
       result: CallContractResult<[bigint, bigint]>;
     };
@@ -393,11 +425,11 @@ export namespace PoolTypes {
       result: CallContractResult<[boolean, bigint, HexString, HexString]>;
     };
     swapExactOut: {
-      params: CallContractParams<{ p: types.SwapParams }>;
+      params: CallContractParams<{ p: SwapParams; refRewards: bigint }>;
       result: CallContractResult<null>;
     };
     swapExactIn: {
-      params: CallContractParams<{ p: types.SwapParams }>;
+      params: CallContractParams<{ p: SwapParams; refRewards: bigint }>;
       result: CallContractResult<null>;
     };
     getSqrtPricesX96: {
@@ -412,12 +444,20 @@ export namespace PoolTypes {
       params: CallContractParams<{ blockTime: bigint }>;
       result: CallContractResult<null>;
     };
+    extendRewards: {
+      params: CallContractParams<{
+        index: bigint;
+        token: HexString;
+        amount: bigint;
+      }>;
+      result: CallContractResult<null>;
+    };
     setRewardParams: {
       params: CallContractParams<{
         index: bigint;
-        emmisionsPerSecond: bigint;
         openTime: bigint;
         endTime: bigint;
+        amount: bigint;
       }>;
       result: CallContractResult<null>;
     };
@@ -443,6 +483,25 @@ export namespace PoolTypes {
   };
 
   export interface SignExecuteMethodTable {
+    getCollectionUri: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    totalSupply: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
+      result: SignExecuteScriptTxResult;
+    };
+    nftByIndex: {
+      params: SignExecuteContractMethodParams<{ index: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
+    validateNFT: {
+      params: SignExecuteContractMethodParams<{
+        nftId: HexString;
+        nftIndex: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
     getSqrtRatioAtTick: {
       params: SignExecuteContractMethodParams<{ tick: bigint }>;
       result: SignExecuteScriptTxResult;
@@ -576,7 +635,7 @@ export namespace PoolTypes {
     };
     positionPath: {
       params: SignExecuteContractMethodParams<{
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -585,7 +644,7 @@ export namespace PoolTypes {
     positionContractId: {
       params: SignExecuteContractMethodParams<{
         pool: HexString;
-        owner: Address;
+        o: Address;
         tickLower: bigint;
         tickUpper: bigint;
       }>;
@@ -595,7 +654,7 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -603,7 +662,7 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
         tokens: HexString;
-        configIndex: bigint;
+        configIndex_: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -662,7 +721,7 @@ export namespace PoolTypes {
     modifyPosition: {
       params: SignExecuteContractMethodParams<{
         position: HexString;
-        params: types.ModifyPositionParams;
+        params: ModifyPositionParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -735,11 +794,17 @@ export namespace PoolTypes {
       result: SignExecuteScriptTxResult;
     };
     swapExactOut: {
-      params: SignExecuteContractMethodParams<{ p: types.SwapParams }>;
+      params: SignExecuteContractMethodParams<{
+        p: SwapParams;
+        refRewards: bigint;
+      }>;
       result: SignExecuteScriptTxResult;
     };
     swapExactIn: {
-      params: SignExecuteContractMethodParams<{ p: types.SwapParams }>;
+      params: SignExecuteContractMethodParams<{
+        p: SwapParams;
+        refRewards: bigint;
+      }>;
       result: SignExecuteScriptTxResult;
     };
     getSqrtPricesX96: {
@@ -760,12 +825,20 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{ blockTime: bigint }>;
       result: SignExecuteScriptTxResult;
     };
+    extendRewards: {
+      params: SignExecuteContractMethodParams<{
+        index: bigint;
+        token: HexString;
+        amount: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
     setRewardParams: {
       params: SignExecuteContractMethodParams<{
         index: bigint;
-        emmisionsPerSecond: bigint;
         openTime: bigint;
         endTime: bigint;
+        amount: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -785,7 +858,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      AllStructs
     );
   }
 
@@ -827,6 +900,11 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
       SPL: BigInt("106"),
       NP: BigInt("107"),
       UnauthorizedMint: BigInt("108"),
+      NFTNotPartOfCollection: BigInt("109"),
+      NFTByIndexNotSupported: BigInt("110"),
+      UnauthorizedRewardSender: BigInt("111"),
+      InvalidRewardParams: BigInt("112"),
+      DexAccountNotFound: BigInt("113"),
     },
   };
 
@@ -835,6 +913,40 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
   }
 
   tests = {
+    getCollectionUri: async (
+      params: Omit<
+        TestContractParamsWithoutMaps<PoolTypes.Fields, never>,
+        "args"
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(
+        this,
+        "getCollectionUri",
+        params,
+        getContractByCodeHash
+      );
+    },
+    totalSupply: async (
+      params: Omit<
+        TestContractParamsWithoutMaps<PoolTypes.Fields, never>,
+        "args"
+      >
+    ): Promise<TestContractResultWithoutMaps<bigint>> => {
+      return testMethod(this, "totalSupply", params, getContractByCodeHash);
+    },
+    nftByIndex: async (
+      params: TestContractParamsWithoutMaps<PoolTypes.Fields, { index: bigint }>
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "nftByIndex", params, getContractByCodeHash);
+    },
+    validateNFT: async (
+      params: TestContractParamsWithoutMaps<
+        PoolTypes.Fields,
+        { nftId: HexString; nftIndex: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "validateNFT", params, getContractByCodeHash);
+    },
     getSqrtRatioAtTick: async (
       params: TestContractParamsWithoutMaps<PoolTypes.Fields, { tick: bigint }>
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
@@ -1067,7 +1179,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     positionPath: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { owner: Address; tickLower: bigint; tickUpper: bigint }
+        { o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "positionPath", params, getContractByCodeHash);
@@ -1075,12 +1187,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     positionContractId: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        {
-          pool: HexString;
-          owner: Address;
-          tickLower: bigint;
-          tickUpper: bigint;
-        }
+        { pool: HexString; o: Address; tickLower: bigint; tickUpper: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(
@@ -1093,7 +1200,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolPath", params, getContractByCodeHash);
@@ -1101,7 +1208,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     poolContractId: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { factory: HexString; tokens: HexString; configIndex: bigint }
+        { factory: HexString; tokens: HexString; configIndex_: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<HexString>> => {
       return testMethod(this, "poolContractId", params, getContractByCodeHash);
@@ -1150,7 +1257,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
         PoolTypes.Fields,
         { tickLower: HexString; tickUpper: HexString }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(
         this,
         "getFeeGrowthInside",
@@ -1175,7 +1282,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     modifyPosition: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { position: HexString; params: types.ModifyPositionParams }
+        { position: HexString; params: ModifyPositionParams }
       >
     ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
       return testMethod(this, "modifyPosition", params, getContractByCodeHash);
@@ -1269,7 +1376,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     swapExactOut: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { p: types.SwapParams }
+        { p: SwapParams; refRewards: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "swapExactOut", params, getContractByCodeHash);
@@ -1277,7 +1384,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     swapExactIn: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { p: types.SwapParams }
+        { p: SwapParams; refRewards: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "swapExactIn", params, getContractByCodeHash);
@@ -1311,15 +1418,18 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "updateRewards", params, getContractByCodeHash);
     },
+    extendRewards: async (
+      params: TestContractParamsWithoutMaps<
+        PoolTypes.Fields,
+        { index: bigint; token: HexString; amount: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "extendRewards", params, getContractByCodeHash);
+    },
     setRewardParams: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        {
-          index: bigint;
-          emmisionsPerSecond: bigint;
-          openTime: bigint;
-          endTime: bigint;
-        }
+        { index: bigint; openTime: bigint; endTime: bigint; amount: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "setRewardParams", params, getContractByCodeHash);
@@ -1349,8 +1459,8 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "e26f510397e54b6d661b45df4b4d65b65a945c8e3fc4177bd3398a66d0cb29c3",
-    types.AllStructs
+    "b4cfcb08f3c572130a146703d1339ad46dcb16861951f7d0fb8a008cc2fd33bb",
+    AllStructs
   )
 );
 registerContract(Pool);
@@ -1490,6 +1600,50 @@ export class PoolInstance extends ContractInstance {
   }
 
   view = {
+    getCollectionUri: async (
+      params?: PoolTypes.CallMethodParams<"getCollectionUri">
+    ): Promise<PoolTypes.CallMethodResult<"getCollectionUri">> => {
+      return callMethod(
+        Pool,
+        this,
+        "getCollectionUri",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
+    totalSupply: async (
+      params?: PoolTypes.CallMethodParams<"totalSupply">
+    ): Promise<PoolTypes.CallMethodResult<"totalSupply">> => {
+      return callMethod(
+        Pool,
+        this,
+        "totalSupply",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
+    nftByIndex: async (
+      params: PoolTypes.CallMethodParams<"nftByIndex">
+    ): Promise<PoolTypes.CallMethodResult<"nftByIndex">> => {
+      return callMethod(
+        Pool,
+        this,
+        "nftByIndex",
+        params,
+        getContractByCodeHash
+      );
+    },
+    validateNFT: async (
+      params: PoolTypes.CallMethodParams<"validateNFT">
+    ): Promise<PoolTypes.CallMethodResult<"validateNFT">> => {
+      return callMethod(
+        Pool,
+        this,
+        "validateNFT",
+        params,
+        getContractByCodeHash
+      );
+    },
     getSqrtRatioAtTick: async (
       params: PoolTypes.CallMethodParams<"getSqrtRatioAtTick">
     ): Promise<PoolTypes.CallMethodResult<"getSqrtRatioAtTick">> => {
@@ -1896,6 +2050,17 @@ export class PoolInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    extendRewards: async (
+      params: PoolTypes.CallMethodParams<"extendRewards">
+    ): Promise<PoolTypes.CallMethodResult<"extendRewards">> => {
+      return callMethod(
+        Pool,
+        this,
+        "extendRewards",
+        params,
+        getContractByCodeHash
+      );
+    },
     setRewardParams: async (
       params: PoolTypes.CallMethodParams<"setRewardParams">
     ): Promise<PoolTypes.CallMethodResult<"setRewardParams">> => {
@@ -1921,6 +2086,26 @@ export class PoolInstance extends ContractInstance {
   };
 
   transact = {
+    getCollectionUri: async (
+      params: PoolTypes.SignExecuteMethodParams<"getCollectionUri">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"getCollectionUri">> => {
+      return signExecuteMethod(Pool, this, "getCollectionUri", params);
+    },
+    totalSupply: async (
+      params: PoolTypes.SignExecuteMethodParams<"totalSupply">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"totalSupply">> => {
+      return signExecuteMethod(Pool, this, "totalSupply", params);
+    },
+    nftByIndex: async (
+      params: PoolTypes.SignExecuteMethodParams<"nftByIndex">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"nftByIndex">> => {
+      return signExecuteMethod(Pool, this, "nftByIndex", params);
+    },
+    validateNFT: async (
+      params: PoolTypes.SignExecuteMethodParams<"validateNFT">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"validateNFT">> => {
+      return signExecuteMethod(Pool, this, "validateNFT", params);
+    },
     getSqrtRatioAtTick: async (
       params: PoolTypes.SignExecuteMethodParams<"getSqrtRatioAtTick">
     ): Promise<PoolTypes.SignExecuteMethodResult<"getSqrtRatioAtTick">> => {
@@ -2170,6 +2355,11 @@ export class PoolInstance extends ContractInstance {
       params: PoolTypes.SignExecuteMethodParams<"updateRewards">
     ): Promise<PoolTypes.SignExecuteMethodResult<"updateRewards">> => {
       return signExecuteMethod(Pool, this, "updateRewards", params);
+    },
+    extendRewards: async (
+      params: PoolTypes.SignExecuteMethodParams<"extendRewards">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"extendRewards">> => {
+      return signExecuteMethod(Pool, this, "extendRewards", params);
     },
     setRewardParams: async (
       params: PoolTypes.SignExecuteMethodParams<"setRewardParams">
