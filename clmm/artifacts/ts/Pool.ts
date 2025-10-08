@@ -401,6 +401,7 @@ export namespace PoolTypes {
         zeroForOne: boolean;
         amountSpecified: bigint;
         data: HexString;
+        maxSteps: bigint;
       }>;
       result: CallContractResult<null>;
     };
@@ -770,6 +771,7 @@ export namespace PoolTypes {
         zeroForOne: boolean;
         amountSpecified: bigint;
         data: HexString;
+        maxSteps: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -1342,7 +1344,12 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     simulateSwap: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { zeroForOne: boolean; amountSpecified: bigint; data: HexString }
+        {
+          zeroForOne: boolean;
+          amountSpecified: bigint;
+          data: HexString;
+          maxSteps: bigint;
+        }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "simulateSwap", params, getContractByCodeHash);
@@ -1459,7 +1466,7 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "b4cfcb08f3c572130a146703d1339ad46dcb16861951f7d0fb8a008cc2fd33bb",
+    "bea1c51338dffaf3d401652ae5f1a3aa755df9df9162763cc157ac5ac1fcb64d",
     AllStructs
   )
 );

@@ -25,6 +25,7 @@ import {
   PositionManager,
   PositionManagerInstance,
 } from ".";
+import { default as testnetDeployments } from "../../deployments/.deployments.testnet.json";
 import { default as devnetDeployments } from "../../deployments/.deployments.devnet.json";
 
 export type Deployments = {
@@ -35,9 +36,9 @@ export type Deployments = {
     Tick: DeployContractExecutionResult<TickInstance>;
     BitmapWord: DeployContractExecutionResult<BitmapWordInstance>;
     PoolConfig: DeployContractExecutionResult<PoolConfigInstance>;
-    DexAccount: DeployContractExecutionResult<DexAccountInstance>;
     PoolFactory: DeployContractExecutionResult<PoolFactoryInstance>;
     PositionManager: DeployContractExecutionResult<PositionManagerInstance>;
+    DexAccount?: DeployContractExecutionResult<DexAccountInstance>;
   };
 };
 
@@ -73,12 +74,6 @@ function toDeployments(json: any): Deployments {
         json.contracts["PoolConfig"].contractInstance.address
       ),
     },
-    DexAccount: {
-      ...json.contracts["DexAccount"],
-      contractInstance: DexAccount.at(
-        json.contracts["DexAccount"].contractInstance.address
-      ),
-    },
     PoolFactory: {
       ...json.contracts["PoolFactory"],
       contractInstance: PoolFactory.at(
@@ -91,6 +86,15 @@ function toDeployments(json: any): Deployments {
         json.contracts["PositionManager"].contractInstance.address
       ),
     },
+    DexAccount:
+      json.contracts["DexAccount"] === undefined
+        ? undefined
+        : {
+            ...json.contracts["DexAccount"],
+            contractInstance: DexAccount.at(
+              json.contracts["DexAccount"].contractInstance.address
+            ),
+          },
   };
   return {
     ...json,
@@ -102,7 +106,12 @@ export function loadDeployments(
   networkId: NetworkId,
   deployerAddress?: string
 ): Deployments {
-  const deployments = networkId === "devnet" ? devnetDeployments : undefined;
+  const deployments =
+    networkId === "testnet"
+      ? testnetDeployments
+      : networkId === "devnet"
+      ? devnetDeployments
+      : undefined;
   if (deployments === undefined) {
     throw Error("The contract has not been deployed to the " + networkId);
   }
