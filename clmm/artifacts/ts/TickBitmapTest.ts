@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as TickBitmapTestContractJson } from "../TickBitmapTest.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace TickBitmapTestTypes {
@@ -195,7 +181,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -317,7 +303,7 @@ export const TickBitmapTest = new Factory(
     TickBitmapTestContractJson,
     "",
     "5cb6cce5c5b8adb88a18a993227d51465e3e54b5a34936cafc51100725724b54",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(TickBitmapTest);

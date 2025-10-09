@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as PositionContractJson } from "../Position.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace PositionTypes {
@@ -173,7 +159,7 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -270,7 +256,7 @@ export const Position = new Factory(
     PositionContractJson,
     "",
     "a80cc7f0178f00c65bb654bd3ce7b442ff398fd22a59325c7a8f56869ca85430",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(Position);

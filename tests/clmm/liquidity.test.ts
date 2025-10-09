@@ -88,10 +88,10 @@ describe('LiquidityUtils', () => {
     const WETHId = '7d778a437c793697381ed67845a76874305f69fb861f31c9b2a84cf06cba8700';
     const USDC = createToken(USDCId, 6);
     const WETH = createToken(WETHId, 18);
-
+    
     test('should handle base < quote, reverse = false', () => {
       const currentPrice = 3000;
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(currentPrice, USDC, WETH);
+      const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const centerTick = priceResult.tick;
       const lowerTick = centerTick - 5000n;
       const upperTick = centerTick + 5000n;
@@ -117,10 +117,11 @@ describe('LiquidityUtils', () => {
       expect(wethShortfall).toBeGreaterThanOrEqual(0n);
       expect(wethShortfall).toBeLessThan(10_000_000n);
 
-      const { price: roundedPrice } = TickUtils.getPriceAndTick(
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(
         currentPrice,
-        USDC.decimals,
-        WETH.decimals,
+        USDC,
+        WETH,
+        1n,
         true,
       );
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
@@ -145,13 +146,10 @@ describe('LiquidityUtils', () => {
     test('handles inverted ordering (base > quote), reverse = true', () => {
       const currentPrice = 0.000333;
       const invertedPrice = 1 / currentPrice; // ~3000 USDC per WETH
-      const poolPriceResult = TickUtils.getPriceAndTickFromBaseQuote(invertedPrice, USDC, WETH);
+      const poolPriceResult = TickUtils.getAlignedPrice(invertedPrice, USDC, WETH, 1n, true);
       const centerTick = poolPriceResult.tick;
-
-      const lowerTick = centerTick + 5000n;
-      const upperTick = centerTick - 5000n;
-      const adjustedLowerTick = upperTick;
-      const adjustedUpperTick = lowerTick;
+      const lowerTick = centerTick - 5000n;
+      const upperTick = centerTick + 5000n;
 
       const amountWETH = 5n * 10n ** 17n; // 0.5 WETH
       const amountUSDC = 1000n * 10n ** 6n; // 1000 USDC
@@ -173,15 +171,16 @@ describe('LiquidityUtils', () => {
       expect(wethShortfall).toBeGreaterThanOrEqual(0n);
       expect(wethShortfall).toBeLessThan(10_000_000n); // <1e-11 WETH
 
-      const { price: roundedPrice } = TickUtils.getPriceAndTick(
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(
         invertedPrice,
-        USDC.decimals,
-        WETH.decimals,
+        USDC,
+        WETH,
+        1n,
         true,
       );
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
-      const sqrtLower = TickUtils.getSqrtRatioAtTick(adjustedLowerTick);
-      const sqrtUpper = TickUtils.getSqrtRatioAtTick(adjustedUpperTick);
+      const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
+      const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);
 
       const liquidityFromWETH = ClmmLiquidityUtils.getLiquidityFromToken1(
         sqrtLower,
@@ -202,10 +201,12 @@ describe('LiquidityUtils', () => {
       const priceUSDCPerWETH = 2500;
       const priceWETHPerUSDC = 1 / priceUSDCPerWETH;
 
-      const normalPriceResult = TickUtils.getPriceAndTickFromBaseQuote(
+      const normalPriceResult = TickUtils.getAlignedPrice(
         priceUSDCPerWETH,
         USDC,
         WETH,
+        1n,
+        true,
       );
       const normalLowerTick = normalPriceResult.tick - 2000n;
       const normalUpperTick = normalPriceResult.tick + 2000n;
@@ -256,10 +257,11 @@ describe('LiquidityUtils', () => {
       expect(usdcShortfall).toBe(usdcShortfallReversed);
       expect(wethShortfall).toBeLessThan(10_000_000n);
 
-      const { price: roundedPrice } = TickUtils.getPriceAndTick(
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(
         priceUSDCPerWETH,
-        USDC.decimals,
-        WETH.decimals,
+        USDC,
+        WETH,
+        1n,
         true,
       );
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
@@ -283,7 +285,7 @@ describe('LiquidityUtils', () => {
 
     test('should work with UNLIMITED_AMOUNT constant for single-sided liquidity', () => {
       const currentPrice = 1500;
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(currentPrice, USDC, WETH);
+      const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const lowerTick = priceResult.tick - 3000n;
       const upperTick = priceResult.tick + 3000n;
 
@@ -321,7 +323,7 @@ describe('LiquidityUtils', () => {
 
     test('should handle zero amount with UNLIMITED_AMOUNT', () => {
       const currentPrice = 2000;
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(currentPrice, USDC, WETH);
+      const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 
@@ -356,7 +358,7 @@ describe('LiquidityUtils', () => {
 
     test('should handle very small amounts correctly', () => {
       const currentPrice = 2000;
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(currentPrice, USDC, WETH);
+      const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 
@@ -366,10 +368,11 @@ describe('LiquidityUtils', () => {
       const smallUSDC = 1000n; // 0.001 USDC
       const smallWETH = 1_000_000_000_000n; // 0.000001 WETH
 
-      const { price: roundedPrice } = TickUtils.getPriceAndTick(
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(
         currentPrice,
-        USDC.decimals,
-        WETH.decimals,
+        USDC,
+        WETH,
+        1n,
         true,
       );
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
@@ -486,7 +489,7 @@ describe('LiquidityUtils', () => {
 
     test('should handle various small finite amounts correctly', () => {
       const currentPrice = 1500; // $1500 per ETH
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(currentPrice, USDC, WETH);
+      const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 

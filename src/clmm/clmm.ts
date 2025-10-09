@@ -1,4 +1,4 @@
-import type { SignExecuteScriptTxResult } from '@alephium/web3';
+import type { SignExecuteScriptTxResult, Token } from '@alephium/web3';
 import {
   addressFromContractId,
   binToHex,
@@ -6,7 +6,9 @@ import {
   MINIMAL_CONTRACT_DEPOSIT,
   subContractId,
   codec,
+  ALPH_TOKEN_ID,
   encodePrimitiveValues,
+  groupOfAddress,
 } from '@alephium/web3';
 import { loadDeployments } from '../../clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -24,11 +26,12 @@ import type {
   ClmmPoolConfig,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
-import { Pool, PoolConfig, PoolFactory, PositionManager } from '../../clmm/artifacts/ts';
+import { CreateLiquidPool, Pool, PoolConfig, PoolFactory, PositionManager, SwapWithoutAccount } from '../../clmm/artifacts/ts';
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
 import { PoolNotFoundError, sortTokens } from '../common';
+import { TokenInfo } from '@alephium/token-list';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -99,6 +102,7 @@ export class ClmmModule extends ModuleBase {
     };
   }
 
+
   async getPoolState(poolId: string): Promise<ClmmPoolState> {
     try {
       const poolAddress = addressFromContractId(poolId);
@@ -117,6 +121,7 @@ export class ClmmModule extends ModuleBase {
         tick: state.fields.slot0.tick,
         tickSpacing: state.fields.tickSpacing,
         sqrtPriceX96: state.fields.slot0.sqrtPriceX96,
+        configIndex: state.fields.configIndex,
       };
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -130,11 +135,22 @@ export class ClmmModule extends ModuleBase {
     const [token0, token1] = sortTokens(tokenA, tokenB);
     const group = this.config.groupIndex;
     const factoryId = this.config.factoryId;
-    const rawIndex = encodePrimitiveValues([{ type: 'U256', value: configIndex }]);
+    const rawIndex = codec.u256Codec.encode(configIndex);
     const configPath = binToHex(rawIndex);
     const configId = subContractId(factoryId, configPath, group);
     const path = token0 + token1 + configId;
     return subContractId(factoryId, path, group);
+  }
+
+  getPositionId(poolId: string, owner: string, tickLower: bigint, tickUpper: bigint): string {
+    const group = groupOfAddress(addressFromContractId(poolId));
+    const path = encodePrimitiveValues([
+        {type: 'U256', value: Pool.consts.PathPrefixes.Position},
+        {type: 'Address', value: owner},
+        {type: 'I256', value: tickLower},
+        {type: 'I256', value: tickUpper}
+    ]);
+    return subContractId(poolId, binToHex(path), group);
   }
 
   getPoolAddress(tokenA: string, tokenB: string, configIndex: bigint): string {
@@ -166,22 +182,48 @@ export class ClmmModule extends ModuleBase {
     token0: string,
     token1: string,
     rewardToken: string,
-    sqrtPriceX96: bigint,
+    tick: bigint,
+    amount0: bigint,
+    amount1: bigint,
+    tickLower: bigint,
+    tickUpper: bigint,
   ): Promise<{ poolAddress: string; result: SignExecuteScriptTxResult }> {
-    const factoryAddress = addressFromContractId(this.config.factoryId);
-    const factory = PoolFactory.at(factoryAddress);
-    const result = await factory.transact.create({
+    const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(tick);
+    const tokens = [token0, token1];
+    const amounts = [amount0, amount1];
+    const ticks = [tickLower, tickUpper];
+    if (token0 > token1) {
+      tokens.reverse();
+      amounts.reverse();
+    }
+    if (tickLower > tickUpper) {
+      ticks.reverse();
+    }
+    const sqrtPriceX96A = TickUtils.getSqrtRatioAtTick(ticks[0]);
+    const sqrtPriceX96B = TickUtils.getSqrtRatioAtTick(ticks[1]);
+    const liquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(sqrtPriceX96, sqrtPriceX96A, sqrtPriceX96B, amounts[0], amounts[1]);
+    const result = await CreateLiquidPool.execute({
       signer: this.scope.signer,
-      args: {
-        token0,
-        token1,
+      initialFields: {
+        factory: this.config.factoryId,
+        token0: tokens[0],
+        token1: tokens[1],
         rewardToken,
-        configIndex,
+        liquidity,
+        tickLower: ticks[0],
+        tickUpper: ticks[1],
         sqrtPriceX96,
+        configIndex,
+        amount0: amounts[0],
+        amount1: amounts[1],
       },
-      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
-    });
-    const poolAddress = this.getPoolAddress(token0, token1, configIndex);
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT * 6n,
+      tokens: [
+        { id: tokens[0], amount: amounts[0] },
+        { id: tokens[1], amount: amounts[1] },
+      ],
+    })
+    const poolAddress = this.getPoolAddress(tokens[0], tokens[1], configIndex);
     return { poolAddress, result };
   }
 
@@ -232,7 +274,13 @@ export class ClmmModule extends ModuleBase {
     );
 
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper);
-    const amount = p.owner ? 1n : 0n;
+    const tokens: Token[] = [
+      { id: p.token0, amount: minAmount0 },
+      { id: p.token1, amount: maxAmount1 },
+    ];
+    if (p.owner) {
+      tokens.push({ id: positionId, amount: 1n });
+    }
     const result = await positionManager.transact.addLiquidity({
       signer: this.scope.signer,
       args: {
@@ -250,11 +298,7 @@ export class ClmmModule extends ModuleBase {
           amount1Min: minAmount1,
         },
       },
-      tokens: [
-        { id: p.token0, amount: minAmount0 },
-        { id: p.token1, amount: maxAmount1 },
-        { id: positionId, amount },
-      ],
+      tokens,
       attoAlphAmount: deposit,
     });
 
@@ -338,7 +382,7 @@ export class ClmmModule extends ModuleBase {
         amountSpecified: p.amount,
         zeroForOne: p.zeroForOne,
         data: '',
-        maxSteps: 500n, // TODO: Set to 500 for now based on the test
+        maxSteps: 500n,
       },
     });
 
@@ -361,7 +405,6 @@ export class ClmmModule extends ModuleBase {
 
   async swap(p: ClmmSwapParams): Promise<SignExecuteScriptTxResult> {
     const pool = this.getPool(p.token0, p.token1, p.configIndex);
-    const signerAccount = await this.scope.signer.getSelectedAccount();
     const poolState = await pool.fetchState();
     const sqrtPriceX96 = poolState.fields.slot0.sqrtPriceX96;
     const sqrtPriceLimitX96 = TickUtils.getSqrtPriceLimitX96(
@@ -371,19 +414,21 @@ export class ClmmModule extends ModuleBase {
     );
 
     const [tokenIn, tokenOut] = p.zeroForOne ? [p.token0, p.token1] : [p.token1, p.token0];
-    return await pool.transact.swap({
+    return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
-      args: {
-        payer: signerAccount.address,
-        recipient: signerAccount.address,
-        token: tokenOut,
+      initialFields: {
+        factory: this.config.factoryId,
+        dexAccount: this.config.accountRoot,
+        pool: pool.contractId,
+        tokenIn,
+        tokenOut,
         zeroForOne: p.zeroForOne,
         amountSpecified: p.amount,
         sqrtPriceLimitX96,
         data: '',
       },
       tokens: [{ id: tokenIn, amount: p.amount }],
-    });
+    })
   }
 
   async collectProtocolFees(p: CollectProtocolFees): Promise<SignExecuteScriptTxResult> {
@@ -410,6 +455,7 @@ export class ClmmModule extends ModuleBase {
         factoryId: deployments.contracts.PoolFactory.contractInstance.contractId,
         positionManagerId: deployments.contracts.PositionManager.contractInstance.contractId,
         defaultConfigIndex: 0n,
+        accountRoot: deployments.contracts.DexAccount.contractInstance.contractId,
       };
     } catch (error) {
       this.logAndThrowError(`Failed to load deployments on ${networkId}`, error);

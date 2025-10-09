@@ -1,0 +1,37 @@
+{
+  "version": "v4.2.5",
+  "name": "CreateConfig",
+  "bytecodeTemplate": "01010300010011{0}{4}40cc17001600c5194c08{1}{2}{3}0f0d{0}010418",
+  "fieldsSig": {
+    "names": [
+      "factory",
+      "tickSpacing",
+      "fee",
+      "feeProtocol",
+      "configIndex"
+    ],
+    "types": [
+      "PoolFactory",
+      "I256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

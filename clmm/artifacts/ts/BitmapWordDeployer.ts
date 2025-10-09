@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as BitmapWordDeployerContractJson } from "../BitmapWordDeployer.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace BitmapWordDeployerTypes {
@@ -91,7 +77,7 @@ export namespace BitmapWordDeployerTypes {
 
 class Factory extends ContractFactory<BitmapWordDeployerInstance, {}> {
   encodeFields() {
-    return encodeContractFields({}, this.contract.fieldsSig, AllStructs);
+    return encodeContractFields({}, this.contract.fieldsSig, types.AllStructs);
   }
 
   at(address: string): BitmapWordDeployerInstance {
@@ -120,7 +106,7 @@ export const BitmapWordDeployer = new Factory(
     BitmapWordDeployerContractJson,
     "",
     "082de32f22857e094db5658611a1d2ba23e792a7f23a548525e6de2784f2a70b",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(BitmapWordDeployer);

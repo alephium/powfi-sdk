@@ -16,27 +16,62 @@ export class ClmmLiquidityUtils {
     if (amountBase === 0n || amountQuote === 0n) {
       return [0n, 0n, 0n];
     }
-
-    const reverse = tokenBase.id > tokenQuote.id;
-    const [token0, token1] = reverse ? [tokenQuote, tokenBase] : [tokenBase, tokenQuote];
-    const [amount0, amount1] = reverse ? [amountQuote, amountBase] : [amountBase, amountQuote];
-    const [adjustedLowerTick, adjustedUpperTick] = reverse
-      ? [upperTick, lowerTick]
-      : [lowerTick, upperTick];
-    const adjustedPrice = reverse ? 1 / currentPrice : currentPrice;
-
-    const [adjustedAmount0, adjustedAmount1, liquidity] = this.getAmountsAndLiquidityAtPrice(
-      adjustedPrice,
-      token0,
-      token1,
-      adjustedLowerTick,
-      adjustedUpperTick,
-      amount0,
-      amount1,
+    const tokens = [tokenBase, tokenQuote];
+    const ticks = [lowerTick, upperTick];
+    const amounts = [amountBase, amountQuote];
+    const reverse = tokenBase.id > tokenQuote.id != upperTick > lowerTick;
+    if (reverse) {
+      tokens.reverse();
+      ticks.reverse();
+      amounts.reverse();
+    }
+    const price = reverse ? 1 / currentPrice : currentPrice;
+    const [amount0, amount1, liquidity] = this.getAmountsAndLiquidityAtPrice(
+      price,
+      tokens[0],
+      tokens[1],
+      ticks[0],
+      ticks[1],
+      amounts[0],
+      amounts[1],
     );
     return reverse
-      ? [adjustedAmount1, adjustedAmount0, liquidity]
-      : [adjustedAmount0, adjustedAmount1, liquidity];
+      ? [amount1, amount0, liquidity]
+      : [amount0, amount1, liquidity];
+  }
+
+  static getPositionAmountsFromPrice2(
+    sqrtRatioX96: bigint,
+    tokenBase: TokenInfo,
+    tokenQuote: TokenInfo,
+    lowerTick: bigint,
+    upperTick: bigint,
+    amountBase: bigint,
+    amountQuote: bigint,
+  ): [bigint, bigint, bigint] {
+    if (amountBase === 0n || amountQuote === 0n) {
+      return [0n, 0n, 0n];
+    }
+    const amounts = [amountBase, amountQuote];
+    const sqrts = [TickUtils.getSqrtRatioAtTick(lowerTick), TickUtils.getSqrtRatioAtTick(upperTick)];
+    const reverse1 = lowerTick > upperTick;
+    if (reverse1) {
+      sqrts.reverse();
+    }
+    const reverse2 = tokenBase.id > tokenQuote.id;
+    if (reverse2) {
+      amounts.reverse();
+    }
+    const [amount0, amount1, liquidity] = this.getAmountsAndLiquidityAtSqrtPrice(
+      sqrtRatioX96,
+      sqrts[0],
+      sqrts[1],
+      amounts[0],
+      amounts[1],
+    );
+    return reverse2
+      ? [amount1, amount0, liquidity]
+      : [amount0, amount1, liquidity];
   }
 
   static getAmountsAndLiquidityAtPrice(
@@ -48,13 +83,7 @@ export class ClmmLiquidityUtils {
     amount0: bigint,
     amount1: bigint,
   ): [bigint, bigint, bigint] {
-    const { price } = TickUtils.getPriceAndTick(
-      currentPrice,
-      token0.decimals,
-      token1.decimals,
-      true,
-    );
-    const sqrtRatioX96 = TickUtils.priceToSqrtPriceX96(price, token0.decimals, token1.decimals);
+    const sqrtRatioX96 = TickUtils.priceToSqrtPriceX96(currentPrice, token0.decimals, token1.decimals);
     const sqrtRatioAX96 = TickUtils.getSqrtRatioAtTick(lowerTick);
     const sqrtRatioBX96 = TickUtils.getSqrtRatioAtTick(upperTick);
     return this.getAmountsAndLiquidityAtSqrtPrice(
@@ -131,8 +160,8 @@ export class ClmmLiquidityUtils {
     sqrtRatioBX96: bigint,
     amount0: bigint,
   ): bigint {
-    const intermediate = MathUtil.divFloor(sqrtRatioAX96 * sqrtRatioBX96, Q96);
-    return MathUtil.divFloor(amount0 * intermediate, sqrtRatioBX96 - sqrtRatioAX96);
+    const intermediate = MathUtil.alphDiv(sqrtRatioAX96 * sqrtRatioBX96, Q96);
+    return MathUtil.alphDiv(amount0 * intermediate, sqrtRatioBX96 - sqrtRatioAX96);
   }
 
   static getLiquidityFromToken1(
@@ -140,7 +169,7 @@ export class ClmmLiquidityUtils {
     sqrtRatioBX96: bigint,
     amount1: bigint,
   ): bigint {
-    return MathUtil.divFloor(amount1 * Q96, sqrtRatioBX96 - sqrtRatioAX96);
+    return MathUtil.alphDiv(amount1 * Q96, sqrtRatioBX96 - sqrtRatioAX96);
   }
 
   static getAmountDelta(
@@ -159,10 +188,10 @@ export class ClmmLiquidityUtils {
   static getToken0Delta(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, liquidity: bigint): bigint {
     const numerator1 = liquidity * Q96;
     const numerator2 = sqrtRatioBX96 - sqrtRatioAX96;
-    return MathUtil.divFloor(numerator1 * numerator2, sqrtRatioBX96 * sqrtRatioAX96);
+    return MathUtil.alphDiv(numerator1 * numerator2, sqrtRatioBX96 * sqrtRatioAX96);
   }
 
   static getToken1Delta(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, liquidity: bigint): bigint {
-    return MathUtil.divFloor(liquidity * (sqrtRatioBX96 - sqrtRatioAX96), Q96);
+    return MathUtil.alphDiv(liquidity * (sqrtRatioBX96 - sqrtRatioAX96), Q96);
   }
 }

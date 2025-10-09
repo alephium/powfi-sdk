@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as TickContractJson } from "../Tick.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace TickTypes {
@@ -170,7 +156,7 @@ class Factory extends ContractFactory<TickInstance, TickTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -252,7 +238,7 @@ export const Tick = new Factory(
     TickContractJson,
     "",
     "1373551ca890d886980b8d33277d7ed7a2c9f7665d77a1e893a1f2554d10d4b1",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(Tick);
