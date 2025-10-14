@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@alephium/token-list@^0.0.21":
-  version "0.0.21"
-  resolved "https://registry.yarnpkg.com/@alephium/token-list/-/token-list-0.0.21.tgz#f839c0c9ada49aef8530120ab4cddef5da5727ed"
-  integrity sha512-rtH9F0obAL4u/+oSiqs42BlKNtj7euCDxmGAawMvdAlDhljJIGfMO9/GJNdER9FtQfSL0DPakJV3K/YxrCn2BA==
+"@alephium/token-list@0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@alephium/token-list/-/token-list-0.0.20.tgz#9e5e6c6bc4650ff2fb5fb4b5cef213452d9414c4"
+  integrity sha512-0JoFLsdxqp2M0k0ohsCe0F+tdMEJ1LjJQrNm4s+3c8CY2dDnTNbH1zxPPQ9xF2HbTUHbhAN9VCMB1SmWRuMm7g==
   dependencies:
     cross-fetch "^3.1.8"
 
@@ -35,6 +35,23 @@
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/@alephium/web3/-/web3-2.0.5.tgz#b57683208f9c6d78f178f0091ab8c5d0956b6269"
   integrity sha512-KnorNkynQg0Y1XinnLqVmjjbAThL4syMQs/pDLmr8Uwa4LKL7b41vh+a2d93fhbengoQV1We2gHIJwBQ3yO35A==
+  dependencies:
+    "@noble/secp256k1" "1.7.1"
+    base-x "4.0.0"
+    bignumber.js "^9.1.1"
+    blakejs "1.2.1"
+    bn.js "5.2.1"
+    cross-fetch "^3.1.5"
+    crypto-browserify "^3.12.0"
+    elliptic "6.6.1"
+    eventemitter3 "^4.0.7"
+    path-browserify "^1.0.1"
+    stream-browserify "^3.0.0"
+
+"@alephium/web3@^v2.0.3":
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/@alephium/web3/-/web3-2.0.6.tgz#0485b93b1d6d59e4cc87ea5242745ae8cef0d2fd"
+  integrity sha512-EW2pDIg27z6keIJFArw8ZW2U9bmI6IPX96OCYqbE14oce/abhvMN1QS/ZAatS/bCTOEtNSrnk7H7QRCkG0TNRw==
   dependencies:
     "@noble/secp256k1" "1.7.1"
     base-x "4.0.0"
