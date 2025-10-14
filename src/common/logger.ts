@@ -19,7 +19,7 @@ export class Logger {
   }
 
   get time(): string {
-    return Date.now().toString();
+    return new Date().toISOString();
   }
 
   get moduleName(): string {
@@ -32,7 +32,7 @@ export class Logger {
 
   public error(...props: unknown[]): Logger {
     if (!this.isLogLevel(LogLevel.Error)) return this;
-    console.error(this.time, this.name, 'sdk logger error', ...props);
+    console.error(this.time, this.name, 'error', ...props);
     return this;
   }
 
@@ -45,19 +45,19 @@ export class Logger {
 
   public warning(...props: unknown[]): Logger {
     if (!this.isLogLevel(LogLevel.Warning)) return this;
-    console.warn(this.time, this.name, 'sdk logger warning', ...props);
+    console.warn(this.time, this.name, 'warning', ...props);
     return this;
   }
 
   public info(...props: unknown[]): Logger {
     if (!this.isLogLevel(LogLevel.Info)) return this;
-    console.info(this.time, this.name, 'sdk logger info', ...props);
+    console.info(this.time, this.name, 'info', ...props);
     return this;
   }
 
   public debug(...props: unknown[]): Logger {
     if (!this.isLogLevel(LogLevel.Debug)) return this;
-    console.debug(this.time, this.name, 'sdk logger debug', ...props);
+    console.debug(this.time, this.name, 'debug', ...props);
     return this;
   }
 }

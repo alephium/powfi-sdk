@@ -6,6 +6,7 @@ import {
   MINIMAL_CONTRACT_DEPOSIT,
   subContractId,
   codec,
+  encodePrimitiveValues,
 } from '@alephium/web3';
 import { loadDeployments } from '../../clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -27,7 +28,7 @@ import { Pool, PoolConfig, PoolFactory, PositionManager } from '../../clmm/artif
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
-import { PoolNotFoundError } from '../common';
+import { PoolNotFoundError, sortTokens } from '../common';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -125,26 +126,29 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
-  getPoolId(token0: string, token1: string, configIndex: bigint): string {
+  getPoolId(tokenA: string, tokenB: string, configIndex: bigint): string {
+    const [token0, token1] = sortTokens(tokenA, tokenB);
     const group = this.config.groupIndex;
     const factoryId = this.config.factoryId;
-    const configId = this.getPoolConfigId(configIndex);
-    const path = token0 + token1 + configId;
+    const rawIndex = encodePrimitiveValues([{type: 'U256', value: configIndex}]);
+    const configPath = binToHex(rawIndex);
+    const configId = subContractId(factoryId, configPath, group);
+    const path =  token0 + token1 + configId
     return subContractId(factoryId, path, group);
   }
 
-  getPoolAddress(token0: string, token1: string, configIndex: bigint): string {
-    const poolId = this.getPoolId(token0, token1, configIndex);
+  getPoolAddress(tokenA: string, tokenB: string, configIndex: bigint): string {
+    const poolId = this.getPoolId(tokenA, tokenB, configIndex);
     return addressFromContractId(poolId);
   }
 
-  getPool(token0: string, token1: string, configIndex: bigint): PoolInstance {
-    const poolAddress = this.getPoolAddress(token0, token1, configIndex);
+  getPool(tokenA: string, tokenB: string, configIndex: bigint): PoolInstance {
+    const poolAddress = this.getPoolAddress(tokenA, tokenB, configIndex);
     return Pool.at(poolAddress);
   }
 
-  async poolExists(token0: string, token1: string, configIndex: bigint): Promise<boolean> {
-    const poolAddress = this.getPoolAddress(token0, token1, configIndex);
+  async poolExists(tokenA: string, tokenB: string, configIndex: bigint): Promise<boolean> {
+    const poolAddress = this.getPoolAddress(tokenA, tokenB, configIndex);
     const pool = Pool.at(poolAddress);
     try {
       await pool.fetchState();
@@ -334,6 +338,7 @@ export class ClmmModule extends ModuleBase {
         amountSpecified: p.amount,
         zeroForOne: p.zeroForOne,
         data: '',
+        maxSteps: 500n,  // TODO: Set to 500 for now based on the test
       },
     });
 
