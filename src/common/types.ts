@@ -73,5 +73,3 @@ export type PoolState = CpmmPoolState | ClmmPoolState;
 export type CpmmPoolStateWithStats = CpmmPoolState & PoolStats & { type: 'Standard' };
 export type ClmmPoolStateWithStats = ClmmPoolState & PoolStats & { type: 'Concentrated' };
 export type PoolStateWithStats = CpmmPoolStateWithStats | ClmmPoolStateWithStats;
-
-

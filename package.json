@@ -1,6 +1,7 @@
 {
   "name": "@zetamarket/typescript-sdk",
   "version": "0.0.15",
+  "packageManager": "bun@1.1.20",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -19,18 +20,18 @@
     "clmm"
   ],
   "scripts": {
-    "build": "node ./node_modules/tsup/dist/cli-default.js src --format cjs,esm --dts --sourcemap --no-splitting -d lib",
-    "dev": "node ./node_modules/tsup/dist/cli-default.js src --watch --format cjs,esm --dts --sourcemap --no-splitting -d lib",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "node ./node_modules/eslint/bin/eslint.js --max-warnings=0 . --ext .ts",
-    "format": "prettier --write .",
-    "typecheck": "tsc --noEmit",
+    "build": "bunx tsup src --format cjs,esm --dts --sourcemap --no-splitting -d lib",
+    "dev": "bunx tsup src --watch --format cjs,esm --dts --sourcemap --no-splitting -d lib",
+    "test": "bunx jest",
+    "test:watch": "bunx jest --watch",
+    "test:coverage": "bunx jest --coverage",
+    "lint": "bunx eslint --max-warnings=0 . --ext .ts",
+    "format": "bunx prettier --write .",
+    "typecheck": "bunx tsc --noEmit",
     "clean": "rm -rf lib",
-    "prepublishOnly": "npm run build",
-    "lint:fix": "npm run lint -- --fix",
-    "format:check": "prettier --check ."
+    "prepublishOnly": "bun run build",
+    "lint:fix": "bun run lint -- --fix",
+    "format:check": "bunx prettier --check ."
   },
   "keywords": [
     "alephium",
@@ -68,6 +69,6 @@
     "@alephium/web3-test": "^v2.0.3"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "bun": ">=1.0.0"
   }
 }

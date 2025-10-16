@@ -130,10 +130,10 @@ export class ClmmModule extends ModuleBase {
     const [token0, token1] = sortTokens(tokenA, tokenB);
     const group = this.config.groupIndex;
     const factoryId = this.config.factoryId;
-    const rawIndex = encodePrimitiveValues([{type: 'U256', value: configIndex}]);
+    const rawIndex = encodePrimitiveValues([{ type: 'U256', value: configIndex }]);
     const configPath = binToHex(rawIndex);
     const configId = subContractId(factoryId, configPath, group);
-    const path =  token0 + token1 + configId
+    const path = token0 + token1 + configId;
     return subContractId(factoryId, path, group);
   }
 
@@ -338,7 +338,7 @@ export class ClmmModule extends ModuleBase {
         amountSpecified: p.amount,
         zeroForOne: p.zeroForOne,
         data: '',
-        maxSteps: 500n,  // TODO: Set to 500 for now based on the test
+        maxSteps: 500n, // TODO: Set to 500 for now based on the test
       },
     });
 
