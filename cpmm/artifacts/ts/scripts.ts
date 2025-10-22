@@ -16,6 +16,7 @@ import { default as AddLiquidityScriptJson } from "../scripts/AddLiquidity.ral.j
 import { default as BurnScriptJson } from "../scripts/Burn.ral.json";
 import { default as CollectFeeScriptJson } from "../scripts/CollectFee.ral.json";
 import { default as CreatePairScriptJson } from "../scripts/CreatePair.ral.json";
+import { default as CreatePairAndAddLiquidityScriptJson } from "../scripts/CreatePairAndAddLiquidity.ral.json";
 import { default as EnableFeeCollectorScriptJson } from "../scripts/EnableFeeCollector.ral.json";
 import { default as GetTokenScriptJson } from "../test/GetToken.ral.json";
 import { default as MintScriptJson } from "../scripts/Mint.ral.json";
@@ -54,6 +55,19 @@ export const CreatePair = new ExecutableScript<{
   tokenAId: HexString;
   tokenBId: HexString;
 }>(Script.fromJson(CreatePairScriptJson, "", []), getContractByCodeHash);
+
+export const CreatePairAndAddLiquidity = new ExecutableScript<{
+  payer: Address;
+  factory: HexString;
+  alphAmount: bigint;
+  token0Id: HexString;
+  token1Id: HexString;
+  amount0: bigint;
+  amount1: bigint;
+}>(
+  Script.fromJson(CreatePairAndAddLiquidityScriptJson, "", []),
+  getContractByCodeHash
+);
 
 export const EnableFeeCollector = new ExecutableScript<{
   tokenPairFactory: HexString;
