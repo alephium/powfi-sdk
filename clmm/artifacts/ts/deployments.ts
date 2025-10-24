@@ -24,10 +24,10 @@ import {
   PoolFactoryInstance,
   PositionManager,
   PositionManagerInstance,
-  TestToken,
   TestTokenInstance,
 } from ".";
 import { default as devnetDeployments } from "../../deployments/.deployments.devnet.json";
+import { default as testnetDeployments } from "../../deployments/.deployments.testnet.json";
 
 export type Deployments = {
   deployerAddress: string;
@@ -118,91 +118,7 @@ function toDeployments(json: any): Deployments {
       contractInstance: PositionManager.at(
         json.contracts["PositionManager"].contractInstance.address
       ),
-    },
-    TestToken_AYIN: {
-      ...json.contracts["TestToken:AYIN"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:AYIN"].contractInstance.address
-      ),
-    },
-    TestToken_WETH: {
-      ...json.contracts["TestToken:WETH"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:WETH"].contractInstance.address
-      ),
-    },
-    TestToken_WBTC: {
-      ...json.contracts["TestToken:WBTC"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:WBTC"].contractInstance.address
-      ),
-    },
-    TestToken_USDTeth: {
-      ...json.contracts["TestToken:USDTeth"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:USDTeth"].contractInstance.address
-      ),
-    },
-    TestToken_USDTbsc: {
-      ...json.contracts["TestToken:USDTbsc"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:USDTbsc"].contractInstance.address
-      ),
-    },
-    TestToken_USDCeth: {
-      ...json.contracts["TestToken:USDCeth"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:USDCeth"].contractInstance.address
-      ),
-    },
-    TestToken_USDCbsc: {
-      ...json.contracts["TestToken:USDCbsc"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:USDCbsc"].contractInstance.address
-      ),
-    },
-    TestToken_DAI: {
-      ...json.contracts["TestToken:DAI"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:DAI"].contractInstance.address
-      ),
-    },
-    TestToken_APAD: {
-      ...json.contracts["TestToken:APAD"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:APAD"].contractInstance.address
-      ),
-    },
-    TestToken_CHENG: {
-      ...json.contracts["TestToken:CHENG"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:CHENG"].contractInstance.address
-      ),
-    },
-    TestToken_ALPHAGA: {
-      ...json.contracts["TestToken:ALPHAGA"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:ALPHAGA"].contractInstance.address
-      ),
-    },
-    TestToken_ANSd: {
-      ...json.contracts["TestToken:ANSd"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:ANSd"].contractInstance.address
-      ),
-    },
-    TestToken_ANSo: {
-      ...json.contracts["TestToken:ANSo"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:ANSo"].contractInstance.address
-      ),
-    },
-    TestToken_ABD: {
-      ...json.contracts["TestToken:ABD"],
-      contractInstance: TestToken.at(
-        json.contracts["TestToken:ABD"].contractInstance.address
-      ),
-    },
+    }
   };
   return {
     ...json,
@@ -226,7 +142,8 @@ export function loadDeployments(
   networkId: NetworkId,
   deployerAddress?: string
 ): Deployments {
-  const deployments = networkId === "devnet" ? devnetDeployments : undefined;
+  const deployments =
+    networkId === "devnet" ? devnetDeployments : networkId === "testnet" ? testnetDeployments : undefined;
   if (deployments === undefined) {
     throw Error("The contract has not been deployed to the " + networkId);
   }

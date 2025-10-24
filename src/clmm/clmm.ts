@@ -6,7 +6,6 @@ import {
   MINIMAL_CONTRACT_DEPOSIT,
   subContractId,
   codec,
-  ALPH_TOKEN_ID,
   encodePrimitiveValues,
   groupOfAddress,
 } from '@alephium/web3';
@@ -26,12 +25,18 @@ import type {
   ClmmPoolConfig,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
-import { CreateLiquidPool, Pool, PoolConfig, PoolFactory, PositionManager, SwapWithoutAccount } from '../../clmm/artifacts/ts';
+import {
+  CreateLiquidPool,
+  Pool,
+  PoolConfig,
+  PoolFactory,
+  PositionManager,
+  SwapWithoutAccount,
+} from '../../clmm/artifacts/ts';
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
 import { PoolNotFoundError, sortTokens } from '../common';
-import { TokenInfo } from '@alephium/token-list';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -102,7 +107,6 @@ export class ClmmModule extends ModuleBase {
     };
   }
 
-
   async getPoolState(poolId: string): Promise<ClmmPoolState> {
     try {
       const poolAddress = addressFromContractId(poolId);
@@ -145,10 +149,10 @@ export class ClmmModule extends ModuleBase {
   getPositionId(poolId: string, owner: string, tickLower: bigint, tickUpper: bigint): string {
     const group = groupOfAddress(addressFromContractId(poolId));
     const path = encodePrimitiveValues([
-        {type: 'U256', value: Pool.consts.PathPrefixes.Position},
-        {type: 'Address', value: owner},
-        {type: 'I256', value: tickLower},
-        {type: 'I256', value: tickUpper}
+      { type: 'U256', value: Pool.consts.PathPrefixes.Position },
+      { type: 'Address', value: owner },
+      { type: 'I256', value: tickLower },
+      { type: 'I256', value: tickUpper },
     ]);
     return subContractId(poolId, binToHex(path), group);
   }
@@ -201,7 +205,13 @@ export class ClmmModule extends ModuleBase {
     }
     const sqrtPriceX96A = TickUtils.getSqrtRatioAtTick(ticks[0]);
     const sqrtPriceX96B = TickUtils.getSqrtRatioAtTick(ticks[1]);
-    const liquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(sqrtPriceX96, sqrtPriceX96A, sqrtPriceX96B, amounts[0], amounts[1]);
+    const liquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
+      sqrtPriceX96,
+      sqrtPriceX96A,
+      sqrtPriceX96B,
+      amounts[0],
+      amounts[1],
+    );
     const result = await CreateLiquidPool.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -222,7 +232,7 @@ export class ClmmModule extends ModuleBase {
         { id: tokens[0], amount: amounts[0] },
         { id: tokens[1], amount: amounts[1] },
       ],
-    })
+    });
     const poolAddress = this.getPoolAddress(tokens[0], tokens[1], configIndex);
     return { poolAddress, result };
   }
@@ -428,7 +438,7 @@ export class ClmmModule extends ModuleBase {
         data: '',
       },
       tokens: [{ id: tokenIn, amount: p.amount }],
-    })
+    });
   }
 
   async collectProtocolFees(p: CollectProtocolFees): Promise<SignExecuteScriptTxResult> {

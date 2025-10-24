@@ -34,8 +34,7 @@ export class MathUtil {
 
   static alphDiv(a: bigint, b: bigint): bigint {
     const result = a / b;
-    if (a * b < 0n)
-        return result - BigInt(a % b != 0n);
+    if (a * b < 0n) return result - BigInt(a % b != 0n);
     return result;
   }
 

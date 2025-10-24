@@ -35,9 +35,7 @@ export class ClmmLiquidityUtils {
       amounts[0],
       amounts[1],
     );
-    return reverse
-      ? [amount1, amount0, liquidity]
-      : [amount0, amount1, liquidity];
+    return reverse ? [amount1, amount0, liquidity] : [amount0, amount1, liquidity];
   }
 
   static getPositionAmountsFromPrice2(
@@ -53,7 +51,10 @@ export class ClmmLiquidityUtils {
       return [0n, 0n, 0n];
     }
     const amounts = [amountBase, amountQuote];
-    const sqrts = [TickUtils.getSqrtRatioAtTick(lowerTick), TickUtils.getSqrtRatioAtTick(upperTick)];
+    const sqrts = [
+      TickUtils.getSqrtRatioAtTick(lowerTick),
+      TickUtils.getSqrtRatioAtTick(upperTick),
+    ];
     const reverse1 = lowerTick > upperTick;
     if (reverse1) {
       sqrts.reverse();
@@ -69,9 +70,7 @@ export class ClmmLiquidityUtils {
       amounts[0],
       amounts[1],
     );
-    return reverse2
-      ? [amount1, amount0, liquidity]
-      : [amount0, amount1, liquidity];
+    return reverse2 ? [amount1, amount0, liquidity] : [amount0, amount1, liquidity];
   }
 
   static getAmountsAndLiquidityAtPrice(
@@ -83,7 +82,11 @@ export class ClmmLiquidityUtils {
     amount0: bigint,
     amount1: bigint,
   ): [bigint, bigint, bigint] {
-    const sqrtRatioX96 = TickUtils.priceToSqrtPriceX96(currentPrice, token0.decimals, token1.decimals);
+    const sqrtRatioX96 = TickUtils.priceToSqrtPriceX96(
+      currentPrice,
+      token0.decimals,
+      token1.decimals,
+    );
     const sqrtRatioAX96 = TickUtils.getSqrtRatioAtTick(lowerTick);
     const sqrtRatioBX96 = TickUtils.getSqrtRatioAtTick(upperTick);
     return this.getAmountsAndLiquidityAtSqrtPrice(

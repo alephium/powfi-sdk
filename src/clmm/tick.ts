@@ -231,10 +231,10 @@ export class TickUtils {
   ): { tick: bigint; price: number } {
     const reverse = tokenBase.id > tokenQuote.id == baseIn;
     const rawTick = reverse ? MAX_TICK : MIN_TICK;
-    const tick = rawTick / tickSpacing * tickSpacing;
+    const tick = (rawTick / tickSpacing) * tickSpacing;
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
   }
-  
+
   static getMaxPriceFromTick(
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
@@ -243,7 +243,7 @@ export class TickUtils {
   ): { tick: bigint; price: number } {
     const reverse = tokenBase.id > tokenQuote.id == baseIn;
     const rawTick = reverse ? MIN_TICK : MAX_TICK;
-    const tick = rawTick / tickSpacing * tickSpacing;
+    const tick = (rawTick / tickSpacing) * tickSpacing;
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
   }
 

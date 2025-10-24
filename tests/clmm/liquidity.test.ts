@@ -88,7 +88,7 @@ describe('LiquidityUtils', () => {
     const WETHId = '7d778a437c793697381ed67845a76874305f69fb861f31c9b2a84cf06cba8700';
     const USDC = createToken(USDCId, 6);
     const WETH = createToken(WETHId, 18);
-    
+
     test('should handle base < quote, reverse = false', () => {
       const currentPrice = 3000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
@@ -117,13 +117,7 @@ describe('LiquidityUtils', () => {
       expect(wethShortfall).toBeGreaterThanOrEqual(0n);
       expect(wethShortfall).toBeLessThan(10_000_000n);
 
-      const { price: roundedPrice } = TickUtils.getAlignedPrice(
-        currentPrice,
-        USDC,
-        WETH,
-        1n,
-        true,
-      );
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
       const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
       const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);
@@ -201,13 +195,7 @@ describe('LiquidityUtils', () => {
       const priceUSDCPerWETH = 2500;
       const priceWETHPerUSDC = 1 / priceUSDCPerWETH;
 
-      const normalPriceResult = TickUtils.getAlignedPrice(
-        priceUSDCPerWETH,
-        USDC,
-        WETH,
-        1n,
-        true,
-      );
+      const normalPriceResult = TickUtils.getAlignedPrice(priceUSDCPerWETH, USDC, WETH, 1n, true);
       const normalLowerTick = normalPriceResult.tick - 2000n;
       const normalUpperTick = normalPriceResult.tick + 2000n;
 
@@ -368,13 +356,7 @@ describe('LiquidityUtils', () => {
       const smallUSDC = 1000n; // 0.001 USDC
       const smallWETH = 1_000_000_000_000n; // 0.000001 WETH
 
-      const { price: roundedPrice } = TickUtils.getAlignedPrice(
-        currentPrice,
-        USDC,
-        WETH,
-        1n,
-        true,
-      );
+      const { price: roundedPrice } = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
       const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
       const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);

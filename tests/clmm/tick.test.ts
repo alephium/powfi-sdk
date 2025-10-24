@@ -276,12 +276,7 @@ describe('TickUtils', () => {
       const price = 5.0;
 
       const priceResult = TickUtils.getAlignedPrice(price, tokenBase, tokenQuote, 1n, true);
-      const tickResult = TickUtils.getPriceFromTick(
-        priceResult.tick,
-        tokenBase,
-        tokenQuote,
-        true,
-      );
+      const tickResult = TickUtils.getPriceFromTick(priceResult.tick, tokenBase, tokenQuote, true);
 
       expect(tickResult.price).toBeCloseTo(priceResult.price, 2);
     });
