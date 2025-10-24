@@ -14,6 +14,7 @@ import {
   AddLiquidity,
   RemoveLiquidity,
   CreatePair,
+  CreatePairAndAddLiquidity,
 } from '../../cpmm/artifacts/ts';
 import { loadDeployments } from '../../cpmm/artifacts/ts/deployments';
 import type { CpmmPoolState } from './types';
@@ -309,8 +310,32 @@ export class CpmmModule extends ModuleBase {
       throw new Error('Signer is required for createPool operation');
     }
 
-    const { tokenA, tokenB, sender } = params;
+    const { tokenA, tokenB, sender, tokenAAmount, tokenBAmount } = params;
     const poolId = this.getPoolId(tokenA.id, tokenB.id);
+
+    if (tokenAAmount !== undefined && tokenBAmount !== undefined) {
+      const [token0Id, token1Id] = sortTokens(tokenA.id, tokenB.id);
+      const [amount0, amount1] =
+        token0Id === tokenA.id ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount];
+      const result = await CreatePairAndAddLiquidity.execute({
+        signer: this.scope.signer,
+        initialFields: {
+          payer: sender,
+          factory: this.config.factoryId,
+          alphAmount: ONE_ALPH,
+          token0Id,
+          token1Id,
+          amount0,
+          amount1,
+        },
+        attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenA.id, tokenB.id),
+        tokens: [
+          { id: token0Id, amount: amount0 },
+          { id: token1Id, amount: amount1 },
+        ],
+      });
+      return { ...result, poolId };
+    }
 
     const result = await CreatePair.execute({
       signer: this.scope.signer,

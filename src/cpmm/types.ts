@@ -83,6 +83,8 @@ export interface CreatePoolParams {
   tokenA: TokenInfo;
   tokenB: TokenInfo;
   sender: string;
+  tokenAAmount?: bigint;
+  tokenBAmount?: bigint;
 }
 
 export interface ComputeSwapParams {
