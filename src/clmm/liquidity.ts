@@ -4,40 +4,6 @@ import { MathUtil } from '../common/math';
 import { Q96 } from '../../clmm/artifacts/ts/constants';
 
 export class ClmmLiquidityUtils {
-  static getPositionAmountsFromPrice(
-    currentPrice: number,
-    tokenBase: TokenInfo,
-    tokenQuote: TokenInfo,
-    lowerTick: bigint,
-    upperTick: bigint,
-    amountBase: bigint,
-    amountQuote: bigint,
-  ): [bigint, bigint, bigint] {
-    if (amountBase === 0n || amountQuote === 0n) {
-      return [0n, 0n, 0n];
-    }
-    const tokens = [tokenBase, tokenQuote];
-    const ticks = [lowerTick, upperTick];
-    const amounts = [amountBase, amountQuote];
-    const reverse = tokenBase.id > tokenQuote.id != upperTick > lowerTick;
-    if (reverse) {
-      tokens.reverse();
-      ticks.reverse();
-      amounts.reverse();
-    }
-    const price = reverse ? 1 / currentPrice : currentPrice;
-    const [amount0, amount1, liquidity] = this.getAmountsAndLiquidityAtPrice(
-      price,
-      tokens[0],
-      tokens[1],
-      ticks[0],
-      ticks[1],
-      amounts[0],
-      amounts[1],
-    );
-    return reverse ? [amount1, amount0, liquidity] : [amount0, amount1, liquidity];
-  }
-
   static getPositionAmountsFromPrice2(
     sqrtRatioX96: bigint,
     tokenBase: TokenInfo,
