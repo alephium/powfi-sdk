@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as PoolContractJson } from "../Pool.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace PoolTypes {
@@ -67,11 +53,11 @@ export namespace PoolTypes {
     tickSpacing: bigint;
     maxLiquidityPerTick: bigint;
     nextNftIndex: bigint;
-    slot0: Slot0;
+    slot0: types.Slot0;
     liquidity: bigint;
-    rewardInfos: [Reward, Reward, Reward];
+    rewardInfos: [types.Reward, types.Reward, types.Reward];
     feeGrowths: [bigint, bigint, bigint];
-    protocolFees: ProtocolFees;
+    protocolFees: types.ProtocolFees;
   };
 
   export type State = ContractState<Fields>;
@@ -284,6 +270,10 @@ export namespace PoolTypes {
       }>;
       result: CallContractResult<HexString>;
     };
+    configPath: {
+      params: CallContractParams<{ configIndex_: bigint }>;
+      result: CallContractResult<HexString>;
+    };
     poolPath: {
       params: CallContractParams<{
         factory: HexString;
@@ -352,7 +342,7 @@ export namespace PoolTypes {
     modifyPosition: {
       params: CallContractParams<{
         position: HexString;
-        params: ModifyPositionParams;
+        params: types.ModifyPositionParams;
       }>;
       result: CallContractResult<[bigint, bigint]>;
     };
@@ -426,11 +416,11 @@ export namespace PoolTypes {
       result: CallContractResult<[boolean, bigint, HexString, HexString]>;
     };
     swapExactOut: {
-      params: CallContractParams<{ p: SwapParams; refRewards: bigint }>;
+      params: CallContractParams<{ p: types.SwapParams; refRewards: bigint }>;
       result: CallContractResult<null>;
     };
     swapExactIn: {
-      params: CallContractParams<{ p: SwapParams; refRewards: bigint }>;
+      params: CallContractParams<{ p: types.SwapParams; refRewards: bigint }>;
       result: CallContractResult<null>;
     };
     getSqrtPricesX96: {
@@ -651,6 +641,10 @@ export namespace PoolTypes {
       }>;
       result: SignExecuteScriptTxResult;
     };
+    configPath: {
+      params: SignExecuteContractMethodParams<{ configIndex_: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
     poolPath: {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
@@ -722,7 +716,7 @@ export namespace PoolTypes {
     modifyPosition: {
       params: SignExecuteContractMethodParams<{
         position: HexString;
-        params: ModifyPositionParams;
+        params: types.ModifyPositionParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -797,14 +791,14 @@ export namespace PoolTypes {
     };
     swapExactOut: {
       params: SignExecuteContractMethodParams<{
-        p: SwapParams;
+        p: types.SwapParams;
         refRewards: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
     swapExactIn: {
       params: SignExecuteContractMethodParams<{
-        p: SwapParams;
+        p: types.SwapParams;
         refRewards: bigint;
       }>;
       result: SignExecuteScriptTxResult;
@@ -860,7 +854,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -1199,6 +1193,14 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
         getContractByCodeHash
       );
     },
+    configPath: async (
+      params: TestContractParamsWithoutMaps<
+        PoolTypes.Fields,
+        { configIndex_: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "configPath", params, getContractByCodeHash);
+    },
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
@@ -1284,7 +1286,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     modifyPosition: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { position: HexString; params: ModifyPositionParams }
+        { position: HexString; params: types.ModifyPositionParams }
       >
     ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
       return testMethod(this, "modifyPosition", params, getContractByCodeHash);
@@ -1383,7 +1385,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     swapExactOut: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { p: SwapParams; refRewards: bigint }
+        { p: types.SwapParams; refRewards: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "swapExactOut", params, getContractByCodeHash);
@@ -1391,7 +1393,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     swapExactIn: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { p: SwapParams; refRewards: bigint }
+        { p: types.SwapParams; refRewards: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "swapExactIn", params, getContractByCodeHash);
@@ -1466,8 +1468,8 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "bea1c51338dffaf3d401652ae5f1a3aa755df9df9162763cc157ac5ac1fcb64d",
-    AllStructs
+    "8adcf89800b4c4845887dd1ca60bf2047928149aeedc92e36b6598579210b44b",
+    types.AllStructs
   )
 );
 registerContract(Pool);
@@ -1864,6 +1866,17 @@ export class PoolInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    configPath: async (
+      params: PoolTypes.CallMethodParams<"configPath">
+    ): Promise<PoolTypes.CallMethodResult<"configPath">> => {
+      return callMethod(
+        Pool,
+        this,
+        "configPath",
+        params,
+        getContractByCodeHash
+      );
+    },
     poolPath: async (
       params: PoolTypes.CallMethodParams<"poolPath">
     ): Promise<PoolTypes.CallMethodResult<"poolPath">> => {
@@ -2247,6 +2260,11 @@ export class PoolInstance extends ContractInstance {
       params: PoolTypes.SignExecuteMethodParams<"positionContractId">
     ): Promise<PoolTypes.SignExecuteMethodResult<"positionContractId">> => {
       return signExecuteMethod(Pool, this, "positionContractId", params);
+    },
+    configPath: async (
+      params: PoolTypes.SignExecuteMethodParams<"configPath">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"configPath">> => {
+      return signExecuteMethod(Pool, this, "configPath", params);
     },
     poolPath: async (
       params: PoolTypes.SignExecuteMethodParams<"poolPath">

@@ -12,23 +12,22 @@ import {
   HexString,
 } from "@alephium/web3";
 import { getContractByCodeHash } from "./contracts";
+import { default as CreateConfigScriptJson } from "../CreateConfig.ral.json";
 import { default as CreateLiquidPoolScriptJson } from "../CreateLiquidPool.ral.json";
 import { default as PoolRouterDemoScriptJson } from "../PoolRouterDemo.ral.json";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import { default as SwapWithoutAccountScriptJson } from "../SwapWithoutAccount.ral.json";
+import * as types from "./types";
+
+export const CreateConfig = new ExecutableScript<{
+  factory: HexString;
+  tickSpacing: bigint;
+  fee: bigint;
+  feeProtocol: bigint;
+  configIndex: bigint;
+}>(
+  Script.fromJson(CreateConfigScriptJson, "", types.AllStructs),
+  getContractByCodeHash
+);
 
 export const CreateLiquidPool = new ExecutableScript<{
   factory: HexString;
@@ -40,8 +39,10 @@ export const CreateLiquidPool = new ExecutableScript<{
   tickLower: bigint;
   tickUpper: bigint;
   liquidity: bigint;
+  amount0: bigint;
+  amount1: bigint;
 }>(
-  Script.fromJson(CreateLiquidPoolScriptJson, "", AllStructs),
+  Script.fromJson(CreateLiquidPoolScriptJson, "", types.AllStructs),
   getContractByCodeHash
 );
 
@@ -56,6 +57,21 @@ export const PoolRouterDemo = new ExecutableScript<{
   dexAccount_: HexString;
   counter: bigint;
 }>(
-  Script.fromJson(PoolRouterDemoScriptJson, "", AllStructs),
+  Script.fromJson(PoolRouterDemoScriptJson, "", types.AllStructs),
+  getContractByCodeHash
+);
+
+export const SwapWithoutAccount = new ExecutableScript<{
+  factory: HexString;
+  dexAccount: HexString;
+  pool: HexString;
+  tokenIn: HexString;
+  tokenOut: HexString;
+  zeroForOne: boolean;
+  amountSpecified: bigint;
+  sqrtPriceLimitX96: bigint;
+  data: HexString;
+}>(
+  Script.fromJson(SwapWithoutAccountScriptJson, "", types.AllStructs),
   getContractByCodeHash
 );

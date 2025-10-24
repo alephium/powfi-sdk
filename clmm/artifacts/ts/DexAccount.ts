@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as DexAccountContractJson } from "../DexAccount.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace DexAccountTypes {
@@ -132,7 +118,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -182,7 +168,7 @@ export const DexAccount = new Factory(
     DexAccountContractJson,
     "=6-2+55=2-2+6e=2-2+c6=11-1+f=30+160416031604777e040a706172656e7449643a20092063616c6c65723a20012000=288",
     "430e42026eff21944006c7411e8ba0b006680ed3f7c5d781e0e8b20522fab7a2",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(DexAccount);

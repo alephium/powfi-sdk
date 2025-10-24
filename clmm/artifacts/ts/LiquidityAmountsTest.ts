@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as LiquidityAmountsTestContractJson } from "../LiquidityAmountsTest.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace LiquidityAmountsTestTypes {
@@ -175,7 +161,7 @@ export namespace LiquidityAmountsTestTypes {
 
 class Factory extends ContractFactory<LiquidityAmountsTestInstance, {}> {
   encodeFields() {
-    return encodeContractFields({}, this.contract.fieldsSig, AllStructs);
+    return encodeContractFields({}, this.contract.fieldsSig, types.AllStructs);
   }
 
   consts = { FullMathError: { MulDivOverflow: BigInt("351") } };
@@ -295,7 +281,7 @@ export const LiquidityAmountsTest = new Factory(
     LiquidityAmountsTestContractJson,
     "",
     "6a4ba04c81892909e02efe02e9f3ebf139cf27afd40f5fca01f4a9b98a9003da",
-    AllStructs
+    types.AllStructs
   )
 );
 registerContract(LiquidityAmountsTest);

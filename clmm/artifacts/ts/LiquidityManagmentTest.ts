@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as LiquidityManagmentTestContractJson } from "../LiquidityManagmentTest.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace LiquidityManagmentTestTypes {
@@ -61,7 +47,10 @@ export namespace LiquidityManagmentTestTypes {
 
   export interface CallMethodTable {
     addLiquidity: {
-      params: CallContractParams<{ payer: Address; p: ModifyLiquidityParams }>;
+      params: CallContractParams<{
+        payer: Address;
+        p: types.ModifyLiquidityParams;
+      }>;
       result: CallContractResult<[bigint, bigint, bigint, HexString]>;
     };
     getLiquidityForAmount0: {
@@ -105,6 +94,10 @@ export namespace LiquidityManagmentTestTypes {
     mulDivRoundingUp: {
       params: CallContractParams<{ a: bigint; b: bigint; denominator: bigint }>;
       result: CallContractResult<bigint>;
+    };
+    configPath: {
+      params: CallContractParams<{ configIndex_: bigint }>;
+      result: CallContractResult<HexString>;
     };
     poolPath: {
       params: CallContractParams<{
@@ -168,7 +161,7 @@ export namespace LiquidityManagmentTestTypes {
     addLiquidity: {
       params: SignExecuteContractMethodParams<{
         payer: Address;
-        p: ModifyLiquidityParams;
+        p: types.ModifyLiquidityParams;
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -220,6 +213,10 @@ export namespace LiquidityManagmentTestTypes {
         b: bigint;
         denominator: bigint;
       }>;
+      result: SignExecuteScriptTxResult;
+    };
+    configPath: {
+      params: SignExecuteContractMethodParams<{ configIndex_: bigint }>;
       result: SignExecuteScriptTxResult;
     };
     poolPath: {
@@ -278,7 +275,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -307,7 +304,7 @@ class Factory extends ContractFactory<
     addLiquidity: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
-        { payer: Address; p: ModifyLiquidityParams }
+        { payer: Address; p: types.ModifyLiquidityParams }
       >
     ): Promise<
       TestContractResultWithoutMaps<[bigint, bigint, bigint, HexString]>
@@ -393,6 +390,14 @@ class Factory extends ContractFactory<
         getContractByCodeHash
       );
     },
+    configPath: async (
+      params: TestContractParamsWithoutMaps<
+        LiquidityManagmentTestTypes.Fields,
+        { configIndex_: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "configPath", params, getContractByCodeHash);
+    },
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         LiquidityManagmentTestTypes.Fields,
@@ -472,8 +477,8 @@ export const LiquidityManagmentTest = new Factory(
   Contract.fromJson(
     LiquidityManagmentTestContractJson,
     "",
-    "290f85d5d15b8e04e9fcfc93944a827db482802e6196d8bac169ca97d480863e",
-    AllStructs
+    "8824caa1efe83247812dfa7f32a80ae3d4603937df2b062437581ac421fa817d",
+    types.AllStructs
   )
 );
 registerContract(LiquidityManagmentTest);
@@ -574,6 +579,17 @@ export class LiquidityManagmentTestInstance extends ContractInstance {
         LiquidityManagmentTest,
         this,
         "mulDivRoundingUp",
+        params,
+        getContractByCodeHash
+      );
+    },
+    configPath: async (
+      params: LiquidityManagmentTestTypes.CallMethodParams<"configPath">
+    ): Promise<LiquidityManagmentTestTypes.CallMethodResult<"configPath">> => {
+      return callMethod(
+        LiquidityManagmentTest,
+        this,
+        "configPath",
         params,
         getContractByCodeHash
       );
@@ -733,6 +749,18 @@ export class LiquidityManagmentTestInstance extends ContractInstance {
         LiquidityManagmentTest,
         this,
         "mulDivRoundingUp",
+        params
+      );
+    },
+    configPath: async (
+      params: LiquidityManagmentTestTypes.SignExecuteMethodParams<"configPath">
+    ): Promise<
+      LiquidityManagmentTestTypes.SignExecuteMethodResult<"configPath">
+    > => {
+      return signExecuteMethod(
+        LiquidityManagmentTest,
+        this,
+        "configPath",
         params
       );
     },

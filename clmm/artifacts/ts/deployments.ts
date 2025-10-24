@@ -24,9 +24,10 @@ import {
   PoolFactoryInstance,
   PositionManager,
   PositionManagerInstance,
+  TestTokenInstance,
 } from ".";
-import { default as testnetDeployments } from "../../deployments/.deployments.testnet.json";
 import { default as devnetDeployments } from "../../deployments/.deployments.devnet.json";
+import { default as testnetDeployments } from "../../deployments/.deployments.testnet.json";
 
 export type Deployments = {
   deployerAddress: string;
@@ -36,9 +37,35 @@ export type Deployments = {
     Tick: DeployContractExecutionResult<TickInstance>;
     BitmapWord: DeployContractExecutionResult<BitmapWordInstance>;
     PoolConfig: DeployContractExecutionResult<PoolConfigInstance>;
+    DexAccount: DeployContractExecutionResult<DexAccountInstance>;
     PoolFactory: DeployContractExecutionResult<PoolFactoryInstance>;
     PositionManager: DeployContractExecutionResult<PositionManagerInstance>;
-    DexAccount?: DeployContractExecutionResult<DexAccountInstance>;
+    TestToken_AYIN: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_WETH: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_WBTC: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_USDTeth: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_USDTbsc: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_USDCeth: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_USDCbsc: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_DAI: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_APAD: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_CHENG: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_ALPHAGA: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_ANSd: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_ANSo: DeployContractExecutionResult<TestTokenInstance>;
+    TestToken_ABD: DeployContractExecutionResult<TestTokenInstance>;
+  };
+  scripts: {
+    CreateConfig_CreateConfig0: RunScriptResult;
+    CreateConfig_CreateConfig1: RunScriptResult;
+    CreateConfig_CreateConfig2: RunScriptResult;
+    CreateConfig_CreateConfig3: RunScriptResult;
+    CreateConfig_CreateConfig4: RunScriptResult;
+    CreateConfig_CreateConfig5: RunScriptResult;
+    CreateConfig_CreateConfig6: RunScriptResult;
+    CreateConfig_CreateConfig7: RunScriptResult;
+    CreateConfig_CreateConfig8: RunScriptResult;
+    CreateConfig_CreateConfig9: RunScriptResult;
   };
 };
 
@@ -74,6 +101,12 @@ function toDeployments(json: any): Deployments {
         json.contracts["PoolConfig"].contractInstance.address
       ),
     },
+    DexAccount: {
+      ...json.contracts["DexAccount"],
+      contractInstance: DexAccount.at(
+        json.contracts["DexAccount"].contractInstance.address
+      ),
+    },
     PoolFactory: {
       ...json.contracts["PoolFactory"],
       contractInstance: PoolFactory.at(
@@ -85,20 +118,23 @@ function toDeployments(json: any): Deployments {
       contractInstance: PositionManager.at(
         json.contracts["PositionManager"].contractInstance.address
       ),
-    },
-    DexAccount:
-      json.contracts["DexAccount"] === undefined
-        ? undefined
-        : {
-            ...json.contracts["DexAccount"],
-            contractInstance: DexAccount.at(
-              json.contracts["DexAccount"].contractInstance.address
-            ),
-          },
+    }
   };
   return {
     ...json,
     contracts: contracts as Deployments["contracts"],
+    scripts: {
+      CreateConfig_CreateConfig0: json.scripts["CreateConfig:CreateConfig0"],
+      CreateConfig_CreateConfig1: json.scripts["CreateConfig:CreateConfig1"],
+      CreateConfig_CreateConfig2: json.scripts["CreateConfig:CreateConfig2"],
+      CreateConfig_CreateConfig3: json.scripts["CreateConfig:CreateConfig3"],
+      CreateConfig_CreateConfig4: json.scripts["CreateConfig:CreateConfig4"],
+      CreateConfig_CreateConfig5: json.scripts["CreateConfig:CreateConfig5"],
+      CreateConfig_CreateConfig6: json.scripts["CreateConfig:CreateConfig6"],
+      CreateConfig_CreateConfig7: json.scripts["CreateConfig:CreateConfig7"],
+      CreateConfig_CreateConfig8: json.scripts["CreateConfig:CreateConfig8"],
+      CreateConfig_CreateConfig9: json.scripts["CreateConfig:CreateConfig9"],
+    },
   };
 }
 
@@ -107,11 +143,7 @@ export function loadDeployments(
   deployerAddress?: string
 ): Deployments {
   const deployments =
-    networkId === "testnet"
-      ? testnetDeployments
-      : networkId === "devnet"
-      ? devnetDeployments
-      : undefined;
+    networkId === "devnet" ? devnetDeployments : networkId === "testnet" ? testnetDeployments : undefined;
   if (deployments === undefined) {
     throw Error("The contract has not been deployed to the " + networkId);
   }

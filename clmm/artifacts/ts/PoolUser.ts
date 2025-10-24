@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as PoolUserContractJson } from "../PoolUser.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace PoolUserTypes {
@@ -136,7 +122,7 @@ class Factory extends ContractFactory<PoolUserInstance, PoolUserTypes.Fields> {
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -192,8 +178,8 @@ export const PoolUser = new Factory(
   Contract.fromJson(
     PoolUserContractJson,
     "",
-    "961334da677cf49732dff79add2cad84c2b20673a23067c5c3a3f4f33ffc279f",
-    AllStructs
+    "67c9f2f9113a7530bd3ec30cfd1ef81ae079957c6ebb8877fec4a8c79020b566",
+    types.AllStructs
   )
 );
 registerContract(PoolUser);

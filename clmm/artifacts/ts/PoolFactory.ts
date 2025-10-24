@@ -35,21 +35,7 @@ import {
 } from "@alephium/web3";
 import { default as PoolFactoryContractJson } from "../PoolFactory.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import {
-  CollectParams,
-  Config,
-  DecreaseLiquidityParams,
-  ModifyLiquidityParams,
-  ModifyPositionParams,
-  ProtocolFees,
-  Reward,
-  Slot0,
-  StepComputations,
-  SwapCache,
-  SwapParams,
-  SwapState,
-  AllStructs,
-} from "./types";
+import * as types from "./types";
 
 // Custom types for the contract
 export namespace PoolFactoryTypes {
@@ -81,6 +67,10 @@ export namespace PoolFactoryTypes {
   }>;
 
   export interface CallMethodTable {
+    configPath: {
+      params: CallContractParams<{ configIndex_: bigint }>;
+      result: CallContractResult<HexString>;
+    };
     poolPath: {
       params: CallContractParams<{
         factory: HexString;
@@ -102,7 +92,7 @@ export namespace PoolFactoryTypes {
       result: CallContractResult<bigint>;
     };
     createConfig: {
-      params: CallContractParams<{ config: Config }>;
+      params: CallContractParams<{ config: types.Config }>;
       result: CallContractResult<bigint>;
     };
     create: {
@@ -146,6 +136,14 @@ export namespace PoolFactoryTypes {
       params: CallContractParams<{ nextMinSwapCount: bigint }>;
       result: CallContractResult<null>;
     };
+    upgrate: {
+      params: CallContractParams<{
+        newBytecode: HexString;
+        newEncodedImmFields: HexString;
+        newEncodedMutFields: HexString;
+      }>;
+      result: CallContractResult<null>;
+    };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
     CallMethodTable[T]["params"];
@@ -164,6 +162,10 @@ export namespace PoolFactoryTypes {
   };
 
   export interface SignExecuteMethodTable {
+    configPath: {
+      params: SignExecuteContractMethodParams<{ configIndex_: bigint }>;
+      result: SignExecuteScriptTxResult;
+    };
     poolPath: {
       params: SignExecuteContractMethodParams<{
         factory: HexString;
@@ -185,7 +187,7 @@ export namespace PoolFactoryTypes {
       result: SignExecuteScriptTxResult;
     };
     createConfig: {
-      params: SignExecuteContractMethodParams<{ config: Config }>;
+      params: SignExecuteContractMethodParams<{ config: types.Config }>;
       result: SignExecuteScriptTxResult;
     };
     create: {
@@ -229,6 +231,14 @@ export namespace PoolFactoryTypes {
       params: SignExecuteContractMethodParams<{ nextMinSwapCount: bigint }>;
       result: SignExecuteScriptTxResult;
     };
+    upgrate: {
+      params: SignExecuteContractMethodParams<{
+        newBytecode: HexString;
+        newEncodedImmFields: HexString;
+        newEncodedMutFields: HexString;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
   }
   export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
     SignExecuteMethodTable[T]["params"];
@@ -244,7 +254,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      AllStructs
+      types.AllStructs
     );
   }
 
@@ -264,6 +274,14 @@ class Factory extends ContractFactory<
   }
 
   tests = {
+    configPath: async (
+      params: TestContractParamsWithoutMaps<
+        PoolFactoryTypes.Fields,
+        { configIndex_: bigint }
+      >
+    ): Promise<TestContractResultWithoutMaps<HexString>> => {
+      return testMethod(this, "configPath", params, getContractByCodeHash);
+    },
     poolPath: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
@@ -296,7 +314,7 @@ class Factory extends ContractFactory<
     createConfig: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
-        { config: Config }
+        { config: types.Config }
       >
     ): Promise<TestContractResultWithoutMaps<bigint>> => {
       return testMethod(this, "createConfig", params, getContractByCodeHash);
@@ -372,6 +390,18 @@ class Factory extends ContractFactory<
         getContractByCodeHash
       );
     },
+    upgrate: async (
+      params: TestContractParamsWithoutMaps<
+        PoolFactoryTypes.Fields,
+        {
+          newBytecode: HexString;
+          newEncodedImmFields: HexString;
+          newEncodedMutFields: HexString;
+        }
+      >
+    ): Promise<TestContractResultWithoutMaps<null>> => {
+      return testMethod(this, "upgrate", params, getContractByCodeHash);
+    },
   };
 
   stateForTest(
@@ -388,8 +418,8 @@ export const PoolFactory = new Factory(
   Contract.fromJson(
     PoolFactoryContractJson,
     "",
-    "e86939ec58138b7ea72d2bba4377575d2a5b9b77c57013edf5bbac6e723607c5",
-    AllStructs
+    "30aad0b4d884017ea89da2afb9a369db053efb60697b6a0229dfdfc573ceb0a4",
+    types.AllStructs
   )
 );
 registerContract(PoolFactory);
@@ -464,6 +494,17 @@ export class PoolFactoryInstance extends ContractInstance {
   }
 
   view = {
+    configPath: async (
+      params: PoolFactoryTypes.CallMethodParams<"configPath">
+    ): Promise<PoolFactoryTypes.CallMethodResult<"configPath">> => {
+      return callMethod(
+        PoolFactory,
+        this,
+        "configPath",
+        params,
+        getContractByCodeHash
+      );
+    },
     poolPath: async (
       params: PoolFactoryTypes.CallMethodParams<"poolPath">
     ): Promise<PoolFactoryTypes.CallMethodResult<"poolPath">> => {
@@ -565,9 +606,25 @@ export class PoolFactoryInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    upgrate: async (
+      params: PoolFactoryTypes.CallMethodParams<"upgrate">
+    ): Promise<PoolFactoryTypes.CallMethodResult<"upgrate">> => {
+      return callMethod(
+        PoolFactory,
+        this,
+        "upgrate",
+        params,
+        getContractByCodeHash
+      );
+    },
   };
 
   transact = {
+    configPath: async (
+      params: PoolFactoryTypes.SignExecuteMethodParams<"configPath">
+    ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"configPath">> => {
+      return signExecuteMethod(PoolFactory, this, "configPath", params);
+    },
     poolPath: async (
       params: PoolFactoryTypes.SignExecuteMethodParams<"poolPath">
     ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"poolPath">> => {
@@ -633,6 +690,11 @@ export class PoolFactoryInstance extends ContractInstance {
         "setDexAccountsParams",
         params
       );
+    },
+    upgrate: async (
+      params: PoolFactoryTypes.SignExecuteMethodParams<"upgrate">
+    ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"upgrate">> => {
+      return signExecuteMethod(PoolFactory, this, "upgrate", params);
     },
   };
 

@@ -126,13 +126,13 @@ describe('TickUtils', () => {
       ];
 
       for (const { price, spacing, decimals, expected } of scenarios) {
-        const tick = TickUtils.getTickWithPrice(price, decimals[0], decimals[1], spacing);
-        expect(tick % spacing).toBe(0n);
-        expect(tick).toBe(expected);
-
-        const priceInfo = TickUtils.getPriceAndTick(price, decimals[0], decimals[1], true, spacing);
-        expect(priceInfo.tick).toBe(tick);
+        const tokenBase = createToken('11', decimals[0]);
+        const tokenQuote = createToken('12', decimals[1]);
+        const priceInfo = TickUtils.getAlignedPrice(price, tokenBase, tokenQuote, spacing, true);
+        expect(priceInfo.tick % spacing).toBe(0n);
+        expect(priceInfo.tick).toBe(expected);
         expect(priceInfo.price).toBeCloseTo(price, 0);
+        const tick = expected;
 
         const sqrtPrice = TickUtils.priceToSqrtPriceX96(price, decimals[0], decimals[1]);
         const rawTick = TickUtils.getTickAtSqrtRatio(sqrtPrice);
@@ -193,29 +193,34 @@ describe('TickUtils', () => {
   describe('getPriceAndTick & getTickPrice', () => {
     it('getPriceAndTick returns values consistent with direction', () => {
       const price = 1.5;
-      const result = TickUtils.getPriceAndTick(price, 6, 6, true);
+      const tokenBase = createToken('11', 6);
+      const tokenQuote = createToken('12', 6);
+      const result = TickUtils.getAlignedPrice(price, tokenBase, tokenQuote, 1n, true);
       expect(result.tick).toBe(4054n);
       expect(result.price).toBeCloseTo(price, 1);
     });
 
     it('getPriceAndTick respects baseIn flag', () => {
       const price = 2.0;
-      const baseIn = TickUtils.getPriceAndTick(1 / price, 6, 6, true);
-      const baseOut = TickUtils.getPriceAndTick(price, 6, 6, false);
+      const tokenBase = createToken('11', 6);
+      const tokenQuote = createToken('12', 6);
+      const baseIn = TickUtils.getAlignedPrice(1 / price, tokenBase, tokenQuote, 1n, true);
+      const baseOut = TickUtils.getAlignedPrice(price, tokenBase, tokenQuote, 1n, false);
       const tickDiff = baseIn.tick - baseOut.tick;
       expect(tickDiff >= -10n && tickDiff <= 10n).toBe(true);
     });
 
     it('getTickPrice returns consistent price and sqrt ratio', () => {
       const tick = 1_000n;
-      const sqrtRatio = TickUtils.getSqrtRatioAtTick(tick);
+      const tokenBase = createToken('11', 6);
+      const tokenQuote = createToken('12', 6);
 
-      const baseIn = TickUtils.getTickPrice(tick, 6, 6, true);
-      expect(baseIn.tickSqrtPriceX96).toBe(sqrtRatio);
+      const baseIn = TickUtils.getPriceFromTick(tick, tokenBase, tokenQuote, true);
+      expect(baseIn.tick).toBe(tick);
       expect(baseIn.price).toBeCloseTo(1.10516539, 8);
 
-      const baseOut = TickUtils.getTickPrice(tick, 6, 6, false);
-      expect(baseOut.tickSqrtPriceX96).toBe(sqrtRatio);
+      const baseOut = TickUtils.getPriceFromTick(tick, tokenBase, tokenQuote, false);
+      expect(baseOut.tick).toBe(tick);
       expect(baseOut.price).toBeCloseTo(1 / baseIn.price, 8);
     });
   });
@@ -226,7 +231,7 @@ describe('TickUtils', () => {
       const tokenB = createToken('0x100', 6);
       const price = 1.5;
 
-      const result = TickUtils.getPriceAndTickFromBaseQuote(price, tokenA, tokenB);
+      const result = TickUtils.getAlignedPrice(price, tokenA, tokenB, 1n, true);
       expect(result.price).toBeCloseTo(1.5, 2);
       expect(result.tick).toBeDefined();
     });
@@ -236,7 +241,7 @@ describe('TickUtils', () => {
       const tokenB = createToken('0x100', 6);
       const price = 2_000;
 
-      const result = TickUtils.getPriceAndTickFromBaseQuote(price, tokenA, tokenB);
+      const result = TickUtils.getAlignedPrice(price, tokenA, tokenB, 1n, true);
       expect(result.price).toBeCloseTo(2_000, -2);
       expect(result.tick).toBeGreaterThan(0n);
     });
@@ -246,8 +251,8 @@ describe('TickUtils', () => {
       const tokenB = createToken('0x100', 6);
       const price = 2.0;
 
-      const fromTokenInfo = TickUtils.getPriceAndTickFromBaseQuote(price, tokenA, tokenB);
-      const direct = TickUtils.getPriceAndTick(price, tokenB.decimals, tokenA.decimals, false);
+      const fromTokenInfo = TickUtils.getAlignedPrice(price, tokenA, tokenB, 1n, true);
+      const direct = TickUtils.getAlignedPrice(price, tokenB, tokenA, 1n, false);
 
       expect(Number(fromTokenInfo.tick)).toBe(Number(direct.tick));
       expect(fromTokenInfo.price).toBeCloseTo(direct.price, 2);
@@ -260,9 +265,9 @@ describe('TickUtils', () => {
       const tokenQuote = createToken('0x100', 6);
       const tick = 1_000n;
 
-      const result = TickUtils.getTickPriceFromBaseQuote(tick, tokenBase, tokenQuote);
+      const result = TickUtils.getPriceFromTick(tick, tokenBase, tokenQuote, true);
       expect(result.price).toBeCloseTo(0.9048, 4);
-      expect(result.tickSqrtPriceX96).toBe(TickUtils.getSqrtRatioAtTick(tick));
+      expect(result.tick).toBe(tick);
     });
 
     it('supports round trips with base quote', () => {
@@ -270,14 +275,9 @@ describe('TickUtils', () => {
       const tokenQuote = createToken('0x200', 6);
       const price = 5.0;
 
-      const priceResult = TickUtils.getPriceAndTickFromBaseQuote(price, tokenBase, tokenQuote);
-      const tickResult = TickUtils.getTickPriceFromBaseQuote(
-        priceResult.tick,
-        tokenBase,
-        tokenQuote,
-      );
+      const priceResult = TickUtils.getAlignedPrice(price, tokenBase, tokenQuote, 1n, true);
+      const tickResult = TickUtils.getPriceFromTick(priceResult.tick, tokenBase, tokenQuote, true);
 
-      expect(tickResult.tickSqrtPriceX96).toBe(TickUtils.getSqrtRatioAtTick(priceResult.tick));
       expect(tickResult.price).toBeCloseTo(priceResult.price, 2);
     });
   });

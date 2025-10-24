@@ -1,37 +1,31 @@
 {
   "version": "v4.2.5",
-  "name": "CreateLiquidPool",
-  "bytecodeTemplate": "0101030002001fb41700{1}{2}{3}{4}{5}110d{0}0105170116007a{1}{9}a3{2}{10}a316001600{6}{7}{8}110e160101251818",
+  "name": "SwapWithoutAccount",
+  "bytecodeTemplate": "010103000400402cb41700{1}160047cc17011601c5194c0516000d0c{0}0108{6}3d1702{6}05264c02{3}4a01{4}17031600{3}1602a3160016001603{5}{6}{7}{8}13070e{2}012a1818",
   "fieldsSig": {
     "names": [
       "factory",
-      "token0",
-      "token1",
-      "configIndex",
-      "sqrtPriceX96",
-      "rewardToken",
-      "tickLower",
-      "tickUpper",
-      "liquidity",
-      "amount0",
-      "amount1"
+      "dexAccount",
+      "pool",
+      "tokenIn",
+      "tokenOut",
+      "zeroForOne",
+      "amountSpecified",
+      "sqrtPriceLimitX96",
+      "data"
     ],
     "types": [
       "PoolFactory",
+      "DexAccount",
+      "Pool",
       "ByteVec",
       "ByteVec",
-      "U256",
-      "U256",
-      "ByteVec",
+      "Bool",
       "I256",
-      "I256",
       "U256",
-      "U256",
-      "U256"
+      "ByteVec"
     ],
     "isMutable": [
-      false,
-      false,
       false,
       false,
       false,

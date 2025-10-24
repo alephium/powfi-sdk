@@ -2,6 +2,7 @@ import {
   MAX_SQRT_RATIO,
   MAX_TICK,
   MIN_SQRT_RATIO,
+  MIN_TICK,
   Q128,
   Q32,
   Q64,
@@ -167,83 +168,83 @@ export class TickUtils {
     return priceDecimal.toNumber();
   }
 
-  static getTickWithPrice(
+  static getAlignedTick(
     price: number,
     token0Decimal: number,
     token1Decimal: number,
-    tickSpacing: bigint = 1n,
+    tickSpacing: bigint,
   ): bigint {
-    const tick = this.getTickAtSqrtRatio(
-      this.priceToSqrtPriceX96(price, token0Decimal, token1Decimal),
-    );
+    const sqrtPriceX96 = this.priceToSqrtPriceX96(price, token0Decimal, token1Decimal);
+    const tick0 = this.getTickAtSqrtRatio(sqrtPriceX96);
 
-    let result: bigint;
-    const quotient = tick / tickSpacing;
-    const remainder = tick % tickSpacing;
-
-    if (tick < 0n) {
-      // Floor division for negative numbers
-      result = remainder === 0n ? quotient : quotient - 1n;
-    } else {
-      // Ceil division for positive numbers
-      result = remainder === 0n ? quotient : quotient + 1n;
-    }
-    return result * tickSpacing;
+    return MathUtil.alphCeil(tick0, tickSpacing) * tickSpacing;
   }
 
-  static getPriceAndTickFromBaseQuote(
-    price: number,
+  static getNextTick(
+    tick: bigint,
+    tickSpacing: bigint,
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
-    tickSpacing: bigint = 1n,
-  ): { price: number; tick: bigint } {
-    const reverse = tokenBase.id > tokenQuote.id;
-    const [token0, token1] = reverse ? [tokenQuote, tokenBase] : [tokenBase, tokenQuote];
-    return this.getPriceAndTick(price, token0.decimals, token1.decimals, !reverse, tickSpacing);
-  }
-
-  static getPriceAndTick(
-    price: number,
-    token0Decimal: number,
-    token1Decimal: number,
     baseIn: boolean,
-    tickSpacing: bigint = 1n,
-  ): { price: number; tick: bigint } {
-    const priceToken1PerToken0 = baseIn ? price : 1 / price;
-    const tick = this.getTickWithPrice(
-      priceToken1PerToken0,
-      token0Decimal,
-      token1Decimal,
-      tickSpacing,
-    );
-    const tickSqrtPriceX96 = this.getSqrtRatioAtTick(tick);
-    const tickPrice = this.sqrtPriceX96ToPrice(tickSqrtPriceX96, token0Decimal, token1Decimal);
-
-    return baseIn ? { price: tickPrice, tick } : { price: 1 / tickPrice, tick };
+    isAdd: boolean,
+  ): bigint {
+    const reverse = tokenBase.id > tokenQuote.id == baseIn;
+    const delta = isAdd == reverse ? tickSpacing : -tickSpacing;
+    return tick + delta;
   }
 
-  static getTickPriceFromBaseQuote(
+  static getAlignedPrice(
+    priceIn: number,
+    tokenBase: TokenInfo,
+    tokenQuote: TokenInfo,
+    tickSpacing: bigint,
+    baseIn: boolean,
+  ): { tick: bigint; price: number } {
+    const reverse = tokenBase.id > tokenQuote.id == baseIn;
+    const [token0, token1] = reverse ? [tokenQuote, tokenBase] : [tokenBase, tokenQuote];
+
+    const rawPrice = reverse ? 1 / priceIn : priceIn;
+    const tick = this.getAlignedTick(rawPrice, token0.decimals, token1.decimals, tickSpacing);
+    return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
+  }
+
+  static getPriceFromTick(
     tick: bigint,
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
-  ): { price: number; tickSqrtPriceX96: bigint } {
-    const reverse = tokenBase.id > tokenQuote.id;
+    baseIn: boolean,
+  ): { tick: bigint; price: number } {
+    const reverse = tokenBase.id > tokenQuote.id == baseIn;
     const [token0, token1] = reverse ? [tokenQuote, tokenBase] : [tokenBase, tokenQuote];
-    return this.getTickPrice(tick, token0.decimals, token1.decimals, !reverse);
+
+    const sqrtPriceX96 = this.getSqrtRatioAtTick(tick);
+    const alignedPrice = this.sqrtPriceX96ToPrice(sqrtPriceX96, token0.decimals, token1.decimals);
+    const price = reverse ? 1 / alignedPrice : alignedPrice;
+    return { tick, price };
   }
 
-  static getTickPrice(
-    tick: bigint,
-    token0Decimal: number,
-    token1Decimal: number,
+  static getMinPriceFromTick(
+    tokenBase: TokenInfo,
+    tokenQuote: TokenInfo,
+    tickSpacing: bigint,
     baseIn: boolean,
-  ): { price: number; tickSqrtPriceX96: bigint } {
-    const tickSqrtPriceX96 = this.getSqrtRatioAtTick(tick);
-    const tickPrice = this.sqrtPriceX96ToPrice(tickSqrtPriceX96, token0Decimal, token1Decimal);
+  ): { tick: bigint; price: number } {
+    const reverse = tokenBase.id > tokenQuote.id == baseIn;
+    const rawTick = reverse ? MAX_TICK : MIN_TICK;
+    const tick = (rawTick / tickSpacing) * tickSpacing;
+    return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
+  }
 
-    return baseIn
-      ? { price: tickPrice, tickSqrtPriceX96 }
-      : { price: 1 / tickPrice, tickSqrtPriceX96 };
+  static getMaxPriceFromTick(
+    tokenBase: TokenInfo,
+    tokenQuote: TokenInfo,
+    tickSpacing: bigint,
+    baseIn: boolean,
+  ): { tick: bigint; price: number } {
+    const reverse = tokenBase.id > tokenQuote.id == baseIn;
+    const rawTick = reverse ? MIN_TICK : MAX_TICK;
+    const tick = (rawTick / tickSpacing) * tickSpacing;
+    return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
   }
 
   static getNextSqrtPrice(
@@ -270,7 +271,7 @@ export class TickUtils {
       throw new Error('Amount0 exceeds available liquidity for the swap');
     }
     const denominator = numerator1 - product;
-    return MathUtil.divFloor(numerator1 * sqrtPriceX96, denominator);
+    return MathUtil.alphDiv(numerator1 * sqrtPriceX96, denominator);
   }
 
   static getNextSqrtPriceFromAmount1(
@@ -278,7 +279,7 @@ export class TickUtils {
     liquidity: bigint,
     amount: bigint,
   ): bigint {
-    const quotient = MathUtil.divFloor(amount * Q96, liquidity);
+    const quotient = MathUtil.alphDiv(amount * Q96, liquidity);
     return sqrtPriceX96 + quotient;
   }
 

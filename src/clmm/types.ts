@@ -6,6 +6,7 @@ export interface ClmmConfig {
   factoryId: string;
   positionManagerId: string;
   defaultConfigIndex: bigint;
+  accountRoot: string;
 }
 
 export interface ClmmSwapParams {
@@ -93,6 +94,7 @@ export interface ClmmPoolState {
   sqrtPriceX96: bigint;
   tick: bigint;
   tickSpacing: bigint;
+  configIndex: bigint;
 }
 
 export interface ClmmPoolConfig {

@@ -32,6 +32,18 @@ export class MathUtil {
     return x0;
   };
 
+  static alphDiv(a: bigint, b: bigint): bigint {
+    const result = a / b;
+    if (a * b < 0n) return result - BigInt(a % b != 0n);
+    return result;
+  }
+
+  static alphCeil(a: bigint, b: bigint): bigint {
+    const result = a / b;
+    const rem = a % b;
+    return result + BigInt(rem != 0n) * BigInt(rem < 0n ? -1n : 1n);
+  }
+
   static divFloor(a: bigint, b: bigint): bigint {
     return this.divWithRounding(a, b, 'floor');
   }

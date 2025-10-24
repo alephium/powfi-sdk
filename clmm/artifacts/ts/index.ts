@@ -13,6 +13,7 @@ export * from "./PoolFactory";
 export * from "./PoolUser";
 export * from "./Position";
 export * from "./PositionManager";
+export * from "./TestToken";
 export * from "./Tick";
 export * from "./TickBitmapTest";
 export * from "./contracts";
