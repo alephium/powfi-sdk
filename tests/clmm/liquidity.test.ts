@@ -89,6 +89,35 @@ describe('LiquidityUtils', () => {
     const USDC = createToken(USDCId, 6);
     const WETH = createToken(WETHId, 18);
 
+    test('test from running system', () => {
+      const tickLower = 265210n;
+      const tickUpper = 269295n;
+      // 45452066364233268369925812005835272n
+      const sqrtPriceX96A = TickUtils.getSqrtRatioAtTick(tickLower);
+      // 55751151917851171758765933958365327n
+      const sqrtPriceX96B = TickUtils.getSqrtRatioAtTick(tickUpper);
+    // [addLiquidity][SPOT]  amount0: 4400000000n amount1: 2317711030407264178626n sqrtPriceX96: 45520292209136196485350413856803117n tick: 265240n
+    // [addLiquidity][MIN ]  amount0: 4400000000n amount1: 2287140072585595211262n sqrtPriceX96: 45452066364233268369925812005835272n tick: 265210n
+    // [addLiquidity][MAX ]  amount0: 4341807052n amount1: 2317711030407264128863n sqrtPriceX96: 45588620464474668215330498985281758n tick: 265270n
+      const sqrtMinPriceX96 = 45452066364233268369925812005835272n;
+      const sqrtPriceX96 = 45520292209136196485350413856803117n;
+      const sqrtMaxPriceX96 = 45588620464474668215330498985281758n;
+      expect(TickUtils.getSqrtRatioAtTick(265210n)).toBe(sqrtMinPriceX96);       
+      expect(TickUtils.getSqrtRatioAtTick(265240n)).toBe(sqrtPriceX96);       
+      expect(TickUtils.getSqrtRatioAtTick(265270n)).toBe(sqrtMaxPriceX96);
+      
+      expect(TickUtils.getTickAtSqrtRatio(sqrtMinPriceX96)).toBe(265210n);
+      expect(TickUtils.getTickAtSqrtRatio(sqrtPriceX96)).toBe(265240n);
+      expect(TickUtils.getTickAtSqrtRatio(sqrtMaxPriceX96)).toBe(265270n);
+
+      const amount0 = 4400000000n;
+      const amount1 = 2317711030407264178626n;
+      const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(sqrtPriceX96, sqrtPriceX96A, sqrtPriceX96B, amount0, amount1);
+      const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(sqrtPriceX96, sqrtPriceX96A, sqrtPriceX96B, amount0, amount1);
+      const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(sqrtMaxPriceX96, sqrtPriceX96A, sqrtPriceX96B, amount0, amount1);
+      return;
+    })
+
     test('should handle base < quote, reverse = false', () => {
       const currentPrice = 3000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
