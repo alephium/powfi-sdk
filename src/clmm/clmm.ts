@@ -294,8 +294,9 @@ export class ClmmModule extends ModuleBase {
       { id: p.token0, amount: -minAmount0 },
       { id: p.token1, amount: -maxAmount1 },
     ];
-    if (p.owner) {
-      tokens.push({ id: positionId, amount: 1n });
+    const nftAmount = p.tokenBalances.get(positionId) || 0n;
+    if (nftAmount > 0n) {
+      tokens.push({ id: positionId, amount: nftAmount });
     }
     const result = await positionManager.transact.addLiquidity({
       signer: this.scope.signer,
