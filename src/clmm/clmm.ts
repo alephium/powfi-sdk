@@ -288,7 +288,7 @@ export class ClmmModule extends ModuleBase {
       sqrtRatioBX96,
       -liquidity,
     );
-    
+
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper);
     const tokens: Token[] = [
       { id: p.token0, amount: -minAmount0 },

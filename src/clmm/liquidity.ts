@@ -4,7 +4,7 @@ import { MathUtil } from '../common/math';
 import { Q96 } from '../../clmm/artifacts/ts/constants';
 
 export class ClmmLiquidityUtils {
-  static getPositionAmountsFromPrice2(
+  static getPositionAmountsFromPrice(
     sqrtRatioX96: bigint,
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
