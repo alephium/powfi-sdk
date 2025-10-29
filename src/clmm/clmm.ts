@@ -257,36 +257,42 @@ export class ClmmModule extends ModuleBase {
         owner,
       },
     });
-    const [minSqrtPriceX96, maxSqrtPriceX96] = TickUtils.getSqrtPriceX96Bounds(
-      sqrtPriceX96,
-      p.slippage,
-    );
-    const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+    const currentTick = TickUtils.getTickAtSqrtRatio(sqrtPriceX96);
+    const minTick = currentTick - p.slippage;
+    const maxTick = currentTick + p.slippage;
+    const minSqrtPriceX96 = TickUtils.getSqrtRatioAtTick(minTick);
+    const maxSqrtPriceX96 = TickUtils.getSqrtRatioAtTick(maxTick);
+
+    const liquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
       sqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
       p.amount0,
       p.amount1,
     );
-    const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+    const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      sqrtPriceX96,
+      sqrtRatioAX96,
+      sqrtRatioBX96,
+      -liquidity,
+    );
+    const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
       minSqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
-      p.amount0,
-      p.amount1,
+      -liquidity,
     );
-    const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+    const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
       maxSqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
-      p.amount0,
-      p.amount1,
+      -liquidity,
     );
 
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper);
     const tokens: Token[] = [
-      { id: p.token0, amount: minAmount0 },
-      { id: p.token1, amount: maxAmount1 },
+      { id: p.token0, amount: -minAmount0 },
+      { id: p.token1, amount: -maxAmount1 },
     ];
     if (p.owner) {
       tokens.push({ id: positionId, amount: 1n });
@@ -302,10 +308,10 @@ export class ClmmModule extends ModuleBase {
           owner,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
-          amount0Desired: spotAmount0,
-          amount1Desired: spotAmount1,
-          amount0Min: maxAmount0,
-          amount1Min: minAmount1,
+          amount0Desired: -spotAmount0,
+          amount1Desired: -spotAmount1,
+          amount0Min: -maxAmount0,
+          amount1Min: -minAmount1,
         },
       },
       tokens,

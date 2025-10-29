@@ -37,7 +37,7 @@ describe('LiquidityUtils', () => {
   };
 
   const expectPositionAmounts = ({
-    currentPrice,
+    sqrtPriceX96,
     tokenBase,
     tokenQuote,
     lowerTick,
@@ -48,7 +48,7 @@ describe('LiquidityUtils', () => {
     expectedQuote,
     expectedLiquidity,
   }: {
-    currentPrice: number;
+    sqrtPriceX96: bigint;
     tokenBase: TokenInfo;
     tokenQuote: TokenInfo;
     lowerTick: bigint;
@@ -60,7 +60,7 @@ describe('LiquidityUtils', () => {
     expectedLiquidity?: bigint;
   }): [bigint, bigint, bigint] => {
     const result = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-      currentPrice,
+      sqrtPriceX96,
       tokenBase,
       tokenQuote,
       lowerTick,
@@ -89,10 +89,58 @@ describe('LiquidityUtils', () => {
     const USDC = createToken(USDCId, 6);
     const WETH = createToken(WETHId, 18);
 
+    test('test from running system', () => {
+      const tickLower = 265210n;
+      const tickUpper = 269295n;
+      // 45452066364233268369925812005835272n
+      const sqrtPriceX96A = TickUtils.getSqrtRatioAtTick(tickLower);
+      // 55751151917851171758765933958365327n
+      const sqrtPriceX96B = TickUtils.getSqrtRatioAtTick(tickUpper);
+      // [addLiquidity][SPOT]  amount0: 4400000000n amount1: 2317711030407264178626n sqrtPriceX96: 45520292209136196485350413856803117n tick: 265240n
+      // [addLiquidity][MIN ]  amount0: 4400000000n amount1: 2287140072585595211262n sqrtPriceX96: 45452066364233268369925812005835272n tick: 265210n
+      // [addLiquidity][MAX ]  amount0: 4341807052n amount1: 2317711030407264128863n sqrtPriceX96: 45588620464474668215330498985281758n tick: 265270n
+      const sqrtMinPriceX96 = 45452066364233268369925812005835272n;
+      const sqrtPriceX96 = 45520292209136196485350413856803117n;
+      const sqrtMaxPriceX96 = 45588620464474668215330498985281758n;
+      expect(TickUtils.getSqrtRatioAtTick(265210n)).toBe(sqrtMinPriceX96);
+      expect(TickUtils.getSqrtRatioAtTick(265240n)).toBe(sqrtPriceX96);
+      expect(TickUtils.getSqrtRatioAtTick(265270n)).toBe(sqrtMaxPriceX96);
+
+      expect(TickUtils.getTickAtSqrtRatio(sqrtMinPriceX96)).toBe(265210n);
+      expect(TickUtils.getTickAtSqrtRatio(sqrtPriceX96)).toBe(265240n);
+      expect(TickUtils.getTickAtSqrtRatio(sqrtMaxPriceX96)).toBe(265270n);
+
+      const amount0 = 4400000000n;
+      const amount1 = 2317711030407264178626n;
+      const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+        sqrtPriceX96,
+        sqrtPriceX96A,
+        sqrtPriceX96B,
+        amount0,
+        amount1,
+      );
+      const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+        sqrtPriceX96,
+        sqrtPriceX96A,
+        sqrtPriceX96B,
+        amount0,
+        amount1,
+      );
+      const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
+        sqrtMaxPriceX96,
+        sqrtPriceX96A,
+        sqrtPriceX96B,
+        amount0,
+        amount1,
+      );
+      return;
+    });
+
     test('should handle base < quote, reverse = false', () => {
       const currentPrice = 3000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
       const centerTick = priceResult.tick;
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(centerTick);
       const lowerTick = centerTick - 5000n;
       const upperTick = centerTick + 5000n;
 
@@ -100,7 +148,7 @@ describe('LiquidityUtils', () => {
       const amountWETH = 5n * 10n ** 17n; // 0.5 WETH
 
       const result = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        currentPrice,
+        sqrtPriceX96,
         USDC,
         WETH,
         lowerTick,
@@ -117,20 +165,18 @@ describe('LiquidityUtils', () => {
       expect(wethShortfall).toBeGreaterThanOrEqual(0n);
       expect(wethShortfall).toBeLessThan(10_000_000n);
 
-      const { price: roundedPrice } = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
-      const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
       const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
       const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);
 
       const liquidityFromWETH = ClmmLiquidityUtils.getLiquidityFromToken1(
         sqrtLower,
-        sqrtCurrent,
+        sqrtPriceX96,
         usedWETH,
       );
       expect(liquidity).toBe(liquidityFromWETH);
 
       const expectedUSDC = -ClmmLiquidityUtils.getToken0Delta(
-        sqrtCurrent,
+        sqrtPriceX96,
         sqrtUpper,
         -liquidityFromWETH,
       );
@@ -139,9 +185,9 @@ describe('LiquidityUtils', () => {
 
     test('handles inverted ordering (base > quote), reverse = true', () => {
       const currentPrice = 0.000333;
-      const invertedPrice = 1 / currentPrice; // ~3000 USDC per WETH
-      const poolPriceResult = TickUtils.getAlignedPrice(invertedPrice, USDC, WETH, 1n, true);
+      const poolPriceResult = TickUtils.getAlignedPrice(currentPrice, WETH, USDC, 1n, true);
       const centerTick = poolPriceResult.tick;
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(centerTick);
       const lowerTick = centerTick - 5000n;
       const upperTick = centerTick + 5000n;
 
@@ -149,7 +195,7 @@ describe('LiquidityUtils', () => {
       const amountUSDC = 1000n * 10n ** 6n; // 1000 USDC
 
       const [usedWETH, usedUSDC, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        currentPrice,
+        sqrtPriceX96,
         WETH,
         USDC,
         lowerTick,
@@ -165,26 +211,18 @@ describe('LiquidityUtils', () => {
       expect(wethShortfall).toBeGreaterThanOrEqual(0n);
       expect(wethShortfall).toBeLessThan(10_000_000n); // <1e-11 WETH
 
-      const { price: roundedPrice } = TickUtils.getAlignedPrice(
-        invertedPrice,
-        USDC,
-        WETH,
-        1n,
-        true,
-      );
-      const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
       const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
       const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);
 
       const liquidityFromWETH = ClmmLiquidityUtils.getLiquidityFromToken1(
         sqrtLower,
-        sqrtCurrent,
+        sqrtPriceX96,
         usedWETH,
       );
       expect(liquidity).toBe(liquidityFromWETH);
 
       const expectedUSDC = -ClmmLiquidityUtils.getToken0Delta(
-        sqrtCurrent,
+        sqrtPriceX96,
         sqrtUpper,
         -liquidityFromWETH,
       );
@@ -196,6 +234,7 @@ describe('LiquidityUtils', () => {
       const priceWETHPerUSDC = 1 / priceUSDCPerWETH;
 
       const normalPriceResult = TickUtils.getAlignedPrice(priceUSDCPerWETH, USDC, WETH, 1n, true);
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(normalPriceResult.tick);
       const normalLowerTick = normalPriceResult.tick - 2000n;
       const normalUpperTick = normalPriceResult.tick + 2000n;
 
@@ -208,7 +247,7 @@ describe('LiquidityUtils', () => {
       const amountWETH = 1n * 10n ** 18n; // 1 WETH
 
       const normalResult = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        priceUSDCPerWETH,
+        sqrtPriceX96,
         USDC,
         WETH,
         normalLowerTick,
@@ -218,7 +257,7 @@ describe('LiquidityUtils', () => {
       );
 
       const reversedResult = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        priceWETHPerUSDC,
+        sqrtPriceX96,
         WETH,
         USDC,
         reversedLowerTick,
@@ -274,12 +313,13 @@ describe('LiquidityUtils', () => {
     test('should work with UNLIMITED_AMOUNT constant for single-sided liquidity', () => {
       const currentPrice = 1500;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(priceResult.tick);
       const lowerTick = priceResult.tick - 3000n;
       const upperTick = priceResult.tick + 3000n;
 
       const limitedUSDC = 5000n * 10n ** 6n;
       const [usedUSDC1, , liquidity1] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        currentPrice,
+        sqrtPriceX96,
         USDC,
         WETH,
         lowerTick,
@@ -290,7 +330,7 @@ describe('LiquidityUtils', () => {
 
       const limitedWETH = 3n * 10n ** 18n;
       const [, usedWETH2, liquidity2] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-        currentPrice,
+        sqrtPriceX96,
         USDC,
         WETH,
         lowerTick,
@@ -312,12 +352,13 @@ describe('LiquidityUtils', () => {
     test('should handle zero amount with UNLIMITED_AMOUNT', () => {
       const currentPrice = 2000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(priceResult.tick);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 
       // zero base with unlimited quote
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -331,7 +372,7 @@ describe('LiquidityUtils', () => {
 
       // zero quote with unlimited base
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -347,6 +388,7 @@ describe('LiquidityUtils', () => {
     test('should handle very small amounts correctly', () => {
       const currentPrice = 2000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(priceResult.tick);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 
@@ -356,14 +398,12 @@ describe('LiquidityUtils', () => {
       const smallUSDC = 1000n; // 0.001 USDC
       const smallWETH = 1_000_000_000_000n; // 0.000001 WETH
 
-      const { price: roundedPrice } = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
-      const sqrtCurrent = TickUtils.priceToSqrtPriceX96(roundedPrice, USDC.decimals, WETH.decimals);
       const sqrtLower = TickUtils.getSqrtRatioAtTick(lowerTick);
       const sqrtUpper = TickUtils.getSqrtRatioAtTick(upperTick);
 
       const getExpectedAmounts = (liquidity: bigint): [bigint, bigint] => {
         const [rawAmount0, rawAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
-          sqrtCurrent,
+          sqrtPriceX96,
           sqrtLower,
           sqrtUpper,
           -liquidity,
@@ -372,7 +412,7 @@ describe('LiquidityUtils', () => {
       };
 
       const expectedLiquidityFromUSDC1 = ClmmLiquidityUtils.getLiquidityFromToken0(
-        sqrtCurrent,
+        sqrtPriceX96,
         sqrtUpper,
         smallestUSDC,
       );
@@ -382,7 +422,7 @@ describe('LiquidityUtils', () => {
 
       // 1 μUSDC with unlimited WETH
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -396,7 +436,7 @@ describe('LiquidityUtils', () => {
 
       // 1 wei WETH with unlimited USDC
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -410,7 +450,7 @@ describe('LiquidityUtils', () => {
 
       // both tokens minimal
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -423,7 +463,7 @@ describe('LiquidityUtils', () => {
       });
 
       const expectedLiquidityFromUSDC4 = ClmmLiquidityUtils.getLiquidityFromToken0(
-        sqrtCurrent,
+        sqrtPriceX96,
         sqrtUpper,
         smallUSDC,
       );
@@ -433,7 +473,7 @@ describe('LiquidityUtils', () => {
 
       // 0.001 USDC with unlimited WETH
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -447,7 +487,7 @@ describe('LiquidityUtils', () => {
 
       const expectedLiquidityFromWETH5 = ClmmLiquidityUtils.getLiquidityFromToken1(
         sqrtLower,
-        sqrtCurrent,
+        sqrtPriceX96,
         smallWETH,
       );
       const [expectedUSDCFromWETH5, expectedWETHFromWETH5] = getExpectedAmounts(
@@ -456,7 +496,7 @@ describe('LiquidityUtils', () => {
 
       // 1e-6 WETH with unlimited USDC
       expectPositionAmounts({
-        currentPrice,
+        sqrtPriceX96,
         tokenBase: USDC,
         tokenQuote: WETH,
         lowerTick,
@@ -472,6 +512,7 @@ describe('LiquidityUtils', () => {
     test('should handle various small finite amounts correctly', () => {
       const currentPrice = 1500; // $1500 per ETH
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
+      const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(priceResult.tick);
       const lowerTick = priceResult.tick - 5000n;
       const upperTick = priceResult.tick + 5000n;
 
@@ -485,7 +526,7 @@ describe('LiquidityUtils', () => {
 
       for (const testCase of testCases) {
         const [usedUSDC, , liquidityUSDC] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-          currentPrice,
+          sqrtPriceX96,
           USDC,
           WETH,
           lowerTick,
@@ -495,7 +536,7 @@ describe('LiquidityUtils', () => {
         );
 
         const [, usedWETH2, liquidityWETH] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-          currentPrice,
+          sqrtPriceX96,
           USDC,
           WETH,
           lowerTick,
