@@ -10,12 +10,11 @@ export interface ClmmConfig {
 }
 
 export interface ClmmSwapParams {
-  configIndex: bigint;
   token0: string;
   token1: string;
-  zeroForOne: boolean;
   amount: bigint;
   slippage: bigint;
+  routePlan: any[];
 }
 
 export interface SimulateSwap {

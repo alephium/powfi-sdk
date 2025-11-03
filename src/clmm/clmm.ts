@@ -436,16 +436,18 @@ export class ClmmModule extends ModuleBase {
   }
 
   async swap(p: ClmmSwapParams): Promise<SignExecuteScriptTxResult> {
-    const pool = this.getPool(p.token0, p.token1, p.configIndex);
+    const configIndex = BigInt(p.routePlan[0]);
+    const pool = this.getPool(p.token0, p.token1, configIndex);
     const poolState = await pool.fetchState();
     const sqrtPriceX96 = poolState.fields.slot0.sqrtPriceX96;
+    const zeroForOne = poolState.fields.token0 === p.token0;
     const sqrtPriceLimitX96 = TickUtils.getSqrtPriceLimitX96(
       sqrtPriceX96,
       p.slippage,
-      p.zeroForOne,
+      zeroForOne,
     );
 
-    const [tokenIn, tokenOut] = p.zeroForOne ? [p.token0, p.token1] : [p.token1, p.token0];
+    const [tokenIn, tokenOut] = zeroForOne ? [p.token0, p.token1] : [p.token1, p.token0];
     return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -454,7 +456,7 @@ export class ClmmModule extends ModuleBase {
         pool: pool.contractId,
         tokenIn,
         tokenOut,
-        zeroForOne: p.zeroForOne,
+        zeroForOne,
         amountSpecified: p.amount,
         sqrtPriceLimitX96,
         data: '',
