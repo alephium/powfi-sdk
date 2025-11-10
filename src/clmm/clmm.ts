@@ -391,6 +391,21 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result };
   }
 
+  async findBestRoute(token0: string, token1: string): Promise<bigint> {
+    const poolFactoryAddress = addressFromContractId(this.config.factoryId);
+    const poolFactory = PoolFactory.at(poolFactoryAddress);
+    const state = await poolFactory.fetchState();
+    const f = (_: any, i: number) => this.getPoolAddress(token0, token1, BigInt(i))
+    const addresses = Array.from({ length: Number(state.fields.nextConfigIndex) }, f)
+    const pools = await Promise.all(addresses.map(async (addr, i) => await this.poolExists(token0, token1, BigInt(i)) ? Pool.at(addr).fetchState() : undefined))
+    const [index, _] = pools.reduce(([index, liquidity], pool, i) => {
+      const liquidity2 = pool?.fields.liquidity || 0n
+      return liquidity2 > liquidity ? [BigInt(i), liquidity2] : [index, liquidity]
+    }, [-1n, 0n])
+    return index
+
+  } 
+
   async simulateSwap(p: SimulateSwap): Promise<LiquidityDistribution> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
