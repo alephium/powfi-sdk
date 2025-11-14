@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*.ts", "tests/**/*.ts", "cpmm/**/*.ts", "clmm/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "cpmm/**/*.ts", "clmm/**/*.ts", "staking/**/*.ts"],
   "exclude": ["node_modules", "lib", "dist"]
 }

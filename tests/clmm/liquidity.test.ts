@@ -561,7 +561,7 @@ describe('LiquidityUtils', () => {
     test('should return false for non-existent pool', async () => {
       const zeta = new Zeta({ networkId: 'devnet' });
       zeta.setCurrentProviders();
-    
+
       const fakeToken0 = '0000000000000000000000000000000000000000000000000000000000000001';
       const fakeToken1 = '0000000000000000000000000000000000000000000000000000000000000002';
       const configIndex = 0n;

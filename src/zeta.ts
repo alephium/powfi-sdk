@@ -1,15 +1,17 @@
 import type { SignerProvider, Account } from '@alephium/web3';
 import { NodeProvider, ExplorerProvider, web3 } from '@alephium/web3';
 import { CpmmModule } from './cpmm/cpmm';
-import { TokenModule } from './token/token';
 import type { Network, ZetaLoadParams } from './common/types';
 import { defaultNetworks } from './common/types';
 import { ClmmModule } from './clmm/clmm';
+import { TokenModule } from './token/token';
+import { StakingModule } from './staking/staking';
 
 export class Zeta {
   public cpmm: CpmmModule;
   public clmm: ClmmModule;
   public token: TokenModule;
+  public staking: StakingModule;
 
   private _nodeProvider: NodeProvider;
   private _explorerProvider: ExplorerProvider;
@@ -37,6 +39,7 @@ export class Zeta {
     this.cpmm = new CpmmModule(this);
     this.clmm = new ClmmModule(this);
     this.token = new TokenModule(this);
+    this.staking = new StakingModule(this);
   }
 
   static load(config: ZetaLoadParams): Zeta {
