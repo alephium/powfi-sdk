@@ -1,6 +1,15 @@
 import type { HexString } from '@alephium/web3';
-import { MINIMAL_CONTRACT_DEPOSIT, addressFromContractId } from '@alephium/web3';
+import {
+  MINIMAL_CONTRACT_DEPOSIT,
+  addressFromContractId,
+  addressToBytes,
+  binToHex,
+  codec,
+  groupOfAddress,
+  subContractId,
+} from '@alephium/web3';
 import type {
+  AlphUnstakeVaultInstance,
   GovernanceDemoInstance,
   RewardSharingVaultInstance,
   XAlphStakeVaultInstance,
@@ -9,6 +18,7 @@ import type {
   XAlphTokenTypes,
 } from '../../staking/artifacts/ts';
 import {
+  AlphUnstakeVault,
   GovernanceDemo,
   RewardSharingVault,
   XAlphStakeVault,
@@ -19,7 +29,8 @@ import ModuleBase from '../moduleBase';
 import type { Zeta } from '../zeta';
 import type { StakeVaultUserInfo, StakingConfig } from './types';
 import { decodeContractIdList, decodeU256List } from './utils';
-import { getStakingSettings, StakingSettings } from './settings';
+import type { StakingSettings } from './settings';
+import { getStakingSettings } from './settings';
 
 export class StakingModule extends ModuleBase {
   private readonly config: StakingConfig;
@@ -117,6 +128,17 @@ export class StakingModule extends ModuleBase {
       args: { amount },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
     });
+  }
+
+  alphUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
+    const userHex = binToHex(addressToBytes(userAddress));
+    const indexHex = binToHex(codec.u256Codec.encode(vaultIndex));
+    const contractId = subContractId(
+      this.config.xAlphTokenId,
+      `${userHex}${indexHex}`,
+      groupOfAddress(this.config.xAlphTokenAddress),
+    );
+    return AlphUnstakeVault.at(addressFromContractId(contractId));
   }
 
   async connectToDapp(
