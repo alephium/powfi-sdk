@@ -1,4 +1,4 @@
-import type { HexString, SignerProvider } from '@alephium/web3';
+import type { HexString } from '@alephium/web3';
 import { MINIMAL_CONTRACT_DEPOSIT, addressFromContractId } from '@alephium/web3';
 import type {
   GovernanceDemoInstance,
@@ -19,6 +19,7 @@ import ModuleBase from '../moduleBase';
 import type { Zeta } from '../zeta';
 import type { StakeVaultUserInfo, StakingConfig } from './types';
 import { decodeContractIdList, decodeU256List } from './utils';
+import { getStakingSettings, StakingSettings } from './settings';
 
 export class StakingModule extends ModuleBase {
   private readonly config: StakingConfig;
@@ -171,6 +172,10 @@ export class StakingModule extends ModuleBase {
       args: { user: address, vaultIndex },
     });
     return result.returns;
+  }
+
+  getSettings(): StakingSettings {
+    return getStakingSettings(this.scope.network.id);
   }
 
   private loadStakingConfig(): StakingConfig {
