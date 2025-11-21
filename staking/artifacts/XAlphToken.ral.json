@@ -1,0 +1,404 @@
+{
+  "version": "v4.2.5",
+  "name": "XAlphToken",
+  "bytecode": "091109121b40244051407a40ac40ca411741474165417341a6427842b242d4435d010000000102ce0002010000000102ce0102010000000102ce0202010000000102a00002010002040115d3cee9319416011600000a311342277b160113202c170216001602160213202a62170316037102010002030114d33cd5e72916004313202e0c2f1342267b16004313202d1702160016010c1602000802010002030119d32cabd28216004313202e0c2f1342267b160016010005170216020b244c031600024a05160016023d00090201000202010ed31bc25d3416004313202e0c2f1342267b160016016b44020000040601402a16021603344c020b02160216032a0e2d17041600160400041705160516012f4c0316043f0216051601314c091600160116040d2a16030008024a061600160116021604000802010002030118d34b2e25b716011600000a311342277b160113202c170216000c1602621600160213202a16004362440201000101010ed30041471116004313202e0c2f1342267b16004313202d02010000000103d3676c3c3314000201010102001bd3d63c543cb41701160148130a7b16000c33130e7b1601b11600ab16011600a9a00016002aa10005160116005f01010106014069d33538a49fb41701160148130a7bce050c33130c7b16000c33130e7ba0010d2aa101140a5f5f6d61705f5f305f5f16014744cbc54c1d0c0d0d140a5f5f6d61705f5f305f5f16014744cb010117021602000ace0431130b7b1602a00100070c0e0c140a5f5f6d61705f5f305f5f16014744cb01024a09ca140a5f5f6d61705f5f305f5f16014744b1a0016bd201011601b11600acb11601160056ce051305640c13016417041703b21600a2160147a0014044ce0316031604c11705a00016002ba10006160116005f160502010001010115d38072397d140a5f5f6d61705f5f305f5f16004744cbc5194c021400020c0d0d140a5f5f6d61705f5f305f5f16004744cb010102010002030111d3fd3d3af616004716014044cb17021602c5130d7b0c0d160201020201000206004040d38bb32147b4170216024716004044cb170316010c33130e7b16010d0d16030103170416044c40290c0d0d140a5f5f6d61705f5f305f5f16024744cb01011600000617051605430c2f4c0a16020d0c140a5f5f6d61705f5f305f5f16024744cb01034a0a16050c0e0c140a5f5f6d61705f5f305f5f16024744cb01020c0c16030104",
+  "codeHash": "5f95704fd2f96ed987b89fdb6e0659cc32d2accc50194a6bd2aedcffdce2f3e5",
+  "fieldsSig": {
+    "names": [
+      "symbol",
+      "name",
+      "decimals",
+      "unstakeVaultTemplateId",
+      "maxActiveUnstakeRequestsPerUser",
+      "unstakeDuration",
+      "totalStaked",
+      "lastUnstakeVaultIndex",
+      "__stdInterfaceId"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "Staked",
+      "fieldNames": [
+        "to",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "UnstakeScheduled",
+      "fieldNames": [
+        "to",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "getSymbol",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getName",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getDecimals",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getTotalSupply",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "get",
+      "paramNames": [
+        "array",
+        "index"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "find",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "remove",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "push",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "binarySearch",
+      "paramNames": [
+        "array",
+        "value",
+        "left",
+        "right"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "removeAt",
+      "paramNames": [
+        "array",
+        "index"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "size",
+      "paramNames": [
+        "array"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "empty",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "stake",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "startUnstake",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getActiveUnstakeVaultIndexes",
+      "paramNames": [
+        "caller"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getClaimableAmount",
+      "paramNames": [
+        "user",
+        "vaultIndex"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "claimUnstaked",
+      "paramNames": [
+        "vaultIndex",
+        "amount"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [
+    {
+      "name": "IntByteLength",
+      "value": {
+        "type": "U256",
+        "value": "32"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "ErrorCode",
+      "fields": [
+        {
+          "name": "InvalidArrayLength",
+          "value": {
+            "type": "U256",
+            "value": "550"
+          }
+        },
+        {
+          "name": "IndexOutOfBound",
+          "value": {
+            "type": "U256",
+            "value": "551"
+          }
+        },
+        {
+          "name": "InvalidByteVecLength",
+          "value": {
+            "type": "U256",
+            "value": "552"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "AssetAddressCallerOnly",
+          "value": {
+            "type": "U256",
+            "value": "10"
+          }
+        },
+        {
+          "name": "TooManyActiveUnstakeVaults",
+          "value": {
+            "type": "U256",
+            "value": "11"
+          }
+        },
+        {
+          "name": "InvalidUnstakeDuration",
+          "value": {
+            "type": "U256",
+            "value": "12"
+          }
+        },
+        {
+          "name": "NonExistantUnstakeVault",
+          "value": {
+            "type": "U256",
+            "value": "13"
+          }
+        },
+        {
+          "name": "AmountMustBeGreaterThanZero",
+          "value": {
+            "type": "U256",
+            "value": "14"
+          }
+        }
+      ]
+    }
+  ],
+  "mapsSig": {
+    "names": [
+      "userActiveUnstakeVaults"
+    ],
+    "types": [
+      "Map[Address,ByteVec]"
+    ]
+  },
+  "stdInterfaceId": "0001"
+}

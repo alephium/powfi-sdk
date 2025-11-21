@@ -395,16 +395,22 @@ export class ClmmModule extends ModuleBase {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId);
     const poolFactory = PoolFactory.at(poolFactoryAddress);
     const state = await poolFactory.fetchState();
-    const f = (_: any, i: number) => this.getPoolAddress(token0, token1, BigInt(i))
-    const addresses = Array.from({ length: Number(state.fields.nextConfigIndex) }, f)
-    const pools = await Promise.all(addresses.map(async (addr, i) => await this.poolExists(token0, token1, BigInt(i)) ? Pool.at(addr).fetchState() : undefined))
-    const [index, _] = pools.reduce(([index, liquidity], pool, i) => {
-      const liquidity2 = pool?.fields.liquidity || 0n
-      return liquidity2 > liquidity ? [BigInt(i), liquidity2] : [index, liquidity]
-    }, [-1n, 0n])
-    return index
-
-  } 
+    const f = (_: any, i: number) => this.getPoolAddress(token0, token1, BigInt(i));
+    const addresses = Array.from({ length: Number(state.fields.nextConfigIndex) }, f);
+    const pools = await Promise.all(
+      addresses.map(async (addr, i) =>
+        (await this.poolExists(token0, token1, BigInt(i))) ? Pool.at(addr).fetchState() : undefined,
+      ),
+    );
+    const [index, _] = pools.reduce(
+      ([index, liquidity], pool, i) => {
+        const liquidity2 = pool?.fields.liquidity || 0n;
+        return liquidity2 > liquidity ? [BigInt(i), liquidity2] : [index, liquidity];
+      },
+      [-1n, 0n],
+    );
+    return index;
+  }
 
   async simulateSwap(p: SimulateSwap): Promise<LiquidityDistribution> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
@@ -441,11 +447,7 @@ export class ClmmModule extends ModuleBase {
     const poolState = await pool.fetchState();
     const sqrtPriceX96 = poolState.fields.slot0.sqrtPriceX96;
     const zeroForOne = poolState.fields.token0 === p.token0;
-    const sqrtPriceLimitX96 = TickUtils.getSqrtPriceLimitX96(
-      sqrtPriceX96,
-      p.slippage,
-      zeroForOne,
-    );
+    const sqrtPriceLimitX96 = TickUtils.getSqrtPriceLimitX96(sqrtPriceX96, p.slippage, zeroForOne);
 
     const [tokenIn, tokenOut] = zeroForOne ? [p.token0, p.token1] : [p.token1, p.token0];
     return await SwapWithoutAccount.execute({

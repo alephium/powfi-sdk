@@ -1,0 +1,57 @@
+{
+  "version": "v4.2.5",
+  "name": "FullMathTest",
+  "bytecode": "000140ea0000030901409216020c3013415e7b160016010c0d3687170316001601371704160316043616031604314c020d4a010c36170516050c2f4c04160416022d02160216053313415f7b160016011602871706160516061604334c020d4a010c361705160416063617040c1602361602381707160216072d1702160416072d17040c16073616072d0d351707160416051607373917040f1602370e3a170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e160216083736371708160416083702",
+  "codeHash": "fd74df789eb5974e11dfa74960ba1323e0530fe5e1fe0aa43a6c3c9bf9ee1d98",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "FullMathError",
+      "fields": [
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "350"
+          }
+        },
+        {
+          "name": "MulDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "351"
+          }
+        }
+      ]
+    }
+  ]
+}

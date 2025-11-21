@@ -1,6 +1,6 @@
 {
   "name": "@zetamarket/typescript-sdk",
-  "version": "0.0.65",
+  "version": "0.0.68",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -16,7 +16,8 @@
     "lib",
     "src",
     "cpmm",
-    "clmm"
+    "clmm",
+    "staking"
   ],
   "scripts": {
     "build": "bunx tsup src --format cjs,esm --dts --sourcemap --no-splitting -d lib",
@@ -36,6 +37,7 @@
     "alephium",
     "cpmm",
     "clmm",
+    "staking",
     "dex",
     "defi",
     "blockchain",

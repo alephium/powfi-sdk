@@ -16,6 +16,6 @@
     "resolveJsonModule": true,
     "moduleResolution": "node"
   },
-  "include": ["src/**/*", "cpmm/**/*"],
+  "include": ["src/**/*", "cpmm/**/*", "staking/**/*"],
   "exclude": ["node_modules", "lib", "dist"]
 }
