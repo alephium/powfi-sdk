@@ -10,6 +10,7 @@ import {
 } from '@alephium/web3';
 import type {
   AlphUnstakeVaultInstance,
+  AlphUnstakeVaultTypes,
   GovernanceDemoInstance,
   RewardSharingVaultInstance,
   XAlphStakeVaultInstance,
@@ -130,7 +131,7 @@ export class StakingModule extends ModuleBase {
     });
   }
 
-  alphUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
+  getAlphUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
     const userHex = binToHex(addressToBytes(userAddress));
     const indexHex = binToHex(codec.u256Codec.encode(vaultIndex));
     const contractId = subContractId(
@@ -139,6 +140,13 @@ export class StakingModule extends ModuleBase {
       groupOfAddress(this.config.xAlphTokenAddress),
     );
     return AlphUnstakeVault.at(addressFromContractId(contractId));
+  }
+
+  async getAlphUnstakeVaultState(
+    userAddress: string,
+    vaultIndex: bigint,
+  ): Promise<AlphUnstakeVaultTypes.State> {
+    return this.getAlphUnstakeVault(userAddress, vaultIndex).fetchState();
   }
 
   async connectToDapp(
