@@ -62,7 +62,6 @@ export const PoolRouterDemo = new ExecutableScript<{
 );
 
 export const SwapWithoutAccount = new ExecutableScript<{
-  factory: HexString;
   dexAccount: HexString;
   pool: HexString;
   tokenIn: HexString;

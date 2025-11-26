@@ -33,9 +33,8 @@ import {
   encodeContractFields,
   Narrow,
 } from "@alephium/web3";
-import { default as DexAccountContractJson } from "../DexAccount.ral.json";
+import { default as DexAccountContractJson } from "../dex/DexAccount.ral.json";
 import { getContractByCodeHash, registerContract } from "./contracts";
-import * as types from "./types";
 
 // Custom types for the contract
 export namespace DexAccountTypes {
@@ -136,7 +135,7 @@ class Factory extends ContractFactory<
     return encodeContractFields(
       addStdIdToFields(this.contract, fields),
       this.contract.fieldsSig,
-      types.AllStructs
+      []
     );
   }
 
@@ -208,7 +207,7 @@ export const DexAccount = new Factory(
     DexAccountContractJson,
     "",
     "66c27c91033d54a2d3edc97dbc36b35022274ddd8a7b84b724631ac37586ed48",
-    types.AllStructs
+    []
   )
 );
 registerContract(DexAccount);

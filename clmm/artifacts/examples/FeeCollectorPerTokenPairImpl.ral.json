@@ -1,155 +1,74 @@
 {
-  "version": "v4.2.5",
-  "name": "TokenPairFactory",
-  "bytecode": "050716402c403a406b408540a64123010001010008d302f1c0ffb4a0014513107b1600a102010001010008d34db5e042b4a0014513107b1600a101010000000103d34086275fa00102010302040018d3a2ac8580b417021602a0014513107b16021601a21602160116000f0da0020100170316030d0c1600010601000202000bd3c9a43b3cb4a0014513107b16010d0c160001060000020402101600711702160171170316021603314c031600160102160116000201030409004045d3fd02709216001602a50c337a4c061816001603a50c33130f7b1602160342130b7b16021603000517051704b116041605ce011406414c504800011305640c0c0c0c0c0c0c14001308641707170616001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
-  "codeHash": "597644c0643972e3d6e7f5a681e2d9908de74775e9b4e205e15ba39397a9e48c",
+  "version": "v4.0.0",
+  "name": "FeeCollectorPerTokenPairImpl",
+  "bytecode": "0204154032404b406701010202000ab3ce014113107b1600b2ce011601aa01020202000dd3f1ab4760b40c0dce0001024513107b1600ce011601ab01020101000bd320f98f62b40c0dce0001024513107b1600b001000000000dd3f2c71c4bb40c0dce0001024513107b0c0cce010111",
+  "codeHash": "a2326c414551281d90194411b00b614c3fc07cb568020e1ed2e1852099e6996e",
   "fieldsSig": {
     "names": [
-      "pairTemplateId",
-      "dexAccount0",
-      "pairSize",
-      "feeSetter",
-      "feeCollectorFactory"
+      "tokenPairFactory",
+      "tokenPair"
     ],
     "types": [
-      "ByteVec",
-      "IDexAccount",
-      "U256",
-      "Address",
-      "FeeCollectorFactory"
+      "TokenPairFactory",
+      "TokenPair"
     ],
     "isMutable": [
       false,
-      false,
-      true,
-      true,
-      true
+      false
     ]
   },
-  "eventsSig": [
-    {
-      "name": "PairCreated",
-      "fieldNames": [
-        "token0",
-        "token1",
-        "pair",
-        "currentPairSize"
-      ],
-      "fieldTypes": [
-        "ByteVec",
-        "ByteVec",
-        "ByteVec",
-        "U256"
-      ]
-    }
-  ],
+  "eventsSig": [],
   "functions": [
     {
-      "name": "setFeeCollectorFactory",
+      "name": "collectFee",
       "paramNames": [
-        "factory"
-      ],
-      "paramTypes": [
-        "FeeCollectorFactory"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "updateFeeSetter",
-      "paramNames": [
-        "newFeeSetter"
-      ],
-      "paramTypes": [
-        "Address"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "getFeeSetter",
-      "paramNames": [],
-      "paramTypes": [],
-      "paramIsMutable": [],
-      "returnTypes": [
-        "Address"
-      ]
-    },
-    {
-      "name": "enableFeeCollector",
-      "paramNames": [
-        "tokenPair",
-        "alphAmount"
-      ],
-      "paramTypes": [
-        "TokenPair",
-        "U256"
-      ],
-      "paramIsMutable": [
-        false,
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "updateFeeCollector",
-      "paramNames": [
-        "tokenPair",
-        "newFeeCollectorId"
-      ],
-      "paramTypes": [
-        "TokenPair",
-        "ByteVec"
-      ],
-      "paramIsMutable": [
-        false,
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "sortTokens",
-      "paramNames": [
-        "tokenA",
-        "tokenB"
-      ],
-      "paramTypes": [
-        "ByteVec",
-        "ByteVec"
-      ],
-      "paramIsMutable": [
-        false,
-        false
-      ],
-      "returnTypes": [
-        "ByteVec",
-        "ByteVec"
-      ]
-    },
-    {
-      "name": "createPair",
-      "paramNames": [
-        "payer",
-        "alphAmount",
-        "tokenAId",
-        "tokenBId"
+        "from",
+        "amount"
       ],
       "paramTypes": [
         "Address",
-        "U256",
-        "ByteVec",
-        "ByteVec"
+        "U256"
       ],
       "paramIsMutable": [
         false,
-        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "withdraw",
+      "paramNames": [
+        "to",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
         false,
         false
       ],
+      "returnTypes": []
+    },
+    {
+      "name": "destroy",
+      "paramNames": [
+        "to"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "collectFeeManually",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
       "returnTypes": []
     }
   ],

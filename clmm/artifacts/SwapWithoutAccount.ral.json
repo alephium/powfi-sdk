@@ -1,10 +1,9 @@
 {
   "version": "v4.2.5",
   "name": "SwapWithoutAccount",
-  "bytecodeTemplate": "010103000400402cb41700{1}160047cc17011601c5194c0516000d0c{0}0108{6}3d1702{6}05264c02{3}4a01{4}17031600{3}1602a3160016001603{5}{6}{7}{8}13070e{2}012a1818",
+  "bytecodeTemplate": "010103000400402cb41700{0}160047cc17011601c5194c0516000d0c{0}d465b302f9{5}3d1702{5}05264c02{2}4a01{3}17031600{2}1602a3160016001603{4}{5}{6}{7}13070e{1}012a1818",
   "fieldsSig": {
     "names": [
-      "factory",
       "dexAccount",
       "pool",
       "tokenIn",
@@ -15,8 +14,7 @@
       "data"
     ],
     "types": [
-      "PoolFactory",
-      "DexAccount",
+      "IDexAccount",
       "Pool",
       "ByteVec",
       "ByteVec",
@@ -26,7 +24,6 @@
       "ByteVec"
     ],
     "isMutable": [
-      false,
       false,
       false,
       false,

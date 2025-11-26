@@ -83,6 +83,7 @@ export class CpmmModule extends ModuleBase {
         token0Info,
         token1Info,
         totalSupply: state.fields.totalSupply,
+        dexAccount: state.fields.dexAccount0,
       };
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -155,6 +156,7 @@ export class CpmmModule extends ModuleBase {
       const result = await SwapMinOut.execute({
         signer: this.scope.signer,
         initialFields: {
+          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,
@@ -179,10 +181,10 @@ export class CpmmModule extends ModuleBase {
       } else {
         tokens.push({ id: swapDetails.tokenInInfo.id, amount: swapDetails.maximalTokenInAmount! });
       }
-
       const result = await SwapMaxIn.execute({
         signer: this.scope.signer,
         initialFields: {
+          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,

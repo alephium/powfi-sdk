@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export * from "./DexAccount";
 export * from "./ExampleOracleSimple";
 export * from "./FeeCollectorFactoryImpl";
 export * from "./FeeCollectorPerTokenPairImpl";

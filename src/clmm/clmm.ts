@@ -449,11 +449,11 @@ export class ClmmModule extends ModuleBase {
     const zeroForOne = poolState.fields.token0 === p.token0;
     const sqrtPriceLimitX96 = TickUtils.getSqrtPriceLimitX96(sqrtPriceX96, p.slippage, zeroForOne);
 
-    const [tokenIn, tokenOut] = zeroForOne ? [p.token0, p.token1] : [p.token1, p.token0];
+    const tokens = sortTokens(p.token0, p.token1);
+    const [tokenIn, tokenOut] = zeroForOne ? tokens : tokens.reverse();
     return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
       initialFields: {
-        factory: this.config.factoryId,
         dexAccount: this.config.accountRoot,
         pool: pool.contractId,
         tokenIn,
@@ -464,6 +464,7 @@ export class ClmmModule extends ModuleBase {
         data: '',
       },
       tokens: [{ id: tokenIn, amount: p.amount }],
+      attoAlphAmount: DUST_AMOUNT * 2n,
     });
   }
 

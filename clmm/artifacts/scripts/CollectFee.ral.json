@@ -1,0 +1,25 @@
+{
+  "version": "v4.0.0",
+  "name": "CollectFee",
+  "bytecodeTemplate": "010100000000040c0c{0}0103",
+  "fieldsSig": {
+    "names": [
+      "feeCollector"
+    ],
+    "types": [
+      "FeeCollectorPerTokenPairImpl"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

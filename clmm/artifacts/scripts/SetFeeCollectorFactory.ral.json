@@ -1,0 +1,28 @@
+{
+  "version": "v4.0.0",
+  "name": "SetFeeCollectorFactory",
+  "bytecodeTemplate": "01010300000005{1}0d0c{0}0100",
+  "fieldsSig": {
+    "names": [
+      "tokenPairFactory",
+      "feeCollectorFactory"
+    ],
+    "types": [
+      "TokenPairFactory",
+      "FeeCollectorFactory"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}
