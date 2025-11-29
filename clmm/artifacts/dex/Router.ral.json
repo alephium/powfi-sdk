@@ -1,105 +1,117 @@
 {
-  "version": "v4.2.5",
-  "name": "TokenPairFactory",
-  "bytecode": "050716402c403a406b408540a64123010001010008d302f1c0ffb4a0014513107b1600a102010001010008d34db5e042b4a0014513107b1600a101010000000103d34086275fa00102010302040018d3a2ac8580b417021602a0014513107b16021601a21602160116000f0da0020100170316030d0c1600010601000202000bd3c9a43b3cb4a0014513107b16010d0c160001060000020402101600711702160171170316021603314c031600160102160116000201030409004045d3fd02709216001602a50c337a4c061816001603a50c33130f7b1602160342130b7b16021603000517051704b116041605ce011406414c504800011305640c0c0c0c0c0c0c14001308641707170616001601a21604160544ce00160616070d1340ff3bc2170805160416051608a00061a0000d2aa100",
-  "codeHash": "597644c0643972e3d6e7f5a681e2d9908de74775e9b4e205e15ba39397a9e48c",
+  "version": "v4.0.0",
+  "name": "Router",
+  "bytecode": "0007405840b340ef4119416c41bd42060000060802403316000c2f7a4c041816010c2f4c031602160302160216012c16002d170616061603324c081606160534130e7b1602160602160316002c16012d170716071604347a4c04181607160232130d7b16071603020103070e03402fd3c2b1ca2116065634130c7b0c0e16000107170817070c0e16000108170a17091609160a16021603160416050000170c170b16017a1607160ba31608160ca31601160b160c0f0d1600010e170d160b160c160d0201030608021fd3b9fb57ea16055634130c7b160116001602a3160116020e0e1600010f170717061606160334130d7b1607160434130e7b16061607020000020502160c0e16000108170317020c0e1600010718170416011604414c03160216030216031602020103070b004029d364342a1916065634130c7b160016020003170817071343e516032c1709160916082c16091343e816072c2a2d170a160a16043413097b160116021603a316001601160516021603160a00060103070a004029d31937d61916065634130c7b16001602000317081707160716042c1343e82c160816042b1343e52c2d0d2a17091609160332130a7b160116021609a31600160116051602160916040006000306070040270c0e1600010718170616031606414c0f160116031604a31601160216040c0c160513060c160001104a0e160116031604a3160116020c160416050c13060c16000110",
+  "codeHash": "e1ef7a11988dd23f3815d376e474266e3e9f69c9ad289974b9c45ed4ad986a6d",
   "fieldsSig": {
-    "names": [
-      "pairTemplateId",
-      "dexAccount0",
-      "pairSize",
-      "feeSetter",
-      "feeCollectorFactory"
-    ],
-    "types": [
-      "ByteVec",
-      "IDexAccount",
-      "U256",
-      "Address",
-      "FeeCollectorFactory"
-    ],
-    "isMutable": [
-      false,
-      false,
-      true,
-      true,
-      true
-    ]
+    "names": [],
+    "types": [],
+    "isMutable": []
   },
-  "eventsSig": [
-    {
-      "name": "PairCreated",
-      "fieldNames": [
-        "token0",
-        "token1",
-        "pair",
-        "currentPairSize"
-      ],
-      "fieldTypes": [
-        "ByteVec",
-        "ByteVec",
-        "ByteVec",
-        "U256"
-      ]
-    }
-  ],
+  "eventsSig": [],
   "functions": [
     {
-      "name": "setFeeCollectorFactory",
+      "name": "addLiquidity_",
       "paramNames": [
-        "factory"
+        "reserve0",
+        "reserve1",
+        "amount0Desired",
+        "amount1Desired",
+        "amount0Min",
+        "amount1Min"
       ],
       "paramTypes": [
-        "FeeCollectorFactory"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "updateFeeSetter",
-      "paramNames": [
-        "newFeeSetter"
-      ],
-      "paramTypes": [
-        "Address"
-      ],
-      "paramIsMutable": [
-        false
-      ],
-      "returnTypes": []
-    },
-    {
-      "name": "getFeeSetter",
-      "paramNames": [],
-      "paramTypes": [],
-      "paramIsMutable": [],
-      "returnTypes": [
-        "Address"
-      ]
-    },
-    {
-      "name": "enableFeeCollector",
-      "paramNames": [
-        "tokenPair",
-        "alphAmount"
-      ],
-      "paramTypes": [
-        "TokenPair",
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256",
         "U256"
       ],
       "paramIsMutable": [
         false,
+        false,
+        false,
+        false,
+        false,
         false
       ],
-      "returnTypes": []
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
     },
     {
-      "name": "updateFeeCollector",
+      "name": "addLiquidity",
       "paramNames": [
         "tokenPair",
-        "newFeeCollectorId"
+        "sender",
+        "amount0Desired",
+        "amount1Desired",
+        "amount0Min",
+        "amount1Min",
+        "deadline"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "removeLiquidity",
+      "paramNames": [
+        "tokenPairId",
+        "sender",
+        "liquidity",
+        "amount0Min",
+        "amount1Min",
+        "deadline"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "Address",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "getReserveInAndReserveOut",
+      "paramNames": [
+        "tokenPair",
+        "tokenInId"
       ],
       "paramTypes": [
         "TokenPair",
@@ -109,42 +121,94 @@
         false,
         false
       ],
-      "returnTypes": []
-    },
-    {
-      "name": "sortTokens",
-      "paramNames": [
-        "tokenA",
-        "tokenB"
-      ],
-      "paramTypes": [
-        "ByteVec",
-        "ByteVec"
-      ],
-      "paramIsMutable": [
-        false,
-        false
-      ],
       "returnTypes": [
-        "ByteVec",
-        "ByteVec"
+        "U256",
+        "U256"
       ]
     },
     {
-      "name": "createPair",
+      "name": "swapExactTokenForToken",
       "paramNames": [
-        "payer",
-        "alphAmount",
-        "tokenAId",
-        "tokenBId"
+        "tokenPair",
+        "sender",
+        "tokenInId",
+        "amountIn",
+        "amountOutMin",
+        "to",
+        "deadline"
       ],
       "paramTypes": [
+        "TokenPair",
         "Address",
-        "U256",
         "ByteVec",
-        "ByteVec"
+        "U256",
+        "U256",
+        "Address",
+        "U256"
       ],
       "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swapTokenForExactToken",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "tokenInId",
+        "amountInMax",
+        "amountOut",
+        "to",
+        "deadline"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256",
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swap",
+      "paramNames": [
+        "tokenPair",
+        "sender",
+        "to",
+        "tokenInId",
+        "amountIn",
+        "amountOut"
+      ],
+      "paramTypes": [
+        "TokenPair",
+        "Address",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
         false,
         false,
         false,

@@ -1,6 +1,6 @@
 {
   "name": "@h0ngcha0/typescript-sdk",
-  "version": "0.0.1-rc.1",
+  "version": "0.0.1-rc.2",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -52,11 +52,11 @@
   },
   "dependencies": {
     "@alephium/token-list": "0.0.20",
-    "@alephium/web3": "^v2.0.3",
+    "@alephium/web3": "^2.0.8",
     "decimal.js": "^10.6.0"
   },
   "devDependencies": {
-    "@alephium/web3-test": "^v2.0.3",
+    "@alephium/web3-test": "^v2.0.8",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",

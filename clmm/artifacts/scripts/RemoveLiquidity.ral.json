@@ -1,30 +1,27 @@
 {
-  "version": "v4.2.5",
-  "name": "SwapMinOut",
-  "bytecodeTemplate": "0101030001001d{0}{1}47cc17001600c5194c05{1}0d0c{0}d465b302f9{1}{4}{5}a3{3}{1}{4}{5}{6}{1}{7}13070c{2}0104",
+  "version": "v4.0.0",
+  "name": "RemoveLiquidity",
+  "bytecodeTemplate": "01010300000010{0}{2}{3}a3{2}{0}{3}{4}{5}{6}13060e{1}01021818",
   "fieldsSig": {
     "names": [
-      "dexAccount",
       "sender",
       "router",
-      "pair",
-      "tokenInId",
-      "amountIn",
-      "amountOutMin",
+      "pairId",
+      "liquidity",
+      "amount0Min",
+      "amount1Min",
       "deadline"
     ],
     "types": [
-      "IDexAccount",
       "Address",
       "Router",
-      "TokenPair",
       "ByteVec",
+      "U256",
       "U256",
       "U256",
       "U256"
     ],
     "isMutable": [
-      false,
       false,
       false,
       false,

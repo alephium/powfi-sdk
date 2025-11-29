@@ -109,6 +109,7 @@ export const SetFeeCollectorFactory = new ExecutableScript<{
 );
 
 export const Swap = new ExecutableScript<{
+  dexAccount: HexString;
   tokenPair: HexString;
   sender: Address;
   to: Address;
@@ -119,6 +120,7 @@ export const Swap = new ExecutableScript<{
 }>(Script.fromJson(SwapScriptJson, "", []), getContractByCodeHash);
 
 export const SwapMaxIn = new ExecutableScript<{
+  dexAccount: HexString;
   sender: Address;
   router: HexString;
   pair: HexString;
@@ -129,6 +131,7 @@ export const SwapMaxIn = new ExecutableScript<{
 }>(Script.fromJson(SwapMaxInScriptJson, "", []), getContractByCodeHash);
 
 export const SwapMinOut = new ExecutableScript<{
+  dexAccount: HexString;
   sender: Address;
   router: HexString;
   pair: HexString;

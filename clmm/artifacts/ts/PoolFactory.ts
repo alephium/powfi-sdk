@@ -47,7 +47,6 @@ export namespace PoolFactoryTypes {
     wordTemplate: HexString;
     poolConfigTemplate: HexString;
     dexAccountTemplate: HexString;
-    minSwapCount: bigint;
     nextConfigIndex: bigint;
   };
 
@@ -126,14 +125,6 @@ export namespace PoolFactoryTypes {
         endTime: bigint;
         amount: bigint;
       }>;
-      result: CallContractResult<null>;
-    };
-    createAccount: {
-      params: CallContractParams<{ refferer: Address }>;
-      result: CallContractResult<null>;
-    };
-    setDexAccountsParams: {
-      params: CallContractParams<{ nextMinSwapCount: bigint }>;
       result: CallContractResult<null>;
     };
     upgrate: {
@@ -223,14 +214,6 @@ export namespace PoolFactoryTypes {
       }>;
       result: SignExecuteScriptTxResult;
     };
-    createAccount: {
-      params: SignExecuteContractMethodParams<{ refferer: Address }>;
-      result: SignExecuteScriptTxResult;
-    };
-    setDexAccountsParams: {
-      params: SignExecuteContractMethodParams<{ nextMinSwapCount: bigint }>;
-      result: SignExecuteScriptTxResult;
-    };
     upgrate: {
       params: SignExecuteContractMethodParams<{
         newBytecode: HexString;
@@ -264,8 +247,6 @@ class Factory extends ContractFactory<
       InvalidTokenOrder: BigInt("701"),
       UnauthorizedRewardSender: BigInt("702"),
       UnauthorizedFeeCollector: BigInt("703"),
-      AccountAddressIsContract: BigInt("704"),
-      UnauthorizedDexAccountsParams: BigInt("705"),
     },
   };
 
@@ -369,27 +350,6 @@ class Factory extends ContractFactory<
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "setRewardParams", params, getContractByCodeHash);
     },
-    createAccount: async (
-      params: TestContractParamsWithoutMaps<
-        PoolFactoryTypes.Fields,
-        { refferer: Address }
-      >
-    ): Promise<TestContractResultWithoutMaps<null>> => {
-      return testMethod(this, "createAccount", params, getContractByCodeHash);
-    },
-    setDexAccountsParams: async (
-      params: TestContractParamsWithoutMaps<
-        PoolFactoryTypes.Fields,
-        { nextMinSwapCount: bigint }
-      >
-    ): Promise<TestContractResultWithoutMaps<null>> => {
-      return testMethod(
-        this,
-        "setDexAccountsParams",
-        params,
-        getContractByCodeHash
-      );
-    },
     upgrate: async (
       params: TestContractParamsWithoutMaps<
         PoolFactoryTypes.Fields,
@@ -418,7 +378,7 @@ export const PoolFactory = new Factory(
   Contract.fromJson(
     PoolFactoryContractJson,
     "",
-    "30aad0b4d884017ea89da2afb9a369db053efb60697b6a0229dfdfc573ceb0a4",
+    "4cc966e77dc138edb179af84306a4a565438d8848bf0c4f771e09adf580ef2de",
     types.AllStructs
   )
 );
@@ -584,28 +544,6 @@ export class PoolFactoryInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
-    createAccount: async (
-      params: PoolFactoryTypes.CallMethodParams<"createAccount">
-    ): Promise<PoolFactoryTypes.CallMethodResult<"createAccount">> => {
-      return callMethod(
-        PoolFactory,
-        this,
-        "createAccount",
-        params,
-        getContractByCodeHash
-      );
-    },
-    setDexAccountsParams: async (
-      params: PoolFactoryTypes.CallMethodParams<"setDexAccountsParams">
-    ): Promise<PoolFactoryTypes.CallMethodResult<"setDexAccountsParams">> => {
-      return callMethod(
-        PoolFactory,
-        this,
-        "setDexAccountsParams",
-        params,
-        getContractByCodeHash
-      );
-    },
     upgrate: async (
       params: PoolFactoryTypes.CallMethodParams<"upgrate">
     ): Promise<PoolFactoryTypes.CallMethodResult<"upgrate">> => {
@@ -673,23 +611,6 @@ export class PoolFactoryInstance extends ContractInstance {
       params: PoolFactoryTypes.SignExecuteMethodParams<"setRewardParams">
     ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"setRewardParams">> => {
       return signExecuteMethod(PoolFactory, this, "setRewardParams", params);
-    },
-    createAccount: async (
-      params: PoolFactoryTypes.SignExecuteMethodParams<"createAccount">
-    ): Promise<PoolFactoryTypes.SignExecuteMethodResult<"createAccount">> => {
-      return signExecuteMethod(PoolFactory, this, "createAccount", params);
-    },
-    setDexAccountsParams: async (
-      params: PoolFactoryTypes.SignExecuteMethodParams<"setDexAccountsParams">
-    ): Promise<
-      PoolFactoryTypes.SignExecuteMethodResult<"setDexAccountsParams">
-    > => {
-      return signExecuteMethod(
-        PoolFactory,
-        this,
-        "setDexAccountsParams",
-        params
-      );
     },
     upgrate: async (
       params: PoolFactoryTypes.SignExecuteMethodParams<"upgrate">
