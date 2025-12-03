@@ -75,7 +75,14 @@ class Fixture {
     const tickTemplate = (await Tick.deployTemplate(deployer)).contractInstance;
     const wordTemplate = (await BitmapWord.deployTemplate(deployer)).contractInstance;
     const poolConfigTemplate = (await PoolConfig.deployTemplate(deployer)).contractInstance;
-    const dexAccountTemplate = (await DexAccount.deployTemplate(deployer)).contractInstance;
+    const dexAccountTemplate = (await DexAccount.deploy(deployer, {
+      initialFields: {
+        counter: 0n,
+        owner: deployer.address,
+        refferer: deployer.address,
+        parents: ['', ''],
+      }
+    })).contractInstance;
 
     const factory = (
       await PoolFactory.deploy(deployer, {
