@@ -91,6 +91,7 @@ export class Fixture {
     readonly dexAccountTemplate: DexAccountInstance,
     readonly tokenId0: string,
     readonly tokenId1: string,
+    readonly tokenDecimal: number,
     readonly zeta: Zeta,
     readonly deployer: SignerProvider,
   ) {}
@@ -151,7 +152,7 @@ export class Fixture {
       accountRoot: dexAccountTemplate.contractId,
     });
 
-    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, zeta, deployer);
+    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, 18, zeta, deployer);
   }
 
   async createConfigIndex(tickSpacing: bigint, fee: bigint, feeProtocol: bigint): Promise<bigint> {
@@ -307,5 +308,28 @@ export class Fixture {
     const outputAmount = PoolUtils.offlineSwap(distribution, amountIn, distribution.sqrtPriceX96);
 
     return outputAmount;
+  }
+
+  buildRange(
+    sqrtPriceX96: bigint,
+    tickSpacing: bigint,
+    lowerFactor: number,
+    upperFactor: number,
+  ): { tickLower: bigint; tickUpper: bigint } {
+    const decimals = this.tokenDecimal;
+    const currentPrice = TickUtils.sqrtPriceX96ToPrice(sqrtPriceX96, decimals, decimals);
+    const tickLower = TickUtils.getAlignedTick(
+      currentPrice * lowerFactor,
+      decimals,
+      decimals,
+      tickSpacing,
+    );
+    const tickUpper = TickUtils.getAlignedTick(
+      currentPrice * upperFactor,
+      decimals,
+      decimals,
+      tickSpacing,
+    );
+    return { tickLower, tickUpper };
   }
 }
