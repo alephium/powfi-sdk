@@ -14,7 +14,7 @@ export interface ClmmSwapParams {
   token1: string;
   amount: bigint;
   slippage: bigint;
-  routePlan: any[];
+  routePlan: bigint[];
 }
 
 export interface SimulateSwap {

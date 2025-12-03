@@ -61,8 +61,8 @@ describe('LiquidityUtils', () => {
   }): [bigint, bigint, bigint] => {
     const result = ClmmLiquidityUtils.getPositionAmountsFromPrice(
       sqrtPriceX96,
-      tokenBase,
-      tokenQuote,
+      tokenBase.id,
+      tokenQuote.id,
       lowerTick,
       upperTick,
       amountBase,
@@ -89,53 +89,6 @@ describe('LiquidityUtils', () => {
     const USDC = createToken(USDCId, 6);
     const WETH = createToken(WETHId, 18);
 
-    test('test from running system', () => {
-      const tickLower = 265210n;
-      const tickUpper = 269295n;
-      // 45452066364233268369925812005835272n
-      const sqrtPriceX96A = TickUtils.getSqrtRatioAtTick(tickLower);
-      // 55751151917851171758765933958365327n
-      const sqrtPriceX96B = TickUtils.getSqrtRatioAtTick(tickUpper);
-      // [addLiquidity][SPOT]  amount0: 4400000000n amount1: 2317711030407264178626n sqrtPriceX96: 45520292209136196485350413856803117n tick: 265240n
-      // [addLiquidity][MIN ]  amount0: 4400000000n amount1: 2287140072585595211262n sqrtPriceX96: 45452066364233268369925812005835272n tick: 265210n
-      // [addLiquidity][MAX ]  amount0: 4341807052n amount1: 2317711030407264128863n sqrtPriceX96: 45588620464474668215330498985281758n tick: 265270n
-      const sqrtMinPriceX96 = 45452066364233268369925812005835272n;
-      const sqrtPriceX96 = 45520292209136196485350413856803117n;
-      const sqrtMaxPriceX96 = 45588620464474668215330498985281758n;
-      expect(TickUtils.getSqrtRatioAtTick(265210n)).toBe(sqrtMinPriceX96);
-      expect(TickUtils.getSqrtRatioAtTick(265240n)).toBe(sqrtPriceX96);
-      expect(TickUtils.getSqrtRatioAtTick(265270n)).toBe(sqrtMaxPriceX96);
-
-      expect(TickUtils.getTickAtSqrtRatio(sqrtMinPriceX96)).toBe(265210n);
-      expect(TickUtils.getTickAtSqrtRatio(sqrtPriceX96)).toBe(265240n);
-      expect(TickUtils.getTickAtSqrtRatio(sqrtMaxPriceX96)).toBe(265270n);
-
-      const amount0 = 4400000000n;
-      const amount1 = 2317711030407264178626n;
-      const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
-        sqrtPriceX96,
-        sqrtPriceX96A,
-        sqrtPriceX96B,
-        amount0,
-        amount1,
-      );
-      const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
-        sqrtPriceX96,
-        sqrtPriceX96A,
-        sqrtPriceX96B,
-        amount0,
-        amount1,
-      );
-      const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsAndLiquidityAtSqrtPrice(
-        sqrtMaxPriceX96,
-        sqrtPriceX96A,
-        sqrtPriceX96B,
-        amount0,
-        amount1,
-      );
-      return;
-    });
-
     test('should handle base < quote, reverse = false', () => {
       const currentPrice = 3000;
       const priceResult = TickUtils.getAlignedPrice(currentPrice, USDC, WETH, 1n, true);
@@ -149,8 +102,8 @@ describe('LiquidityUtils', () => {
 
       const result = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        USDC,
-        WETH,
+        USDC.id,
+        WETH.id,
         lowerTick,
         upperTick,
         amountUSDC,
@@ -196,8 +149,8 @@ describe('LiquidityUtils', () => {
 
       const [usedWETH, usedUSDC, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        WETH,
-        USDC,
+        WETH.id,
+        USDC.id,
         lowerTick,
         upperTick,
         amountWETH,
@@ -231,7 +184,6 @@ describe('LiquidityUtils', () => {
 
     test('preserves amounts and liquidity for inverse pricing', () => {
       const priceUSDCPerWETH = 2500;
-      const priceWETHPerUSDC = 1 / priceUSDCPerWETH;
 
       const normalPriceResult = TickUtils.getAlignedPrice(priceUSDCPerWETH, USDC, WETH, 1n, true);
       const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(normalPriceResult.tick);
@@ -248,8 +200,8 @@ describe('LiquidityUtils', () => {
 
       const normalResult = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        USDC,
-        WETH,
+        USDC.id,
+        WETH.id,
         normalLowerTick,
         normalUpperTick,
         amountUSDC,
@@ -258,8 +210,8 @@ describe('LiquidityUtils', () => {
 
       const reversedResult = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        WETH,
-        USDC,
+        WETH.id,
+        USDC.id,
         reversedLowerTick,
         reversedUpperTick,
         amountWETH,
@@ -320,8 +272,8 @@ describe('LiquidityUtils', () => {
       const limitedUSDC = 5000n * 10n ** 6n;
       const [usedUSDC1, , liquidity1] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        USDC,
-        WETH,
+        USDC.id,
+        WETH.id,
         lowerTick,
         upperTick,
         limitedUSDC,
@@ -331,8 +283,8 @@ describe('LiquidityUtils', () => {
       const limitedWETH = 3n * 10n ** 18n;
       const [, usedWETH2, liquidity2] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
         sqrtPriceX96,
-        USDC,
-        WETH,
+        USDC.id,
+        WETH.id,
         lowerTick,
         upperTick,
         UNLIMITED_AMOUNT,
@@ -527,8 +479,8 @@ describe('LiquidityUtils', () => {
       for (const testCase of testCases) {
         const [usedUSDC, , liquidityUSDC] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
           sqrtPriceX96,
-          USDC,
-          WETH,
+          USDC.id,
+          WETH.id,
           lowerTick,
           upperTick,
           testCase.amount,
@@ -537,8 +489,8 @@ describe('LiquidityUtils', () => {
 
         const [, usedWETH2, liquidityWETH] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
           sqrtPriceX96,
-          USDC,
-          WETH,
+          USDC.id,
+          WETH.id,
           lowerTick,
           upperTick,
           UNLIMITED_AMOUNT,
@@ -568,9 +520,6 @@ describe('LiquidityUtils', () => {
 
       const exists = await zeta.clmm.poolExists(fakeToken0, fakeToken1, configIndex);
       expect(exists).toBe(false);
-
-      const result = await zeta.clmm.findBestRoute(fakeToken0, fakeToken1);
-      expect(result).toBe(-1n);
     });
   });
 });

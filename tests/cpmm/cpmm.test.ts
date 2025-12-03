@@ -35,6 +35,7 @@ describe('CpmmModule functions', () => {
     reserve0,
     reserve1,
     totalSupply: MathUtil.sqrt(reserve0 * reserve1),
+    dexAccount: 'dex-account-id',
   });
 
   const mockCpmmPoolState = createPoolState({

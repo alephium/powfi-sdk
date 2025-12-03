@@ -399,14 +399,14 @@ export class ClmmModule extends ModuleBase {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId);
     const poolFactory = PoolFactory.at(poolFactoryAddress);
     const state = await poolFactory.fetchState();
-    const f = (_: any, i: number) => this.getPoolAddress(token0, token1, BigInt(i));
+    const f = (_: number, i: number) => this.getPoolAddress(token0, token1, BigInt(i));
     const addresses = Array.from({ length: Number(state.fields.nextConfigIndex) }, f);
     const pools = await Promise.all(
       addresses.map(async (addr, i) =>
         (await this.poolExists(token0, token1, BigInt(i))) ? Pool.at(addr).fetchState() : undefined,
       ),
     );
-    const [index, _] = pools.reduce(
+    const [index] = pools.reduce<[bigint, bigint]>(
       ([index, liquidity], pool, i) => {
         const liquidity2 = pool?.fields.liquidity || 0n;
         return liquidity2 > liquidity ? [BigInt(i), liquidity2] : [index, liquidity];
@@ -446,7 +446,7 @@ export class ClmmModule extends ModuleBase {
   }
 
   async swap(p: ClmmSwapParams): Promise<SignExecuteScriptTxResult> {
-    const configIndex = BigInt(p.routePlan[0]);
+    const configIndex = p.routePlan[0];
     const pool = this.getPool(p.token0, p.token1, configIndex);
     const poolState = await pool.fetchState();
     const sqrtPriceX96 = poolState.fields.slot0.sqrtPriceX96;
