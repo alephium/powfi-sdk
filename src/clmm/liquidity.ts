@@ -6,8 +6,8 @@ import { Q96 } from '../../clmm/artifacts/ts/constants';
 export class ClmmLiquidityUtils {
   static getPositionAmountsFromPrice(
     sqrtRatioX96: bigint,
-    tokenBase: TokenInfo,
-    tokenQuote: TokenInfo,
+    tokenBaseId: string,
+    tokenQuoteId: string,
     lowerTick: bigint,
     upperTick: bigint,
     amountBase: bigint,
@@ -25,7 +25,7 @@ export class ClmmLiquidityUtils {
     if (reverse1) {
       sqrts.reverse();
     }
-    const reverse2 = tokenBase.id > tokenQuote.id;
+    const reverse2 = tokenBaseId > tokenQuoteId;
     if (reverse2) {
       amounts.reverse();
     }

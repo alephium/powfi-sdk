@@ -14,8 +14,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*", "cpmm/**/*", "staking/**/*"],
+  "include": ["src/**/*", "cpmm/**/*", "staking/**/*", "tests/**/*"],
   "exclude": ["node_modules", "lib", "dist"]
 }

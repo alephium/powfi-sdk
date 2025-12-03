@@ -48,6 +48,10 @@ export class ClmmModule extends ModuleBase {
     this.config = this._getClmmConfig();
   }
 
+  setConfig(config: ClmmConfig) {
+    this.config = config;
+  }
+
   getClmmConfig(): ClmmConfig {
     return this.config;
   }
