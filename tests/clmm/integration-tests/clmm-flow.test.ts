@@ -27,11 +27,10 @@ import {
   Tick,
   PositionManager,
 } from '../../../clmm/artifacts/ts';
-import { MIN_SQRT_RATIO } from '../../../clmm/artifacts/ts/constants';
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { TickUtils } from '../../../src/clmm/tick';
 import { Zeta } from '../../../src/zeta';
-import { PoolUtils, UNLIMITED_AMOUNT } from '../../../src';
+import { PoolUtils, sortTokens, UNLIMITED_AMOUNT } from '../../../src';
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
 
@@ -50,8 +49,48 @@ async function getBalances(address: string, tokenIds: string[]): Promise<Balance
   return { alph: BigInt(balance.balance), tokens };
 }
 
-function sortTokens(a: string, b: string): [string, string] {
-  return BigInt('0x' + a) < BigInt('0x' + b) ? [a, b] : [b, a];
+async function assertBalancesChange(params: {
+  pool: PoolInstance;
+  signer: SignerProvider;
+  tokenIds: string[];
+  action: () => Promise<unknown>;
+  expect: {
+    signer: Record<string, bigint>;
+    pool?: Record<string, bigint>;
+    poolLiquidityDelta?: bigint;
+  };
+}) {
+  const { pool, signer: actor, tokenIds, action, expect: expected } = params;
+  const signerAddr = (await actor.getSelectedAccount()).address;
+
+  const signerBefore = await getBalances(signerAddr, tokenIds);
+  const poolBefore = await getBalances(pool.address, tokenIds);
+  const poolStateBefore = await pool.fetchState();
+
+  await action();
+
+  const signerAfter = await getBalances(signerAddr, tokenIds);
+  const poolAfter = await getBalances(pool.address, tokenIds);
+  const poolStateAfter = await pool.fetchState();
+
+  const check = (before: Balances, after: Balances, expectations?: Record<string, bigint>) => {
+    if (!expectations) {
+      return;
+    }
+    for (const [tokenId, exp] of Object.entries(expectations)) {
+      const delta = after.tokens[tokenId] - before.tokens[tokenId];
+      expect(delta).toBe(exp);
+    }
+  };
+
+  check(signerBefore, signerAfter, expected.signer);
+  check(poolBefore, poolAfter, expected.pool);
+
+  if (expected.poolLiquidityDelta !== undefined) {
+    expect(poolStateAfter.fields.liquidity - poolStateBefore.fields.liquidity).toBe(
+      expected.poolLiquidityDelta,
+    );
+  }
 }
 
 class Fixture {
@@ -75,14 +114,16 @@ class Fixture {
     const tickTemplate = (await Tick.deployTemplate(deployer)).contractInstance;
     const wordTemplate = (await BitmapWord.deployTemplate(deployer)).contractInstance;
     const poolConfigTemplate = (await PoolConfig.deployTemplate(deployer)).contractInstance;
-    const dexAccountTemplate = (await DexAccount.deploy(deployer, {
-      initialFields: {
-        counter: 0n,
-        owner: deployer.address,
-        refferer: deployer.address,
-        parents: ['', ''],
-      }
-    })).contractInstance;
+    const dexAccountTemplate = (
+      await DexAccount.deploy(deployer, {
+        initialFields: {
+          counter: 0n,
+          owner: deployer.address,
+          refferer: deployer.address,
+          parents: ['', ''],
+        },
+      })
+    ).contractInstance;
 
     const factory = (
       await PoolFactory.deploy(deployer, {
@@ -277,8 +318,8 @@ class Fixture {
   }
 }
 
-describe('CLMM basic pool flow', () => {
-  test('mint liquidity and swap while tracking balances', async () => {
+describe('CLMM liquidity and swap flow', () => {
+  test('add liquidity and swap', async () => {
     const fixture = await Fixture.create();
     const [lp, trader] = await getSigners(2, 3_000n * ONE_ALPH);
 
@@ -300,7 +341,6 @@ describe('CLMM basic pool flow', () => {
 
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
-    const currentLiquidity = poolStateBefore.fields.liquidity;
     const decimals = 18;
 
     const currentPrice = TickUtils.sqrtPriceX96ToPrice(sqrtPriceCurrent, decimals, decimals);
@@ -318,44 +358,60 @@ describe('CLMM basic pool flow', () => {
       UNLIMITED_AMOUNT,
     );
 
-    const lpBefore = await getBalances(lp.address, [fixture.tokenId0, fixture.tokenId1]);
-    const poolBefore = await getBalances(pool.address, [fixture.tokenId0, fixture.tokenId1]);
-
+    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
     const liquiditySlippage = 30n; // allow +/- 30 ticks around the current tick
-    await fixture.addLiquidity(
-      lp,
-      configIndex,
-      token0Amount,
-      token1Amount,
-      liquiditySlippage,
-      tickLower,
-      tickUpper,
-    );
-
-    const lpAfter = await getBalances(lp.address, [fixture.tokenId0, fixture.tokenId1]);
-    const poolAfter = await getBalances(pool.address, [fixture.tokenId0, fixture.tokenId1]);
-    const poolStateAfter = await pool.fetchState();
-
-    expect(lpBefore.tokens[fixture.tokenId0] - lpAfter.tokens[fixture.tokenId0]).toBe(token0Amount);
-    expect(lpBefore.tokens[fixture.tokenId1] - lpAfter.tokens[fixture.tokenId1]).toBe(token1Amount);
-    expect(poolAfter.tokens[fixture.tokenId0] - poolBefore.tokens[fixture.tokenId0]).toBe(
-      token0Amount,
-    );
-    expect(poolAfter.tokens[fixture.tokenId1] - poolBefore.tokens[fixture.tokenId1]).toBe(
-      token1Amount,
-    );
-    expect(poolStateAfter.fields.liquidity).toBe(currentLiquidity + liquidity);
+    await assertBalancesChange({
+      pool,
+      signer: lp,
+      tokenIds,
+      action: () =>
+        fixture.addLiquidity(
+          lp,
+          configIndex,
+          token0Amount,
+          token1Amount,
+          liquiditySlippage,
+          tickLower,
+          tickUpper,
+        ),
+      expect: {
+        signer: {
+          [fixture.tokenId0]: -token0Amount,
+          [fixture.tokenId1]: -token1Amount,
+        },
+        pool: {
+          [fixture.tokenId0]: token0Amount,
+          [fixture.tokenId1]: token1Amount,
+        },
+        poolLiquidityDelta: liquidity,
+      },
+    });
 
     const swapIn = 5n * ONE_ALPH;
-    const outputAmount = await fixture.computeSwapBaseIn(
+    const expectedOutput = await fixture.computeSwapBaseIn(
       configIndex,
       fixture.tokenId0,
       fixture.tokenId1,
       swapIn,
     );
-    console.log('outputAmount', outputAmount);
 
     const swapSlippage = 30;
-    await fixture.swapExactIn(trader, configIndex, swapIn, swapSlippage);
+    await assertBalancesChange({
+      pool,
+      signer: trader,
+      tokenIds,
+      action: () => fixture.swapExactIn(trader, configIndex, swapIn, swapSlippage),
+      expect: {
+        signer: {
+          [fixture.tokenId0]: -swapIn,
+          [fixture.tokenId1]: expectedOutput - 1n,
+        },
+        pool: {
+          [fixture.tokenId0]: swapIn,
+          [fixture.tokenId1]: -expectedOutput + 1n,
+        },
+        poolLiquidityDelta: 0n,
+      },
+    });
   }, 60000);
 });
