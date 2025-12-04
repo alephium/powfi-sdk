@@ -445,6 +445,7 @@ export class Fixture {
     tickUpper: bigint,
     amount0: bigint,
     amount1: bigint,
+    liquidity: bigint = 0n,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
     this.zeta.signer = lp;
@@ -456,7 +457,7 @@ export class Fixture {
       recipient: lpAddress,
       tickLower,
       tickUpper,
-      liquidity: 0n,
+      liquidity,
       amount0Max: amount0,
       amount1Max: amount1,
     });
