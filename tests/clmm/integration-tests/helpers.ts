@@ -412,4 +412,53 @@ export class Fixture {
 
     return { amount0, amount1, liquidity };
   }
+
+  async removeLiquidity(
+    lp: SignerProvider,
+    configIndex: bigint,
+    removeLiq: bigint,
+    tickLower: bigint,
+    tickUpper: bigint,
+    amount0: bigint,
+    amount1: bigint,
+  ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
+    const lpAddress = (await lp.getSelectedAccount()).address;
+    this.zeta.signer = lp;
+    return await this.zeta.clmm.removeLiquidity({
+      token0: this.tokenId0,
+      token1: this.tokenId1,
+      configIndex,
+      owner: lpAddress,
+      tickLower,
+      tickUpper,
+      liquidity: removeLiq,
+      base: 'token0',
+      baseAmount: amount0,
+      otherAmountMax: amount1,
+    });
+  }
+
+  async collectTokens(
+    lp: SignerProvider,
+    configIndex: bigint,
+    tickLower: bigint,
+    tickUpper: bigint,
+    amount0: bigint,
+    amount1: bigint
+  ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
+    const lpAddress = (await lp.getSelectedAccount()).address;
+    this.zeta.signer = lp;
+    return await this.zeta.clmm.collectTokens({
+      token0: this.tokenId0,
+      token1: this.tokenId1,
+      configIndex,
+      owner: lpAddress,
+      recipient: lpAddress,
+      tickLower,
+      tickUpper,
+      liquidity: 0n,
+      amount0Max: amount0,
+      amount1Max: amount1,
+    });
+  }
 }
