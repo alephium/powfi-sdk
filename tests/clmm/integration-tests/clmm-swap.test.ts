@@ -3,7 +3,6 @@ import { ONE_ALPH, web3 } from '@alephium/web3';
 import { getSigners } from '@alephium/web3-test';
 import { UNLIMITED_AMOUNT } from '../../../src';
 import { assertBalancesChange, Fixture, getBalances } from './helpers';
-import { TickUtils } from '../../../src/clmm/tick';
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
 
@@ -27,12 +26,7 @@ describe('CLMM Swap', () => {
   });
 
   const setupPoolWithLiquidity = async () => {
-    const configIndex = await fixture.createConfigIndex(tickSpacing, fee, feeProtocol);
-    const pool = await fixture.createPoolWithInitialLiquidity(
-      configIndex,
-      100n * ONE_ALPH,
-      1_000n * ONE_ALPH,
-    );
+    const { configIndex, pool } = await fixture.setupPool(tickSpacing, fee, feeProtocol);
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
 

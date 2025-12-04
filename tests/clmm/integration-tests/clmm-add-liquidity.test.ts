@@ -20,20 +20,8 @@ describe('CLMM Add Liquidity', () => {
     await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp);
   });
 
-  const setupPool = async (tickSpacing = 1n) => {
-    const fee = 3_000n;
-    const feeProtocol = 0n;
-    const configIndex = await fixture.createConfigIndex(tickSpacing, fee, feeProtocol);
-    const pool = await fixture.createPoolWithInitialLiquidity(
-      configIndex,
-      100n * ONE_ALPH,
-      1_000n * ONE_ALPH,
-    );
-    return { configIndex, pool };
-  };
-
   test('current price inside range (token0 and token1 provided)', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
@@ -50,7 +38,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('current price above provided range (position fully in token1)', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.8, 0.9);
@@ -80,7 +68,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('current price below provided range (position fully in token0)', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 1.1, 1.2);
@@ -110,7 +98,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('partially overlapping positions both add liquidity', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
 
@@ -136,7 +124,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('nested positions (first contains second) both add liquidity', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
 
@@ -162,7 +150,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('nested positions (second contains first) both add liquidity', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
 
@@ -187,7 +175,7 @@ describe('CLMM Add Liquidity', () => {
   });
 
   test('fails when LP lacks sufficient tokens for provided range', async () => {
-    const { configIndex, pool } = await setupPool();
+    const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);

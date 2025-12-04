@@ -444,7 +444,7 @@ export class Fixture {
     tickLower: bigint,
     tickUpper: bigint,
     amount0: bigint,
-    amount1: bigint
+    amount1: bigint,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
     this.zeta.signer = lp;
@@ -460,5 +460,22 @@ export class Fixture {
       amount0Max: amount0,
       amount1Max: amount1,
     });
+  }
+
+  async setupPool(
+    tickSpacing: bigint = 1n,
+    fee: bigint = 3_000n,
+    feeProtocol: bigint = 0n,
+    amount0: bigint = 100n * ONE_ALPH,
+    amount1: bigint = 1_000n * ONE_ALPH,
+  ) {
+    const configIndex = await this.createConfigIndex(tickSpacing, fee, feeProtocol);
+    const pool = await this.createPoolWithInitialLiquidity(
+      configIndex,
+      amount0,
+      amount1,
+      tickSpacing,
+    );
+    return { configIndex, pool };
   }
 }
