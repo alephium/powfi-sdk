@@ -29,7 +29,7 @@ import {
 } from '../../../clmm/artifacts/ts';
 import { TickUtils } from '../../../src/clmm/tick';
 import { Zeta } from '../../../src/zeta';
-import { PoolUtils, sortTokens } from '../../../src';
+import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src';
 
 export interface Balances {
   alph: bigint;
@@ -331,5 +331,67 @@ export class Fixture {
       tickSpacing,
     );
     return { tickLower, tickUpper };
+  }
+
+  async addRangePosition({
+    lp,
+    pool,
+    configIndex,
+    sqrtPriceCurrent,
+    range,
+    amount0Desired,
+    amount1Desired,
+    slippage = 30n,
+  }: {
+    lp: SignerProvider;
+    pool: PoolInstance;
+    configIndex: bigint;
+    sqrtPriceCurrent: bigint;
+    range: { tickLower: bigint; tickUpper: bigint };
+    amount0Desired: bigint;
+    amount1Desired: bigint;
+    slippage?: bigint;
+  }): Promise<{ amount0: bigint; amount1: bigint; liquidity: bigint }> {
+    const [amount0, amount1, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
+      sqrtPriceCurrent,
+      this.tokenId0,
+      this.tokenId1,
+      range.tickLower,
+      range.tickUpper,
+      amount0Desired,
+      amount1Desired,
+    );
+    const currentTick = TickUtils.getTickAtSqrtRatio(sqrtPriceCurrent);
+    const isActive = range.tickLower <= currentTick && currentTick < range.tickUpper;
+    const liquidityDelta = isActive ? liquidity : 0n;
+
+    await assertBalancesChange({
+      pool,
+      signer: lp,
+      tokenIds: [this.tokenId0, this.tokenId1],
+      action: () =>
+        this.addLiquidity(
+          lp,
+          configIndex,
+          amount0,
+          amount1,
+          slippage,
+          range.tickLower,
+          range.tickUpper,
+        ),
+      expect: {
+        signer: {
+          [this.tokenId0]: -amount0,
+          [this.tokenId1]: -amount1,
+        },
+        pool: {
+          [this.tokenId0]: amount0,
+          [this.tokenId1]: amount1,
+        },
+        poolLiquidityDelta: liquidityDelta,
+      },
+    });
+
+    return { amount0, amount1, liquidity };
   }
 }
