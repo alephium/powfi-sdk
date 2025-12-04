@@ -228,16 +228,19 @@ export class Fixture {
     return subContractId(factoryId, configPath, group);
   }
 
-  async swapExactIn(
+  async swap(
     trader: SignerProvider,
     configIndex: bigint,
     amountIn: bigint,
     slippage: number,
+    opts?: { token0?: string; token1?: string },
   ) {
     this.zeta.signer = trader;
+    const token0 = opts?.token0 ?? this.tokenId0;
+    const token1 = opts?.token1 ?? this.tokenId1;
     return await this.zeta.clmm.swap({
-      token0: this.tokenId0,
-      token1: this.tokenId1,
+      token0,
+      token1,
       amount: amountIn,
       routePlan: [configIndex],
       slippage: BigInt(slippage),
@@ -305,9 +308,24 @@ export class Fixture {
       amount: amountIn,
     });
 
-    const outputAmount = PoolUtils.offlineSwap(distribution, amountIn, distribution.sqrtPriceX96);
+    return PoolUtils.offlineSwap(distribution, amountIn, distribution.sqrtPriceX96);
+  }
 
-    return outputAmount;
+  async computeSwapBaseOut(
+    configIndex: bigint,
+    token0: string,
+    token1: string,
+    amountOut: bigint,
+  ): Promise<bigint> {
+    const distribution = await this.zeta.clmm.simulateSwap({
+      configIndex: configIndex,
+      token0: token0,
+      token1: token1,
+      zeroForOne: true,
+      amount: -amountOut,
+    });
+
+    return PoolUtils.offlineSwap(distribution, -amountOut, distribution.sqrtPriceX96);
   }
 
   buildRange(

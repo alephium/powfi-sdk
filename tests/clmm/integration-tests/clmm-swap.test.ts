@@ -1,9 +1,9 @@
 import type { SignerProvider } from '@alephium/web3';
 import { ONE_ALPH, web3 } from '@alephium/web3';
 import { getSigners } from '@alephium/web3-test';
-import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { UNLIMITED_AMOUNT } from '../../../src';
-import { assertBalancesChange, Fixture } from './helpers';
+import { assertBalancesChange, Fixture, getBalances } from './helpers';
+import { TickUtils } from '../../../src/clmm/tick';
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
 
@@ -11,6 +11,9 @@ describe('CLMM Swap', () => {
   let fixture: Fixture;
   let lp: SignerProvider;
   let trader: SignerProvider;
+  const tickSpacing = 1n;
+  const fee = 3_000n;
+  const feeProtocol = 0n;
 
   beforeEach(async () => {
     fixture = await Fixture.create();
@@ -23,10 +26,7 @@ describe('CLMM Swap', () => {
     await fixture.transferToken(fixture.tokenId1, 1_000n * ONE_ALPH, trader);
   });
 
-  test('add liquidity in-range then swap', async () => {
-    const tickSpacing = 1n;
-    const fee = 3_000n;
-    const feeProtocol = 0n;
+  const setupPoolWithLiquidity = async () => {
     const configIndex = await fixture.createConfigIndex(tickSpacing, fee, feeProtocol);
     const pool = await fixture.createPoolWithInitialLiquidity(
       configIndex,
@@ -38,43 +38,24 @@ describe('CLMM Swap', () => {
 
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
 
-    const [token0Amount, token1Amount, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-      sqrtPriceCurrent,
-      fixture.tokenId0,
-      fixture.tokenId1,
-      tickLower,
-      tickUpper,
-      100n * ONE_ALPH,
-      UNLIMITED_AMOUNT,
-    );
-
-    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
-    await assertBalancesChange({
+    await fixture.addRangePosition({
+      lp,
       pool,
-      signer: lp,
-      tokenIds,
-      action: () =>
-        fixture.addLiquidity(
-          lp,
-          configIndex,
-          token0Amount,
-          token1Amount,
-          30n,
-          tickLower,
-          tickUpper,
-        ),
-      expect: {
-        signer: {
-          [fixture.tokenId0]: -token0Amount,
-          [fixture.tokenId1]: -token1Amount,
-        },
-        pool: {
-          [fixture.tokenId0]: token0Amount,
-          [fixture.tokenId1]: token1Amount,
-        },
-        poolLiquidityDelta: liquidity,
-      },
+      configIndex,
+      sqrtPriceCurrent,
+      range: { tickLower, tickUpper },
+      amount0Desired: 100n * ONE_ALPH,
+      amount1Desired: UNLIMITED_AMOUNT,
     });
+
+    const poolStateAfter = await pool.fetchState();
+    const liquidity = poolStateAfter.fields.liquidity;
+
+    return { configIndex, pool, tokenIds: [fixture.tokenId0, fixture.tokenId1], liquidity };
+  };
+
+  test('exact-in swap', async () => {
+    const { configIndex, pool, tokenIds } = await setupPoolWithLiquidity();
 
     const swapIn = 5n * ONE_ALPH;
     const expectedOutput = await fixture.computeSwapBaseIn(
@@ -88,7 +69,7 @@ describe('CLMM Swap', () => {
       pool,
       signer: trader,
       tokenIds,
-      action: () => fixture.swapExactIn(trader, configIndex, swapIn, 30),
+      action: () => fixture.swap(trader, configIndex, swapIn, 30),
       expect: {
         signer: {
           [fixture.tokenId0]: -swapIn,
@@ -102,4 +83,47 @@ describe('CLMM Swap', () => {
       },
     });
   }, 60000);
+
+  test('exact-out swap', async () => {
+    const { configIndex, pool, tokenIds } = await setupPoolWithLiquidity();
+    const traderAddr = (await trader.getSelectedAccount()).address;
+    const beforeTrader = await getBalances(traderAddr, tokenIds);
+    const beforePool = await getBalances(pool.address, tokenIds);
+
+    const exactOut = 5n * ONE_ALPH;
+    const expectedInput = await fixture.computeSwapBaseOut(
+      configIndex,
+      fixture.tokenId0,
+      fixture.tokenId1,
+      exactOut,
+    );
+
+    await fixture.swap(trader, configIndex, exactOut, 30, {
+      token0: fixture.tokenId1,
+      token1: fixture.tokenId0,
+    });
+
+    const afterTrader = await getBalances(traderAddr, tokenIds);
+    const afterPool = await getBalances(pool.address, tokenIds);
+
+    const traderToken0Delta =
+      afterTrader.tokens[fixture.tokenId0] - beforeTrader.tokens[fixture.tokenId0];
+    const traderToken1Delta =
+      afterTrader.tokens[fixture.tokenId1] - beforeTrader.tokens[fixture.tokenId1];
+    const poolToken0Delta =
+      afterPool.tokens[fixture.tokenId0] - beforePool.tokens[fixture.tokenId0];
+    const poolToken1Delta =
+      afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1];
+
+    expect(traderToken0Delta).toBeLessThanOrEqual(-expectedInput);
+    expect(traderToken1Delta).toBe(-exactOut);
+    expect(-poolToken0Delta).toBeLessThanOrEqual(-expectedInput);
+    expect(poolToken1Delta).toBe(exactOut);
+  }, 60000);
+
+  test('slippage limit enforcement rejects swap', async () => {
+    const { configIndex } = await setupPoolWithLiquidity();
+    const amountIn = 500n * ONE_ALPH;
+    await expect(fixture.swap(trader, configIndex, amountIn, 0)).rejects.toThrow();
+  }, 30000);
 });
