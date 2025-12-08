@@ -1,4 +1,4 @@
-import type { HexString } from '@alephium/web3';
+import type { ExecuteScriptResult, HexString } from '@alephium/web3';
 import {
   MINIMAL_CONTRACT_DEPOSIT,
   addressFromContractId,
@@ -19,11 +19,13 @@ import type {
   XAlphTokenTypes,
 } from '../../staking/artifacts/ts';
 import {
+  AlphStakeAndLock,
   AlphUnstakeVault,
   GovernanceDemo,
   RewardSharingVault,
   XAlphStakeVault,
   XAlphToken,
+  XAlphUnlockAndStartUnstake,
 } from '../../staking/artifacts/ts';
 import { loadDeployments } from '../../staking/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -127,6 +129,30 @@ export class StakingModule extends ModuleBase {
     return this.stakeVaultContract.transact.unstake({
       signer: this.scope.signer,
       args: { amount },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
+    });
+  }
+
+  async stakeAndLockAlph(amount: bigint): Promise<ExecuteScriptResult> {
+    return AlphStakeAndLock.execute({
+      signer: this.scope.signer,
+      initialFields: {
+        xAlphToken: this.xAlphTokenContract.contractId,
+        xAlphStakeVault: this.stakeVaultContract.contractId,
+        amount,
+      },
+      attoAlphAmount: amount + MINIMAL_CONTRACT_DEPOSIT,
+    });
+  }
+
+  async unlockAndStartUnstake(amount: bigint): Promise<ExecuteScriptResult> {
+    return XAlphUnlockAndStartUnstake.execute({
+      signer: this.scope.signer,
+      initialFields: {
+        xAlphToken: this.xAlphTokenContract.contractId,
+        xAlphStakeVault: this.stakeVaultContract.contractId,
+        amount,
+      },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
     });
   }

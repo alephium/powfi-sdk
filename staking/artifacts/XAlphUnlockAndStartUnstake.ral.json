@@ -1,0 +1,31 @@
+{
+  "version": "v4.2.5",
+  "name": "XAlphUnlockAndStartUnstake",
+  "bytecodeTemplate": "01010300020016b41700{2}0d0c{1}01100c0d{1}010c170116001601{2}a3{2}0d0d{0}010d18",
+  "fieldsSig": {
+    "names": [
+      "xAlphToken",
+      "xAlphStakeVault",
+      "amount"
+    ],
+    "types": [
+      "XAlphToken",
+      "XAlphStakeVault",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}
