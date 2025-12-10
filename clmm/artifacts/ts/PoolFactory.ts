@@ -378,7 +378,7 @@ export const PoolFactory = new Factory(
   Contract.fromJson(
     PoolFactoryContractJson,
     "",
-    "4cc966e77dc138edb179af84306a4a565438d8848bf0c4f771e09adf580ef2de",
+    "4f2990418f84360134e2fe3c2732c0ad191b52d772a8406ae9afe6e87c427bf3",
     types.AllStructs
   )
 );
