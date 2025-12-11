@@ -1,6 +1,6 @@
 {
   "name": "@h0ngcha0/typescript-sdk",
-  "version": "0.0.1-rc.3",
+  "version": "0.0.1-rc.4",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
