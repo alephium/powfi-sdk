@@ -32,6 +32,7 @@ import type {
   AddLiquidityDetails,
   RemoveLiquidityParams,
   RemoveLiquidityDetails,
+  ClaimableAmounts,
   CreatePoolParams,
   ComputeSwapParams,
   ComputeLiquidityParams,
@@ -307,6 +308,21 @@ export class CpmmModule extends ModuleBase {
     return result;
   }
 
+  async computeClaimableAmounts(
+    tokenAId: string,
+    tokenBId: string,
+    liquidityBalance: bigint,
+  ): Promise<ClaimableAmounts> {
+    const state = await this.getPoolState(tokenAId, tokenBId);
+    const details = CpmmModule.computeClaimableAmounts(state, liquidityBalance);
+    return {
+      token0Id: details.token0Id,
+      amount0: details.amount0,
+      token1Id: details.token1Id,
+      amount1: details.amount1,
+    };
+  }
+
   async createPool(params: CreatePoolParams): Promise<ExecuteScriptResult & { poolId: string }> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for createPool operation');
@@ -462,6 +478,13 @@ export class CpmmModule extends ModuleBase {
       remainShareAmount,
       remainSharePercentage: parseFloat(remainSharePercentage),
     };
+  }
+
+  static computeClaimableAmounts(
+    state: CpmmPoolState,
+    liquidityBalance: bigint,
+  ): RemoveLiquidityDetails {
+    return this.computeRemoveLiquidityAmounts(state, liquidityBalance, liquidityBalance);
   }
 
   static minimalAmount(amount: bigint, slippage: bigint): bigint {
