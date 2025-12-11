@@ -3,8 +3,9 @@ import { MINIMUM_LIQUIDITY } from '../../src/cpmm/constants';
 import { InsufficientLiquidityError } from '../../src/common/error';
 import { MathUtil } from '../../src/common/math';
 import type { TokenInfo } from '@alephium/token-list';
-import type { CpmmPoolState } from '../../src/cpmm/types';
+import type { CpmmConfig, CpmmPoolState } from '../../src/cpmm/types';
 import { ONE_ALPH } from '@alephium/web3';
+import type { Zeta } from '../../src/zeta';
 
 describe('CpmmModule functions', () => {
   const createTokenInfo = (id: string, decimals: number): TokenInfo => ({
@@ -44,6 +45,10 @@ describe('CpmmModule functions', () => {
   });
 
   const percent = (value: bigint, total: bigint): number => Number((value * 10000n) / total) / 100;
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 
   describe('getAmountOut', () => {
     it('returns the output amount for token0 -> token1 swaps', () => {
@@ -250,6 +255,86 @@ describe('CpmmModule functions', () => {
           liquidityToRemove,
         ),
       ).toThrow('Liquidity exceeds total liquidity amount');
+    });
+  });
+
+  describe('computeClaimableAmounts', () => {
+    class TestCpmmModule extends CpmmModule {
+      getCpmmConfig(): CpmmConfig {
+        return { groupIndex: 0, factoryId: 'factory', routerId: 'router' };
+      }
+
+      constructor(
+        scope: Zeta,
+        private mockState: CpmmPoolState,
+      ) {
+        super(scope);
+      }
+
+      async getPoolState(_tokenA: string, _tokenB: string): Promise<CpmmPoolState> {
+        return Promise.resolve(this.mockState);
+      }
+    }
+
+    it('fetches pool state and computes claimable tokens', async () => {
+      const reserve0 = ONE_ALPH * 500n;
+      const reserve1 = ONE_ALPH * 1000n;
+      const totalSupply = ONE_ALPH * 2000n;
+      const liquidityBalance = ONE_ALPH * 200n;
+
+      const token0 = createTokenInfo('token0', 18);
+      const token1 = createTokenInfo('token1', 18);
+
+      const mockScope = {
+        network: { id: 'testnet' },
+        token: { getTokenById: jest.fn((id: string) => (id === token0.id ? token0 : token1)) },
+      } as unknown as Zeta;
+
+      const mockState: CpmmPoolState = {
+        poolId: 'pool-id',
+        reserve0,
+        reserve1,
+        token0Info: token0,
+        token1Info: token1,
+        totalSupply,
+        dexAccount: 'dex-account',
+      };
+
+      const module = new TestCpmmModule(mockScope, mockState);
+
+      const result = await module.computeClaimableAmounts(token0.id, token1.id, liquidityBalance);
+
+      expect(result.amount0).toBe((liquidityBalance * reserve0) / totalSupply);
+      expect(result.amount1).toBe((liquidityBalance * reserve1) / totalSupply);
+      expect(result.token0Id).toBe(token0.id);
+      expect(result.token1Id).toBe(token1.id);
+
+      // Simulate two swaps with external inputs to accrue fees in both tokens
+      const swapIn0 = ONE_ALPH * 110n;
+      const amount1Out = CpmmModule.getAmountOut(mockState, token0.id, swapIn0);
+      const stateAfterFirstSwap: CpmmPoolState = {
+        ...mockState,
+        reserve0: mockState.reserve0 + swapIn0,
+        reserve1: mockState.reserve1 - amount1Out,
+      };
+
+      const swapIn1 = ONE_ALPH * 180n;
+      const amount0Out = CpmmModule.getAmountOut(stateAfterFirstSwap, token1.id, swapIn1);
+      const stateAfterSwaps: CpmmPoolState = {
+        ...stateAfterFirstSwap,
+        reserve0: stateAfterFirstSwap.reserve0 - amount0Out,
+        reserve1: stateAfterFirstSwap.reserve1 + swapIn1,
+      };
+
+      const moduleAfterSwaps = new TestCpmmModule(mockScope, stateAfterSwaps);
+      const claimableAfterSwaps = await moduleAfterSwaps.computeClaimableAmounts(
+        token0.id,
+        token1.id,
+        liquidityBalance,
+      );
+
+      expect(claimableAfterSwaps.amount0 > result.amount0).toBe(true);
+      expect(claimableAfterSwaps.amount1 > result.amount1).toBe(true);
     });
   });
 });

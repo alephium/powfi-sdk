@@ -80,6 +80,13 @@ export interface RemoveLiquidityDetails {
   remainSharePercentage: number;
 }
 
+export interface ClaimableAmounts {
+  token0Id: string;
+  amount0: bigint;
+  token1Id: string;
+  amount1: bigint;
+}
+
 export interface CreatePoolParams {
   tokenA: TokenInfo;
   tokenB: TokenInfo;
