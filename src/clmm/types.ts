@@ -84,6 +84,26 @@ export interface CollectProtocolFees {
   recipient: string;
 }
 
+export interface SetRewardParams {
+  token0: string;
+  token1: string;
+  configIndex: bigint;
+  rewardToken: string;
+  payer: string;
+  amount: bigint;
+  openTime: bigint;
+  endTime: bigint;
+}
+
+export interface ExtendRewards {
+  token0: string;
+  token1: string;
+  configIndex: bigint;
+  rewardToken: string;
+  payer: string;
+  amount: bigint;
+}
+
 export interface ClmmPoolState {
   poolId: string;
   token0Info: TokenInfo;

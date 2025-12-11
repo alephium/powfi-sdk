@@ -437,14 +437,15 @@ export namespace PoolTypes {
     };
     extendRewards: {
       params: CallContractParams<{
+        payer: Address;
         index: bigint;
-        token: HexString;
         amount: bigint;
       }>;
       result: CallContractResult<null>;
     };
     setRewardParams: {
       params: CallContractParams<{
+        payer: Address;
         index: bigint;
         openTime: bigint;
         endTime: bigint;
@@ -823,14 +824,15 @@ export namespace PoolTypes {
     };
     extendRewards: {
       params: SignExecuteContractMethodParams<{
+        payer: Address;
         index: bigint;
-        token: HexString;
         amount: bigint;
       }>;
       result: SignExecuteScriptTxResult;
     };
     setRewardParams: {
       params: SignExecuteContractMethodParams<{
+        payer: Address;
         index: bigint;
         openTime: bigint;
         endTime: bigint;
@@ -901,6 +903,9 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
       UnauthorizedRewardSender: BigInt("111"),
       InvalidRewardParams: BigInt("112"),
       DexAccountNotFound: BigInt("113"),
+      InvalidRewardIndex: BigInt("114"),
+      RewardPeriodEnded: BigInt("115"),
+      ZeroRewardAmount: BigInt("116"),
     },
   };
 
@@ -1430,7 +1435,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     extendRewards: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { index: bigint; token: HexString; amount: bigint }
+        { payer: Address; index: bigint; amount: bigint }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "extendRewards", params, getContractByCodeHash);
@@ -1438,7 +1443,13 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     setRewardParams: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { index: bigint; openTime: bigint; endTime: bigint; amount: bigint }
+        {
+          payer: Address;
+          index: bigint;
+          openTime: bigint;
+          endTime: bigint;
+          amount: bigint;
+        }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "setRewardParams", params, getContractByCodeHash);
@@ -1468,7 +1479,7 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "c08b2f5b1a133553fb4aa45d2aabfd5afdbd2e7a615ce4c8672716d71d523635",
+    "b682654ed9b2e1ddee3dd66f1f3cf2c44e9ffb4886e41667703f3c9956e49ec3",
     types.AllStructs
   )
 );

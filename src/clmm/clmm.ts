@@ -23,6 +23,8 @@ import type {
   ClmmSwapParams,
   ClmmPoolState,
   ClmmPoolConfig,
+  SetRewardParams,
+  ExtendRewards,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
 import {
@@ -479,6 +481,50 @@ export class ClmmModule extends ModuleBase {
         token0: p.token0,
         token1: p.token1,
       },
+    });
+    return result;
+  }
+
+  async setRewardParams(p: SetRewardParams): Promise<SignExecuteScriptTxResult> {
+    const poolFactoryAddress = addressFromContractId(this.config.factoryId);
+    const poolFactory = PoolFactory.at(poolFactoryAddress);
+    const index = p.rewardToken === p.token0 ? 0n : (p.rewardToken === p.token1 ? 1n : 2n);
+    const result = await poolFactory.transact.setRewardParams({
+      signer: this.scope.signer,
+      args: {
+        token0: p.token0,
+        token1: p.token1,
+        configIndex: p.configIndex,
+        amount: p.amount,
+        index,
+        openTime: p.openTime,
+        endTime: p.endTime,
+        payer: p.payer,
+        tokenId: p.rewardToken
+      },
+      tokens: [
+        {id: p.rewardToken, amount: p.amount},
+      ],
+      attoAlphAmount: DUST_AMOUNT,
+    });
+    return result;
+  }
+
+  async extendRewards(p: ExtendRewards): Promise<SignExecuteScriptTxResult> {
+    const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
+    const pool = Pool.at(poolAddress);
+    const index = p.rewardToken === p.token0 ? 0n : (p.rewardToken === p.token1 ? 1n : 2n);
+    const result = await pool.transact.extendRewards({
+      signer: this.scope.signer,
+      args: {
+        payer: p.payer,
+        index,
+        amount: p.amount,
+      },
+      tokens: [
+        { id: p.rewardToken, amount: p.amount },
+      ],
+      attoAlphAmount: DUST_AMOUNT,
     });
     return result;
   }

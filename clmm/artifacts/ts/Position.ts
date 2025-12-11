@@ -255,7 +255,7 @@ export const Position = new Factory(
   Contract.fromJson(
     PositionContractJson,
     "",
-    "a80cc7f0178f00c65bb654bd3ce7b442ff398fd22a59325c7a8f56869ca85430",
+    "896553fcb24ed90a3c3a19c3154bd5b4478a7c9358376fc0bd0971c32051de55",
     types.AllStructs
   )
 );
