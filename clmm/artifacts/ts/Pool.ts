@@ -88,7 +88,7 @@ export namespace PoolTypes {
     liquidity: bigint;
     amount0: bigint;
     amount1: bigint;
-    totalLiquidity: bigint;
+    timestamp: bigint;
   }>;
   export type BurnEvent = ContractEvent<{
     operator: Address;
@@ -98,7 +98,6 @@ export namespace PoolTypes {
     liquidity: bigint;
     amount0: bigint;
     amount1: bigint;
-    totalLiquidity: bigint;
   }>;
   export type CollectEvent = ContractEvent<{
     operator: Address;
@@ -108,6 +107,16 @@ export namespace PoolTypes {
     tickUpper: bigint;
     amount0: bigint;
     amount1: bigint;
+    amount2: bigint;
+  }>;
+  export type FeesEvent = ContractEvent<{
+    owner: Address;
+    tickLower: bigint;
+    tickUpper: bigint;
+    amount0: bigint;
+    amount1: bigint;
+    amount2: bigint;
+    timestamp: bigint;
   }>;
   export type CollectProtocolEvent = ContractEvent<{
     sender: Address;
@@ -337,14 +346,14 @@ export namespace PoolTypes {
         tickUpper: bigint;
         liquidityDelta: bigint;
       }>;
-      result: CallContractResult<null>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     modifyPosition: {
       params: CallContractParams<{
         position: HexString;
         params: types.ModifyPositionParams;
       }>;
-      result: CallContractResult<[bigint, bigint]>;
+      result: CallContractResult<[bigint, bigint, [bigint, bigint, bigint]]>;
     };
     mint: {
       params: CallContractParams<{
@@ -373,16 +382,14 @@ export namespace PoolTypes {
         owner: Address;
         tickLower: bigint;
         tickUpper: bigint;
-        amount0Requested: bigint;
-        amount1Requested: bigint;
+        maxAmounts: [bigint, bigint, bigint];
       }>;
-      result: CallContractResult<[bigint, bigint]>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     withdraw: {
       params: CallContractParams<{
         recipient: Address;
-        amount0: bigint;
-        amount1: bigint;
+        amounts: [bigint, bigint, bigint];
       }>;
       result: CallContractResult<null>;
     };
@@ -456,6 +463,19 @@ export namespace PoolTypes {
     collectProtocolFees: {
       params: CallContractParams<{ recipient: Address }>;
       result: CallContractResult<null>;
+    };
+    positionInfo: {
+      params: CallContractParams<{
+        owner: Address;
+        tickLower: bigint;
+        tickUpper: bigint;
+        acc: bigint;
+        iacc0: bigint;
+        iacc1: bigint;
+        t0: bigint;
+        acct0: bigint;
+      }>;
+      result: CallContractResult<types.PositionInfo>;
     };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
@@ -748,16 +768,14 @@ export namespace PoolTypes {
         owner: Address;
         tickLower: bigint;
         tickUpper: bigint;
-        amount0Requested: bigint;
-        amount1Requested: bigint;
+        maxAmounts: [bigint, bigint, bigint];
       }>;
       result: SignExecuteScriptTxResult;
     };
     withdraw: {
       params: SignExecuteContractMethodParams<{
         recipient: Address;
-        amount0: bigint;
-        amount1: bigint;
+        amounts: [bigint, bigint, bigint];
       }>;
       result: SignExecuteScriptTxResult;
     };
@@ -844,6 +862,19 @@ export namespace PoolTypes {
       params: SignExecuteContractMethodParams<{ recipient: Address }>;
       result: SignExecuteScriptTxResult;
     };
+    positionInfo: {
+      params: SignExecuteContractMethodParams<{
+        owner: Address;
+        tickLower: bigint;
+        tickUpper: bigint;
+        acc: bigint;
+        iacc0: bigint;
+        iacc1: bigint;
+        t0: bigint;
+        acct0: bigint;
+      }>;
+      result: SignExecuteScriptTxResult;
+    };
   }
   export type SignExecuteMethodParams<T extends keyof SignExecuteMethodTable> =
     SignExecuteMethodTable[T]["params"];
@@ -868,7 +899,8 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
     Mint: 4,
     Burn: 5,
     Collect: 6,
-    CollectProtocol: 7,
+    Fees: 7,
+    CollectProtocol: 8,
   };
   consts = {
     MAX_PIPS: BigInt("1000000"),
@@ -1285,7 +1317,7 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
           liquidityDelta: bigint;
         }
       >
-    ): Promise<TestContractResultWithoutMaps<null>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "updatePosition", params, getContractByCodeHash);
     },
     modifyPosition: async (
@@ -1293,7 +1325,9 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
         PoolTypes.Fields,
         { position: HexString; params: types.ModifyPositionParams }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<
+      TestContractResultWithoutMaps<[bigint, bigint, [bigint, bigint, bigint]]>
+    > => {
       return testMethod(this, "modifyPosition", params, getContractByCodeHash);
     },
     mint: async (
@@ -1333,17 +1367,16 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
           owner: Address;
           tickLower: bigint;
           tickUpper: bigint;
-          amount0Requested: bigint;
-          amount1Requested: bigint;
+          maxAmounts: [bigint, bigint, bigint];
         }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "collect", params, getContractByCodeHash);
     },
     withdraw: async (
       params: TestContractParamsWithoutMaps<
         PoolTypes.Fields,
-        { recipient: Address; amount0: bigint; amount1: bigint }
+        { recipient: Address; amounts: [bigint, bigint, bigint] }
       >
     ): Promise<TestContractResultWithoutMaps<null>> => {
       return testMethod(this, "withdraw", params, getContractByCodeHash);
@@ -1467,6 +1500,23 @@ class Factory extends ContractFactory<PoolInstance, PoolTypes.Fields> {
         getContractByCodeHash
       );
     },
+    positionInfo: async (
+      params: TestContractParamsWithoutMaps<
+        PoolTypes.Fields,
+        {
+          owner: Address;
+          tickLower: bigint;
+          tickUpper: bigint;
+          acc: bigint;
+          iacc0: bigint;
+          iacc1: bigint;
+          t0: bigint;
+          acct0: bigint;
+        }
+      >
+    ): Promise<TestContractResultWithoutMaps<types.PositionInfo>> => {
+      return testMethod(this, "positionInfo", params, getContractByCodeHash);
+    },
   };
 
   stateForTest(initFields: PoolTypes.Fields, asset?: Asset, address?: string) {
@@ -1479,7 +1529,7 @@ export const Pool = new Factory(
   Contract.fromJson(
     PoolContractJson,
     "",
-    "b682654ed9b2e1ddee3dd66f1f3cf2c44e9ffb4886e41667703f3c9956e49ec3",
+    "9995e9f29a40f4cab43cd73d5d080aae1e53d072d7f3a155b741f7ab2538e32a",
     types.AllStructs
   )
 );
@@ -1590,6 +1640,19 @@ export class PoolInstance extends ContractInstance {
     );
   }
 
+  subscribeFeesEvent(
+    options: EventSubscribeOptions<PoolTypes.FeesEvent>,
+    fromCount?: number
+  ): EventSubscription {
+    return subscribeContractEvent(
+      Pool.contract,
+      this,
+      options,
+      "Fees",
+      fromCount
+    );
+  }
+
   subscribeCollectProtocolEvent(
     options: EventSubscribeOptions<PoolTypes.CollectProtocolEvent>,
     fromCount?: number
@@ -1612,6 +1675,7 @@ export class PoolInstance extends ContractInstance {
       | PoolTypes.MintEvent
       | PoolTypes.BurnEvent
       | PoolTypes.CollectEvent
+      | PoolTypes.FeesEvent
       | PoolTypes.CollectProtocolEvent
     >,
     fromCount?: number
@@ -2114,6 +2178,17 @@ export class PoolInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    positionInfo: async (
+      params: PoolTypes.CallMethodParams<"positionInfo">
+    ): Promise<PoolTypes.CallMethodResult<"positionInfo">> => {
+      return callMethod(
+        Pool,
+        this,
+        "positionInfo",
+        params,
+        getContractByCodeHash
+      );
+    },
   };
 
   transact = {
@@ -2406,6 +2481,11 @@ export class PoolInstance extends ContractInstance {
       params: PoolTypes.SignExecuteMethodParams<"collectProtocolFees">
     ): Promise<PoolTypes.SignExecuteMethodResult<"collectProtocolFees">> => {
       return signExecuteMethod(Pool, this, "collectProtocolFees", params);
+    },
+    positionInfo: async (
+      params: PoolTypes.SignExecuteMethodParams<"positionInfo">
+    ): Promise<PoolTypes.SignExecuteMethodResult<"positionInfo">> => {
+      return signExecuteMethod(Pool, this, "positionInfo", params);
     },
   };
 

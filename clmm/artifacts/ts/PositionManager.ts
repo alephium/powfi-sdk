@@ -553,7 +553,7 @@ export const PositionManager = new Factory(
   Contract.fromJson(
     PositionManagerContractJson,
     "",
-    "5dd904173886943cb02311c638f817d36f809f2415841651882dea99aa4d37e2",
+    "ab39514b7b087164d46e689fc18e1793c9aa0c677ece80b18439df6526c09698",
     types.AllStructs
   )
 );

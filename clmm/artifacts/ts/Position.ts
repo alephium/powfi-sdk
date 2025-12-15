@@ -71,18 +71,19 @@ export namespace PositionTypes {
         liquidityDelta: bigint;
         growths: [bigint, bigint, bigint];
       }>;
-      result: CallContractResult<null>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
     };
     deposit: {
       params: CallContractParams<{ amount0: bigint; amount1: bigint }>;
       result: CallContractResult<null>;
     };
     collect: {
-      params: CallContractParams<{
-        amount0Requested: bigint;
-        amount1Requested: bigint;
-      }>;
-      result: CallContractResult<[bigint, bigint]>;
+      params: CallContractParams<{ maxAmounts: [bigint, bigint, bigint] }>;
+      result: CallContractResult<[bigint, bigint, bigint]>;
+    };
+    getState: {
+      params: Omit<CallContractParams<{}>, "args">;
+      result: CallContractResult<[bigint, [bigint, bigint, bigint]]>;
     };
   }
   export type CallMethodParams<T extends keyof CallMethodTable> =
@@ -142,9 +143,12 @@ export namespace PositionTypes {
     };
     collect: {
       params: SignExecuteContractMethodParams<{
-        amount0Requested: bigint;
-        amount1Requested: bigint;
+        maxAmounts: [bigint, bigint, bigint];
       }>;
+      result: SignExecuteScriptTxResult;
+    };
+    getState: {
+      params: Omit<SignExecuteContractMethodParams<{}>, "args">;
       result: SignExecuteScriptTxResult;
     };
   }
@@ -220,7 +224,7 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
         PositionTypes.Fields,
         { liquidityDelta: bigint; growths: [bigint, bigint, bigint] }
       >
-    ): Promise<TestContractResultWithoutMaps<null>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "update", params, getContractByCodeHash);
     },
     deposit: async (
@@ -234,10 +238,20 @@ class Factory extends ContractFactory<PositionInstance, PositionTypes.Fields> {
     collect: async (
       params: TestContractParamsWithoutMaps<
         PositionTypes.Fields,
-        { amount0Requested: bigint; amount1Requested: bigint }
+        { maxAmounts: [bigint, bigint, bigint] }
       >
-    ): Promise<TestContractResultWithoutMaps<[bigint, bigint]>> => {
+    ): Promise<TestContractResultWithoutMaps<[bigint, bigint, bigint]>> => {
       return testMethod(this, "collect", params, getContractByCodeHash);
+    },
+    getState: async (
+      params: Omit<
+        TestContractParamsWithoutMaps<PositionTypes.Fields, never>,
+        "args"
+      >
+    ): Promise<
+      TestContractResultWithoutMaps<[bigint, [bigint, bigint, bigint]]>
+    > => {
+      return testMethod(this, "getState", params, getContractByCodeHash);
     },
   };
 
@@ -255,7 +269,7 @@ export const Position = new Factory(
   Contract.fromJson(
     PositionContractJson,
     "",
-    "896553fcb24ed90a3c3a19c3154bd5b4478a7c9358376fc0bd0971c32051de55",
+    "5d3304b74ba5d5498cb1e19cfa3dd9ad3374eaec540e3f2a77ced61829cabf11",
     types.AllStructs
   )
 );
@@ -349,6 +363,17 @@ export class PositionInstance extends ContractInstance {
         getContractByCodeHash
       );
     },
+    getState: async (
+      params?: PositionTypes.CallMethodParams<"getState">
+    ): Promise<PositionTypes.CallMethodResult<"getState">> => {
+      return callMethod(
+        Position,
+        this,
+        "getState",
+        params === undefined ? {} : params,
+        getContractByCodeHash
+      );
+    },
   };
 
   transact = {
@@ -386,6 +411,11 @@ export class PositionInstance extends ContractInstance {
       params: PositionTypes.SignExecuteMethodParams<"collect">
     ): Promise<PositionTypes.SignExecuteMethodResult<"collect">> => {
       return signExecuteMethod(Position, this, "collect", params);
+    },
+    getState: async (
+      params: PositionTypes.SignExecuteMethodParams<"getState">
+    ): Promise<PositionTypes.SignExecuteMethodResult<"getState">> => {
+      return signExecuteMethod(Position, this, "getState", params);
     },
   };
 
