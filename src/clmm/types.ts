@@ -104,7 +104,7 @@ export interface ExtendRewards {
   amount: bigint;
 }
 
-export interface ClmmPoolState {
+export interface ClmmPoolContractState {
   poolId: string;
   token0Info: TokenInfo;
   token1Info: TokenInfo;

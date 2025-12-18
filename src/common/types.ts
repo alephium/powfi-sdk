@@ -1,6 +1,4 @@
 import type { SignerProvider, NetworkId } from '@alephium/web3';
-import type { CpmmPoolState } from '../cpmm/types';
-import type { ClmmPoolState } from '../clmm/types';
 
 export interface Network {
   id: NetworkId;
@@ -48,28 +46,3 @@ export interface ZetaLoadParams {
   signer?: SignerProvider;
   networkOverrides?: NetworkOverrides;
 }
-
-export interface PoolStatsItem {
-  volume: number;
-  volumeQuote: number;
-  volumeFee: number;
-  apr: number;
-  feeApr: number;
-  priceMin: number;
-  priceMax: number;
-  rewardApr: number[];
-}
-export interface PoolStats {
-  feeRate: number;
-  openTime: string;
-  tvl: number;
-  day: PoolStatsItem;
-  week: PoolStatsItem;
-  month: PoolStatsItem;
-}
-
-// Pool state + stats composites (no vendor-specific naming)
-export type PoolState = CpmmPoolState | ClmmPoolState;
-export type CpmmPoolStateWithStats = CpmmPoolState & PoolStats & { type: 'Standard' };
-export type ClmmPoolStateWithStats = ClmmPoolState & PoolStats & { type: 'Concentrated' };
-export type PoolStateWithStats = CpmmPoolStateWithStats | ClmmPoolStateWithStats;
