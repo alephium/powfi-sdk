@@ -17,7 +17,7 @@ import {
   CreatePairAndAddLiquidity,
 } from '../../cpmm/artifacts/ts';
 import { loadDeployments } from '../../cpmm/artifacts/ts/deployments';
-import type { CpmmPoolState } from './types';
+import type { CpmmPoolContractState } from './types';
 import { sortTokens } from '../common/utils';
 import { MAX_PRICE_IMPACT } from './constants';
 import {
@@ -66,7 +66,7 @@ export class CpmmModule extends ModuleBase {
     return addressFromContractId(this.getPoolId(tokenA, tokenB));
   }
 
-  async getPoolState(tokenA: string, tokenB: string): Promise<CpmmPoolState> {
+  async getPoolState(tokenA: string, tokenB: string): Promise<CpmmPoolContractState> {
     const [token0Id, token1Id] = sortTokens(tokenA, tokenB);
     const token0Info = await this.scope.token.getTokenById(token0Id);
     const token1Info = await this.scope.token.getTokenById(token1Id);
@@ -453,7 +453,7 @@ export class CpmmModule extends ModuleBase {
   }
 
   static computeRemoveLiquidityAmounts(
-    state: CpmmPoolState,
+    state: CpmmPoolContractState,
     totalLiquidity: bigint,
     liquidityToRemove: bigint,
   ): RemoveLiquidityDetails {
@@ -481,7 +481,7 @@ export class CpmmModule extends ModuleBase {
   }
 
   static computeClaimableAmounts(
-    state: CpmmPoolState,
+    state: CpmmPoolContractState,
     liquidityBalance: bigint,
   ): RemoveLiquidityDetails {
     return this.computeRemoveLiquidityAmounts(state, liquidityBalance, liquidityBalance);
@@ -523,12 +523,12 @@ export class CpmmModule extends ModuleBase {
   }
 
   static getLiquidityDetails(
-    state: CpmmPoolState,
+    state: CpmmPoolContractState,
     inputTokenId: string,
     inputAmount: bigint,
     inputType: 'TokenA' | 'TokenB', // First or second token in the token input box
   ): {
-    state: CpmmPoolState;
+    state: CpmmPoolContractState;
     tokenAId: string;
     tokenBId: string;
     amountA: bigint;
@@ -559,7 +559,7 @@ export class CpmmModule extends ModuleBase {
     return { state, tokenAId, tokenBId, amountA, amountB, shareAmount: liquidity, sharePercentage };
   }
 
-  static getAmountIn(state: CpmmPoolState, tokenOutId: string, amountOut: bigint): bigint {
+  static getAmountIn(state: CpmmPoolContractState, tokenOutId: string, amountOut: bigint): bigint {
     const [tokenOutInfo, reserveIn, reserveOut] =
       tokenOutId === state.token0Info.id
         ? [state.token0Info, state.reserve1, state.reserve0]
@@ -575,7 +575,7 @@ export class CpmmModule extends ModuleBase {
     return numerator / denominator + 1n;
   }
 
-  static getAmountOut(state: CpmmPoolState, tokenInId: string, amountIn: bigint): bigint {
+  static getAmountOut(state: CpmmPoolContractState, tokenInId: string, amountIn: bigint): bigint {
     if (tokenInId === state.token0Info.id) {
       return this._getAmountOut(amountIn, state.reserve0, state.reserve1);
     } else {

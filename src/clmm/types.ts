@@ -104,17 +104,13 @@ export interface ExtendRewards {
   amount: bigint;
 }
 
-export interface ClmmPoolState {
+export interface ClmmPoolContractState extends ClmmPoolConfig {
   poolId: string;
   token0Info: TokenInfo;
   token1Info: TokenInfo;
   liquidity: bigint;
-  tradingFee: bigint;
-  protocolFee: bigint;
   sqrtPriceX96: bigint;
   tick: bigint;
-  tickSpacing: bigint;
-  configIndex: bigint;
 }
 
 export interface ClmmPoolConfig {

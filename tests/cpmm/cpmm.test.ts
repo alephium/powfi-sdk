@@ -3,7 +3,7 @@ import { MINIMUM_LIQUIDITY } from '../../src/cpmm/constants';
 import { InsufficientLiquidityError } from '../../src/common/error';
 import { MathUtil } from '../../src/common/math';
 import type { TokenInfo } from '@alephium/token-list';
-import type { CpmmConfig, CpmmPoolState } from '../../src/cpmm/types';
+import type { CpmmConfig, CpmmPoolContractState } from '../../src/cpmm/types';
 import { ONE_ALPH } from '@alephium/web3';
 import type { Zeta } from '../../src/zeta';
 
@@ -29,7 +29,7 @@ describe('CpmmModule functions', () => {
     token0?: TokenInfo;
     token1?: TokenInfo;
     poolId?: string;
-  }): CpmmPoolState => ({
+  }): CpmmPoolContractState => ({
     poolId,
     token0Info: token0,
     token1Info: token1,
@@ -266,12 +266,12 @@ describe('CpmmModule functions', () => {
 
       constructor(
         scope: Zeta,
-        private mockState: CpmmPoolState,
+        private mockState: CpmmPoolContractState,
       ) {
         super(scope);
       }
 
-      async getPoolState(_tokenA: string, _tokenB: string): Promise<CpmmPoolState> {
+      async getPoolState(_tokenA: string, _tokenB: string): Promise<CpmmPoolContractState> {
         return Promise.resolve(this.mockState);
       }
     }
@@ -290,7 +290,7 @@ describe('CpmmModule functions', () => {
         token: { getTokenById: jest.fn((id: string) => (id === token0.id ? token0 : token1)) },
       } as unknown as Zeta;
 
-      const mockState: CpmmPoolState = {
+      const mockState: CpmmPoolContractState = {
         poolId: 'pool-id',
         reserve0,
         reserve1,
@@ -312,7 +312,7 @@ describe('CpmmModule functions', () => {
       // Simulate two swaps with external inputs to accrue fees in both tokens
       const swapIn0 = ONE_ALPH * 110n;
       const amount1Out = CpmmModule.getAmountOut(mockState, token0.id, swapIn0);
-      const stateAfterFirstSwap: CpmmPoolState = {
+      const stateAfterFirstSwap: CpmmPoolContractState = {
         ...mockState,
         reserve0: mockState.reserve0 + swapIn0,
         reserve1: mockState.reserve1 - amount1Out,
@@ -320,7 +320,7 @@ describe('CpmmModule functions', () => {
 
       const swapIn1 = ONE_ALPH * 180n;
       const amount0Out = CpmmModule.getAmountOut(stateAfterFirstSwap, token1.id, swapIn1);
-      const stateAfterSwaps: CpmmPoolState = {
+      const stateAfterSwaps: CpmmPoolContractState = {
         ...stateAfterFirstSwap,
         reserve0: stateAfterFirstSwap.reserve0 - amount0Out,
         reserve1: stateAfterFirstSwap.reserve1 + swapIn1,
