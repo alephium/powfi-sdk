@@ -148,12 +148,17 @@ export class ClmmModule extends ModuleBase {
       const state = await Pool.at(poolAddress).fetchState();
       const { token0, token1 } = state.fields;
 
-      const [token0Balance, token1Balance] = await Promise.all([
-        this.getTokenBalance(poolAddress, token0),
-        this.getTokenBalance(poolAddress, token1),
-      ]);
+      const balance = await this.scope.nodeProvider.addresses.getAddressesAddressBalance(poolAddress);
 
-      return { token0Balance, token1Balance };
+      const getBalance = (tokenId: string) =>
+        tokenId === ALPH_TOKEN_ID
+          ? BigInt(balance.balance)
+          : BigInt(balance.tokenBalances?.find((t) => t.id === tokenId)?.amount || '0');
+
+      return {
+        token0Balance: getBalance(token0),
+        token1Balance: getBalance(token1),
+      };
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
         throw new PoolNotFoundError(poolId);
@@ -548,17 +553,6 @@ export class ClmmModule extends ModuleBase {
       attoAlphAmount: DUST_AMOUNT,
     });
     return result;
-  }
-
-  private async getTokenBalance(address: string, tokenId: string): Promise<bigint> {
-    const balance =
-      tokenId === ALPH_TOKEN_ID
-        ? await this.scope.explorerProvider.addresses.getAddressesAddressBalance(address)
-        : await this.scope.explorerProvider.addresses.getAddressesAddressTokensTokenIdBalance(
-            address,
-            tokenId,
-          );
-    return BigInt(balance.balance);
   }
 
   private _getClmmConfig(): ClmmConfig {
