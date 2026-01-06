@@ -8,6 +8,7 @@ import {
   codec,
   encodePrimitiveValues,
   groupOfAddress,
+  ALPH_TOKEN_ID,
 } from '@alephium/web3';
 import { loadDeployments } from '../../clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -138,6 +139,26 @@ export class ClmmModule extends ModuleBase {
         throw new PoolNotFoundError(poolId);
       }
       this.logAndThrowError(`Failed to fetch CLMM pool state on ${poolId}`, error);
+    }
+  }
+
+  async getPoolTokenBalances(poolId: string): Promise<{ token0Balance: bigint; token1Balance: bigint }> {
+    try {
+      const poolAddress = addressFromContractId(poolId);
+      const state = await Pool.at(poolAddress).fetchState();
+      const { token0, token1 } = state.fields;
+
+      const [token0Balance, token1Balance] = await Promise.all([
+        this.getTokenBalance(poolAddress, token0),
+        this.getTokenBalance(poolAddress, token1),
+      ]);
+
+      return { token0Balance, token1Balance };
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('not found')) {
+        throw new PoolNotFoundError(poolId);
+      }
+      this.logAndThrowError(`Failed to fetch CLMM pool token balances for ${poolId}`, error);
     }
   }
 
@@ -527,6 +548,17 @@ export class ClmmModule extends ModuleBase {
       attoAlphAmount: DUST_AMOUNT,
     });
     return result;
+  }
+
+  private async getTokenBalance(address: string, tokenId: string): Promise<bigint> {
+    const balance =
+      tokenId === ALPH_TOKEN_ID
+        ? await this.scope.explorerProvider.addresses.getAddressesAddressBalance(address)
+        : await this.scope.explorerProvider.addresses.getAddressesAddressTokensTokenIdBalance(
+            address,
+            tokenId,
+          );
+    return BigInt(balance.balance);
   }
 
   private _getClmmConfig(): ClmmConfig {
