@@ -21,7 +21,7 @@ import type {
   RemoveLiquidity,
   SimulateSwap,
   ClmmSwapParams,
-  ClmmPoolState,
+  ClmmPoolContractState,
   ClmmPoolConfig,
   SetRewardParams,
   ExtendRewards,
@@ -115,7 +115,7 @@ export class ClmmModule extends ModuleBase {
     };
   }
 
-  async getPoolState(poolId: string): Promise<ClmmPoolState> {
+  async getPoolState(poolId: string): Promise<ClmmPoolContractState> {
     try {
       const poolAddress = addressFromContractId(poolId);
       const pool = Pool.at(poolAddress);
@@ -511,7 +511,7 @@ export class ClmmModule extends ModuleBase {
   async setRewardParams(p: SetRewardParams): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId);
     const poolFactory = PoolFactory.at(poolFactoryAddress);
-    const index = p.rewardToken === p.token0 ? 0n : (p.rewardToken === p.token1 ? 1n : 2n);
+    const index = p.rewardToken === p.token0 ? 0n : p.rewardToken === p.token1 ? 1n : 2n;
     const result = await poolFactory.transact.setRewardParams({
       signer: this.scope.signer,
       args: {
@@ -523,11 +523,9 @@ export class ClmmModule extends ModuleBase {
         openTime: p.openTime,
         endTime: p.endTime,
         payer: p.payer,
-        tokenId: p.rewardToken
+        tokenId: p.rewardToken,
       },
-      tokens: [
-        {id: p.rewardToken, amount: p.amount},
-      ],
+      tokens: [{ id: p.rewardToken, amount: p.amount }],
       attoAlphAmount: DUST_AMOUNT,
     });
     return result;
@@ -536,7 +534,7 @@ export class ClmmModule extends ModuleBase {
   async extendRewards(p: ExtendRewards): Promise<SignExecuteScriptTxResult> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
-    const index = p.rewardToken === p.token0 ? 0n : (p.rewardToken === p.token1 ? 1n : 2n);
+    const index = p.rewardToken === p.token0 ? 0n : p.rewardToken === p.token1 ? 1n : 2n;
     const result = await pool.transact.extendRewards({
       signer: this.scope.signer,
       args: {
@@ -544,9 +542,7 @@ export class ClmmModule extends ModuleBase {
         index,
         amount: p.amount,
       },
-      tokens: [
-        { id: p.rewardToken, amount: p.amount },
-      ],
+      tokens: [{ id: p.rewardToken, amount: p.amount }],
       attoAlphAmount: DUST_AMOUNT,
     });
     return result;
