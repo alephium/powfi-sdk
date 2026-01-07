@@ -186,4 +186,32 @@ describe('CLMM Add Liquidity', () => {
       fixture.addLiquidity(lp, configIndex, hugeAmount, hugeAmount, 30n, tickLower, tickUpper),
     ).rejects.toThrow();
   });
+
+  test('getPoolTokenBalances returns correct balances after adding liquidity', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+
+    // Get initial pool balances
+    const balancesBefore = await fixture.zeta.clmm.getPoolTokenBalances(pool.contractId);
+
+    const amount0Desired = 100n * ONE_ALPH;
+    const { amount0, amount1 } = await fixture.addRangePosition({
+      lp,
+      pool,
+      configIndex,
+      sqrtPriceCurrent,
+      range: { tickLower, tickUpper },
+      amount0Desired,
+      amount1Desired: UNLIMITED_AMOUNT,
+    });
+
+    // Get pool balances after adding liquidity
+    const balancesAfter = await fixture.zeta.clmm.getPoolTokenBalances(pool.contractId);
+
+    // Verify the exact difference matches what was added
+    expect(balancesAfter.token0Balance - balancesBefore.token0Balance).toBe(amount0);
+    expect(balancesAfter.token1Balance - balancesBefore.token1Balance).toBe(amount1);
+  });
 });
