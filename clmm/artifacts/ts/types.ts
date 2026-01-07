@@ -49,6 +49,14 @@ export interface ModifyPositionParams extends Record<string, Val> {
   tickUpper: bigint;
   liquidityDelta: bigint;
 }
+export interface PositionInfo extends Record<string, Val> {
+  amount0: bigint;
+  amount1: bigint;
+  fees: [bigint, bigint, bigint];
+  avgValue: bigint;
+  avgFees: bigint;
+  avgTime: bigint;
+}
 export interface ProtocolFees extends Record<string, Val> {
   token0: bigint;
   token1: bigint;

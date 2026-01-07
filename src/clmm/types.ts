@@ -77,6 +77,18 @@ export interface CollectTokens {
   amount1Max: bigint;
 }
 
+export interface PositionPath {
+  poolId: string;
+  owner: string;
+  tickLower: bigint;
+  tickUpper: bigint;
+  acc: bigint;
+  iacc0: bigint;
+  iacc1: bigint;
+  t0: bigint;
+  acct0: bigint;
+}
+
 export interface CollectProtocolFees {
   token0: string;
   token1: string;

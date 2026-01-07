@@ -26,6 +26,7 @@ import type {
   ClmmPoolConfig,
   SetRewardParams,
   ExtendRewards,
+  PositionPath,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
 import {
@@ -40,6 +41,7 @@ import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
 import { PoolNotFoundError, sortTokens } from '../common';
+import { PositionInfo } from '../../clmm/artifacts/ts/types';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -390,6 +392,11 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result };
   }
 
+  async positionInfo({ poolId, ...args }: PositionPath): Promise<PositionInfo> {
+    const pool = Pool.at(addressFromContractId(poolId));
+    const { returns } = await pool.view.positionInfo({ args });
+    return returns;
+  }
   async collectTokens(
     p: CollectTokens,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {

@@ -219,6 +219,33 @@
     ]
   },
   {
+    "name": "PositionInfo",
+    "fieldNames": [
+      "amount0",
+      "amount1",
+      "fees",
+      "avgValue",
+      "avgFees",
+      "avgTime"
+    ],
+    "fieldTypes": [
+      "I256",
+      "I256",
+      "[U256;3]",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
     "name": "Config",
     "fieldNames": [
       "tickSpacing",
