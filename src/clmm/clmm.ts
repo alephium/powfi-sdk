@@ -366,23 +366,11 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result };
   }
 
-  async positionInfo(p: PositionPath): Promise<PositionInfo> {
-    const pool = Pool.at(addressFromContractId(p.poolId));
-    const result = await pool.view.positionInfo({
-      args: {
-        owner: p.owner,
-        tickLower: p.tickLower,
-        tickUpper: p.tickUpper,
-        acc: p.acc,
-        iacc0: p.iacc0,
-        iacc1: p.iacc1,
-        t0: p.t0,
-        acct0: p.acct0,
-      },
-    });
-    return result.returns;
+  async positionInfo({ poolId, ...args }: PositionPath): Promise<PositionInfo> {
+    const pool = Pool.at(addressFromContractId(poolId));
+    const { returns } = await pool.view.positionInfo({ args });
+    return returns;
   }
-
   async collectTokens(
     p: CollectTokens,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
