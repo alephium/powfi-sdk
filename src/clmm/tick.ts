@@ -7,7 +7,7 @@ import {
   Q32,
   Q64,
   Q96,
-} from '../../clmm/artifacts/ts/constants';
+} from 'clmm/artifacts/ts/constants';
 import { U256_MAX } from './constants';
 import Decimal from 'decimal.js';
 import { MathUtil } from '../common/math';

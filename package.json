@@ -14,10 +14,7 @@
   },
   "files": [
     "lib",
-    "src",
-    "cpmm",
-    "clmm",
-    "staking"
+    "src"
   ],
   "scripts": {
     "build": "bunx tsup src --format cjs,esm --dts --sourcemap --no-splitting -d lib",
@@ -53,7 +50,10 @@
   "dependencies": {
     "@alephium/token-list": "0.0.20",
     "@alephium/web3": "^2.0.8",
-    "decimal.js": "^10.6.0"
+    "clmm": "workspace:*",
+    "cpmm": "workspace:*",
+    "decimal.js": "^10.6.0",
+    "staking": "workspace:*"
   },
   "devDependencies": {
     "@alephium/web3-test": "^v2.0.8",

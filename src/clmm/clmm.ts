@@ -10,7 +10,7 @@ import {
   groupOfAddress,
   ALPH_TOKEN_ID,
 } from '@alephium/web3';
-import { loadDeployments } from '../../clmm/artifacts/ts/deployments';
+import { loadDeployments } from 'clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
 import type { Zeta } from '../zeta';
 import type {
@@ -29,7 +29,7 @@ import type {
   PositionPath,
   ClmmPositionInfo,
 } from './types';
-import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
+import type { PoolInstance, PoolTypes } from 'clmm/artifacts/ts';
 import {
   CreateLiquidPool,
   Pool,
@@ -37,7 +37,7 @@ import {
   PoolFactory,
   PositionManager,
   SwapWithoutAccount,
-} from '../../clmm/artifacts/ts';
+} from 'clmm/artifacts/ts';
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';

@@ -1,7 +1,7 @@
 import type { TokenInfo } from '@alephium/token-list';
 import { TickUtils } from './tick';
 import { MathUtil } from '../common/math';
-import { Q96 } from '../../clmm/artifacts/ts/constants';
+import { Q96 } from 'clmm/artifacts/ts/constants';
 import type { GetPositionAmountsFromPriceProps, GetPositionAmountsFromPriceReturn } from './types';
 
 export class ClmmLiquidityUtils {

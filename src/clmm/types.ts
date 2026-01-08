@@ -1,6 +1,6 @@
 import type { TokenInfo } from '@alephium/token-list';
-import { Pool } from '../../clmm/artifacts/ts/Pool';
-import { PositionInfo } from '../../clmm/artifacts/ts/types';
+import { Pool } from 'clmm/artifacts/ts/Pool';
+import { PositionInfo } from 'clmm/artifacts/ts/types';
 
 export interface ClmmConfig {
   groupIndex: number;

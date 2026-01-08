@@ -16,7 +16,7 @@ import type {
   DexAccountInstance,
   PoolFactoryInstance,
   PoolInstance,
-} from '../../../clmm/artifacts/ts';
+} from 'clmm/artifacts/ts';
 import {
   BitmapWord,
   DexAccount,
@@ -26,7 +26,7 @@ import {
   Position,
   Tick,
   PositionManager,
-} from '../../../clmm/artifacts/ts';
+} from 'clmm/artifacts/ts';
 import { TickUtils } from '../../../src/clmm/tick';
 import { Zeta } from '../../../src/zeta';
 import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src';

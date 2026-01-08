@@ -5,7 +5,7 @@ import {
   groupOfAddress,
   subContractId,
 } from '@alephium/web3';
-import { Pool } from '../../clmm/artifacts/ts/Pool';
+import { Pool } from 'clmm/artifacts/ts/Pool';
 import { TickUtils } from './tick';
 import type { LiquidityDistribution } from './types';
 import { ClmmLiquidityUtils } from './liquidity';

@@ -17,7 +17,7 @@ import type {
   XAlphStakeVaultTypes,
   XAlphTokenInstance,
   XAlphTokenTypes,
-} from '../../staking/artifacts/ts';
+} from 'staking/artifacts/ts';
 import {
   AlphStakeAndLock,
   AlphUnstakeVault,
@@ -26,8 +26,8 @@ import {
   XAlphStakeVault,
   XAlphToken,
   XAlphUnlockAndStartUnstake,
-} from '../../staking/artifacts/ts';
-import { loadDeployments } from '../../staking/artifacts/ts/deployments';
+} from 'staking/artifacts/ts';
+import { loadDeployments } from 'staking/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
 import type { Zeta } from '../zeta';
 import type { StakeVaultUserInfo, StakingConfig } from './types';

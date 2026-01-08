@@ -5,7 +5,7 @@ import {
   Q96,
   MAX_TICK,
   MIN_TICK,
-} from '../../clmm/artifacts/ts/constants';
+} from 'clmm/artifacts/ts/constants';
 
 describe('TickUtils', () => {
   const createToken = (id: string, decimals: number) => ({

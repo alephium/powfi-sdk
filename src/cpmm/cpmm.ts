@@ -15,8 +15,8 @@ import {
   RemoveLiquidity,
   CreatePair,
   CreatePairAndAddLiquidity,
-} from '../../cpmm/artifacts/ts';
-import { loadDeployments } from '../../cpmm/artifacts/ts/deployments';
+} from 'cpmm/artifacts/ts';
+import { loadDeployments } from 'cpmm/artifacts/ts/deployments';
 import type { CpmmPoolContractState } from './types';
 import { sortTokens } from '../common/utils';
 import { MAX_PRICE_IMPACT } from './constants';
@@ -84,7 +84,6 @@ export class CpmmModule extends ModuleBase {
         token0Info,
         token1Info,
         totalSupply: state.fields.totalSupply,
-        dexAccount: state.fields.dexAccount0,
       };
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {

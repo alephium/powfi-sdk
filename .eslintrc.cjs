@@ -25,7 +25,7 @@ module.exports = {
     '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
     'prettier/prettier': 'error',
   },
-  ignorePatterns: ['lib', 'dist', 'node_modules', 'cpmm/artifacts', 'clmm/artifacts', '*.d.ts'],
+  ignorePatterns: ['lib', 'dist', 'node_modules', '*.d.ts'],
   overrides: [
     {
       files: ['**/*.test.ts', '**/*.spec.ts'],
