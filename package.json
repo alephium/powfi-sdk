@@ -1,5 +1,5 @@
 {
-  "name": "sdk",
+  "name": "@h0ngcha0/typescript-sdk",
   "version": "0.0.1-rc.10",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
