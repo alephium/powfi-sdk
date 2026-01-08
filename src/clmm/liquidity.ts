@@ -2,17 +2,18 @@ import type { TokenInfo } from '@alephium/token-list';
 import { TickUtils } from './tick';
 import { MathUtil } from '../common/math';
 import { Q96 } from '../../clmm/artifacts/ts/constants';
+import type { GetPositionAmountsFromPriceProps } from './types';
 
 export class ClmmLiquidityUtils {
-  static getPositionAmountsFromPrice(
-    sqrtRatioX96: bigint,
-    tokenBaseId: string,
-    tokenQuoteId: string,
-    lowerTick: bigint,
-    upperTick: bigint,
-    amountBase: bigint,
-    amountQuote: bigint,
-  ): [bigint, bigint, bigint] {
+  static getPositionAmountsFromPrice({
+    sqrtRatioX96,
+    tokenBaseId,
+    tokenQuoteId,
+    lowerTick,
+    upperTick,
+    amountBase,
+    amountQuote,
+  }: GetPositionAmountsFromPriceProps): [bigint, bigint, bigint] {
     if (amountBase === 0n || amountQuote === 0n) {
       return [0n, 0n, 0n];
     }
