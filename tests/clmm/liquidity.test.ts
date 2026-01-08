@@ -3,6 +3,7 @@ import { UNLIMITED_AMOUNT } from '../../src/clmm/constants';
 import type { TokenInfo } from '@alephium/token-list';
 import { Zeta } from '../../src/zeta';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
+import { GetPositionAmountsFromPriceReturn } from '../../src';
 
 describe('LiquidityUtils', () => {
   const createToken = (id: string, decimals: number): TokenInfo => ({
@@ -58,7 +59,7 @@ describe('LiquidityUtils', () => {
     expectedBase?: bigint;
     expectedQuote?: bigint;
     expectedLiquidity?: bigint;
-  }): [bigint, bigint, bigint] => {
+  }): GetPositionAmountsFromPriceReturn => {
     const result = ClmmLiquidityUtils.getPositionAmountsFromPrice({
       sqrtRatioX96: sqrtPriceX96,
       tokenBaseId: tokenBase.id,
@@ -68,7 +69,7 @@ describe('LiquidityUtils', () => {
       amountBase,
       amountQuote,
     });
-    const [usedBase, usedQuote, liquidity] = result;
+    const { newAmountBase: usedBase, newAmountQuote: usedQuote, liquidity } = result;
 
     if (expectedBase !== undefined) {
       expect(usedBase).toBe(expectedBase);
@@ -110,7 +111,7 @@ describe('LiquidityUtils', () => {
         amountQuote: amountWETH,
       });
 
-      const [usedUSDC, usedWETH, liquidity] = result;
+      const { newAmountBase: usedUSDC, newAmountQuote: usedWETH, liquidity } = result;
       expect(usedUSDC).toBeLessThanOrEqual(amountUSDC);
       expect(usedWETH).toBeLessThanOrEqual(amountWETH);
 
@@ -147,7 +148,7 @@ describe('LiquidityUtils', () => {
       const amountWETH = 5n * 10n ** 17n; // 0.5 WETH
       const amountUSDC = 1000n * 10n ** 6n; // 1000 USDC
 
-      const [usedWETH, usedUSDC, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      const { newAmountBase: usedWETH, newAmountQuote: usedUSDC, liquidity } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
         sqrtRatioX96: sqrtPriceX96,
         tokenBaseId: WETH.id,
         tokenQuoteId: USDC.id,
@@ -218,8 +219,8 @@ describe('LiquidityUtils', () => {
         amountQuote: amountUSDC,
       });
 
-      const [usedUSDC, usedWETH, liquidity] = normalResult;
-      const [usedWETHReversed, usedUSDCReversed, liquidityReversed] = reversedResult;
+      const { newAmountBase: usedUSDC, newAmountQuote: usedWETH, liquidity } = normalResult;
+      const { newAmountBase: usedWETHReversed, newAmountQuote: usedUSDCReversed, liquidity: liquidityReversed } = reversedResult;
 
       expect(liquidity).toBeGreaterThan(0n);
       expect(liquidityReversed).toBeGreaterThan(0n);
@@ -270,7 +271,7 @@ describe('LiquidityUtils', () => {
       const upperTick = priceResult.tick + 3000n;
 
       const limitedUSDC = 5000n * 10n ** 6n;
-      const [usedUSDC1, , liquidity1] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      const { newAmountBase: usedUSDC1, liquidity: liquidity1 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
         sqrtRatioX96: sqrtPriceX96,
         tokenBaseId: USDC.id,
         tokenQuoteId: WETH.id,
@@ -281,7 +282,7 @@ describe('LiquidityUtils', () => {
       });
 
       const limitedWETH = 3n * 10n ** 18n;
-      const [, usedWETH2, liquidity2] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      const { newAmountQuote: usedWETH2, liquidity: liquidity2 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
         sqrtRatioX96: sqrtPriceX96,
         tokenBaseId: USDC.id,
         tokenQuoteId: WETH.id,
@@ -477,7 +478,7 @@ describe('LiquidityUtils', () => {
       ];
 
       for (const testCase of testCases) {
-        const [usedUSDC, , liquidityUSDC] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+        const { newAmountBase: usedUSDC, liquidity: liquidityUSDC } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
           sqrtRatioX96: sqrtPriceX96,
           tokenBaseId: USDC.id,
           tokenQuoteId: WETH.id,
@@ -487,7 +488,7 @@ describe('LiquidityUtils', () => {
           amountQuote: UNLIMITED_AMOUNT,
         });
 
-        const [, usedWETH2, liquidityWETH] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+        const { newAmountQuote: usedWETH2, liquidity: liquidityWETH } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
           sqrtRatioX96: sqrtPriceX96,
           tokenBaseId: USDC.id,
           tokenQuoteId: WETH.id,

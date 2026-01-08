@@ -370,7 +370,7 @@ export class Fixture {
     amount1Desired: bigint;
     slippage?: bigint;
   }): Promise<{ amount0: bigint; amount1: bigint; liquidity: bigint }> {
-    const [amount0, amount1, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+    const { newAmountBase: amount0, newAmountQuote: amount1, liquidity } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
       sqrtRatioX96: sqrtPriceCurrent,
       tokenBaseId: this.tokenId0,
       tokenQuoteId: this.tokenId1,
