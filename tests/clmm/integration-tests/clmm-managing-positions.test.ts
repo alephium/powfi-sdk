@@ -2,6 +2,7 @@ import type { SignerProvider } from '@alephium/web3';
 import { ONE_ALPH, web3 } from '@alephium/web3';
 import { getSigner } from '@alephium/web3-test';
 import { UNLIMITED_AMOUNT } from '../../../src';
+import { PoolNotFoundError } from '../../../src/common';
 import { Fixture, getBalances } from './helpers';
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
@@ -109,5 +110,15 @@ describe('CLMM Managing Positions', () => {
     expect(deltaPool0).toBe(-deltaLp0);
     expect(deltaPool1).toBe(0n);
     expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n);
+  });
+
+  test('findBestRoute throws PoolNotFoundError for non-existent pool', async () => {
+    await expect(
+      fixture.zeta.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
+    ).rejects.toThrow(PoolNotFoundError);
+
+    await expect(
+      fixture.zeta.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
+    ).rejects.toThrow('No concentrated liquidity pool found for token pair');
   });
 });
