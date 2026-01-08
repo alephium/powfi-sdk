@@ -143,3 +143,9 @@ export interface GetPositionAmountsFromPriceProps {
   amountBase: bigint;
   amountQuote: bigint;
 }
+
+export interface GetPositionAmountsFromPriceReturn {
+  newAmountBase: bigint;
+  newAmountQuote: bigint;
+  liquidity: bigint;
+}

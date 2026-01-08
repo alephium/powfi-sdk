@@ -2,7 +2,7 @@ import type { TokenInfo } from '@alephium/token-list';
 import { TickUtils } from './tick';
 import { MathUtil } from '../common/math';
 import { Q96 } from '../../clmm/artifacts/ts/constants';
-import type { GetPositionAmountsFromPriceProps } from './types';
+import type { GetPositionAmountsFromPriceProps, GetPositionAmountsFromPriceReturn } from './types';
 
 export class ClmmLiquidityUtils {
   static getPositionAmountsFromPrice({
@@ -13,9 +13,9 @@ export class ClmmLiquidityUtils {
     upperTick,
     amountBase,
     amountQuote,
-  }: GetPositionAmountsFromPriceProps): [bigint, bigint, bigint] {
+  }: GetPositionAmountsFromPriceProps): GetPositionAmountsFromPriceReturn {
     if (amountBase === 0n || amountQuote === 0n) {
-      return [0n, 0n, 0n];
+      return { newAmountBase: 0n, newAmountQuote: 0n, liquidity: 0n };
     }
     const amounts = [amountBase, amountQuote];
     const sqrts = [
@@ -37,7 +37,9 @@ export class ClmmLiquidityUtils {
       amounts[0],
       amounts[1],
     );
-    return reverse2 ? [amount1, amount0, liquidity] : [amount0, amount1, liquidity];
+    return reverse2
+      ? { newAmountBase: amount1, newAmountQuote: amount0, liquidity }
+      : { newAmountBase: amount0, newAmountQuote: amount1, liquidity };
   }
 
   static getAmountsAndLiquidityAtPrice(
