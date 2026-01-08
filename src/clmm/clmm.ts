@@ -388,6 +388,7 @@ export class ClmmModule extends ModuleBase {
         },
       },
       tokens: [{ id: positionId, amount: 1n }],
+      attoAlphAmount: DUST_AMOUNT * 3n,
     });
     return { positionId, result };
   }
