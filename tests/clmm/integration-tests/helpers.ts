@@ -370,15 +370,15 @@ export class Fixture {
     amount1Desired: bigint;
     slippage?: bigint;
   }): Promise<{ amount0: bigint; amount1: bigint; liquidity: bigint }> {
-    const [amount0, amount1, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice(
-      sqrtPriceCurrent,
-      this.tokenId0,
-      this.tokenId1,
-      range.tickLower,
-      range.tickUpper,
-      amount0Desired,
-      amount1Desired,
-    );
+    const [amount0, amount1, liquidity] = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      sqrtRatioX96: sqrtPriceCurrent,
+      tokenBaseId: this.tokenId0,
+      tokenQuoteId: this.tokenId1,
+      lowerTick: range.tickLower,
+      upperTick: range.tickUpper,
+      amountBase: amount0Desired,
+      amountQuote: amount1Desired,
+    });
     const currentTick = TickUtils.getTickAtSqrtRatio(sqrtPriceCurrent);
     const isActive = range.tickLower <= currentTick && currentTick < range.tickUpper;
     const liquidityDelta = isActive ? liquidity : 0n;

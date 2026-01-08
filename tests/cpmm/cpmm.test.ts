@@ -226,8 +226,8 @@ describe('CpmmModule functions', () => {
         liquidityToRemove,
       );
 
-      expect(result.token0Id).toBe('token0');
-      expect(result.token1Id).toBe('token1');
+      expect(result.token0.id).toBe('token0');
+      expect(result.token1.id).toBe('token1');
       const expectedAmount0 =
         (liquidityToRemove * mockCpmmPoolState.reserve0) / mockCpmmPoolState.totalSupply;
       const expectedAmount1 =
@@ -306,8 +306,8 @@ describe('CpmmModule functions', () => {
 
       expect(result.amount0).toBe((liquidityBalance * reserve0) / totalSupply);
       expect(result.amount1).toBe((liquidityBalance * reserve1) / totalSupply);
-      expect(result.token0Id).toBe(token0.id);
-      expect(result.token1Id).toBe(token1.id);
+      expect(result.token0.id).toBe(token0.id);
+      expect(result.token1.id).toBe(token1.id);
 
       // Simulate two swaps with external inputs to accrue fees in both tokens
       const swapIn0 = ONE_ALPH * 110n;

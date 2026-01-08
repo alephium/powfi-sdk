@@ -2,41 +2,38 @@ import type { TokenInfo } from '@alephium/token-list';
 import { TickUtils } from './tick';
 import { MathUtil } from '../common/math';
 import { Q96 } from '../../clmm/artifacts/ts/constants';
+import type { GetPositionAmountsFromPriceProps, GetPositionAmountsFromPriceReturn } from './types';
 
 export class ClmmLiquidityUtils {
   static getPositionAmountsFromPrice(
-    sqrtRatioX96: bigint,
-    tokenBaseId: string,
-    tokenQuoteId: string,
-    lowerTick: bigint,
-    upperTick: bigint,
-    amountBase: bigint,
-    amountQuote: bigint,
-  ): [bigint, bigint, bigint] {
-    if (amountBase === 0n || amountQuote === 0n) {
-      return [0n, 0n, 0n];
+    p: GetPositionAmountsFromPriceProps,
+  ): GetPositionAmountsFromPriceReturn {
+    if (p.amountBase === 0n || p.amountQuote === 0n) {
+      return { newAmountBase: 0n, newAmountQuote: 0n, liquidity: 0n };
     }
-    const amounts = [amountBase, amountQuote];
+    const amounts = [p.amountBase, p.amountQuote];
     const sqrts = [
-      TickUtils.getSqrtRatioAtTick(lowerTick),
-      TickUtils.getSqrtRatioAtTick(upperTick),
+      TickUtils.getSqrtRatioAtTick(p.lowerTick),
+      TickUtils.getSqrtRatioAtTick(p.upperTick),
     ];
-    const reverse1 = lowerTick > upperTick;
+    const reverse1 = p.lowerTick > p.upperTick;
     if (reverse1) {
       sqrts.reverse();
     }
-    const reverse2 = tokenBaseId > tokenQuoteId;
+    const reverse2 = p.tokenBaseId > p.tokenQuoteId;
     if (reverse2) {
       amounts.reverse();
     }
     const [amount0, amount1, liquidity] = this.getAmountsAndLiquidityAtSqrtPrice(
-      sqrtRatioX96,
+      p.sqrtRatioX96,
       sqrts[0],
       sqrts[1],
       amounts[0],
       amounts[1],
     );
-    return reverse2 ? [amount1, amount0, liquidity] : [amount0, amount1, liquidity];
+    return reverse2
+      ? { newAmountBase: amount1, newAmountQuote: amount0, liquidity }
+      : { newAmountBase: amount0, newAmountQuote: amount1, liquidity };
   }
 
   static getAmountsAndLiquidityAtPrice(

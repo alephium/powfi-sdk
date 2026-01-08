@@ -316,9 +316,9 @@ export class CpmmModule extends ModuleBase {
     const state = await this.getPoolState(tokenAId, tokenBId);
     const details = CpmmModule.computeClaimableAmounts(state, liquidityBalance);
     return {
-      token0Id: details.token0Id,
+      token0: details.token0,
       amount0: details.amount0,
-      token1Id: details.token1Id,
+      token1: details.token1,
       amount1: details.amount1,
     };
   }
@@ -471,9 +471,9 @@ export class CpmmModule extends ModuleBase {
 
     return {
       state: state,
-      token0Id: state.token0Info.id,
+      token0: state.token0Info,
       amount0,
-      token1Id: state.token1Info.id,
+      token1: state.token1Info,
       amount1,
       remainShareAmount,
       remainSharePercentage: parseFloat(remainSharePercentage),

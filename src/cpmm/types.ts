@@ -71,18 +71,18 @@ export interface RemoveLiquidityParams {
 
 export interface RemoveLiquidityDetails {
   state: CpmmPoolContractState;
-  token0Id: string;
+  token0: TokenInfo;
   amount0: bigint;
-  token1Id: string;
+  token1: TokenInfo;
   amount1: bigint;
   remainShareAmount: bigint;
   remainSharePercentage: number;
 }
 
 export interface ClaimableAmounts {
-  token0Id: string;
+  token0: TokenInfo;
   amount0: bigint;
-  token1Id: string;
+  token1: TokenInfo;
   amount1: bigint;
 }
 
