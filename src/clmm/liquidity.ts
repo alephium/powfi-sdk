@@ -5,33 +5,27 @@ import { Q96 } from '../../clmm/artifacts/ts/constants';
 import type { GetPositionAmountsFromPriceProps, GetPositionAmountsFromPriceReturn } from './types';
 
 export class ClmmLiquidityUtils {
-  static getPositionAmountsFromPrice({
-    sqrtRatioX96,
-    tokenBaseId,
-    tokenQuoteId,
-    lowerTick,
-    upperTick,
-    amountBase,
-    amountQuote,
-  }: GetPositionAmountsFromPriceProps): GetPositionAmountsFromPriceReturn {
-    if (amountBase === 0n || amountQuote === 0n) {
+  static getPositionAmountsFromPrice(
+    p: GetPositionAmountsFromPriceProps,
+  ): GetPositionAmountsFromPriceReturn {
+    if (p.amountBase === 0n || p.amountQuote === 0n) {
       return { newAmountBase: 0n, newAmountQuote: 0n, liquidity: 0n };
     }
-    const amounts = [amountBase, amountQuote];
+    const amounts = [p.amountBase, p.amountQuote];
     const sqrts = [
-      TickUtils.getSqrtRatioAtTick(lowerTick),
-      TickUtils.getSqrtRatioAtTick(upperTick),
+      TickUtils.getSqrtRatioAtTick(p.lowerTick),
+      TickUtils.getSqrtRatioAtTick(p.upperTick),
     ];
-    const reverse1 = lowerTick > upperTick;
+    const reverse1 = p.lowerTick > p.upperTick;
     if (reverse1) {
       sqrts.reverse();
     }
-    const reverse2 = tokenBaseId > tokenQuoteId;
+    const reverse2 = p.tokenBaseId > p.tokenQuoteId;
     if (reverse2) {
       amounts.reverse();
     }
     const [amount0, amount1, liquidity] = this.getAmountsAndLiquidityAtSqrtPrice(
-      sqrtRatioX96,
+      p.sqrtRatioX96,
       sqrts[0],
       sqrts[1],
       amounts[0],
