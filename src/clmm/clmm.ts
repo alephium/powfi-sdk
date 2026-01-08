@@ -27,6 +27,7 @@ import type {
   SetRewardParams,
   ExtendRewards,
   PositionPath,
+  ClmmPositionInfo,
 } from './types';
 import type { PoolInstance, PoolTypes } from '../../clmm/artifacts/ts';
 import {
@@ -41,7 +42,6 @@ import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
 import { PoolNotFoundError, sortTokens } from '../common';
-import { PositionInfo } from '../../clmm/artifacts/ts/types';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -392,7 +392,7 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result };
   }
 
-  async positionInfo({ poolId, ...args }: PositionPath): Promise<PositionInfo> {
+  async positionInfo({ poolId, ...args }: PositionPath): Promise<ClmmPositionInfo> {
     const pool = Pool.at(addressFromContractId(poolId));
     const { returns } = await pool.view.positionInfo({ args });
     return returns;
@@ -448,6 +448,11 @@ export class ClmmModule extends ModuleBase {
       },
       [-1n, 0n],
     );
+
+    if (index === -1n) {
+      throw new PoolNotFoundError(`No concentrated liquidity pool found for token pair ${token0}/${token1}`);
+    }
+
     return index;
   }
 

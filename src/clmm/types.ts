@@ -1,5 +1,6 @@
 import type { TokenInfo } from '@alephium/token-list';
 import { Pool } from '../../clmm/artifacts/ts/Pool';
+import { PositionInfo } from '../../clmm/artifacts/ts/types';
 
 export interface ClmmConfig {
   groupIndex: number;
@@ -133,3 +134,5 @@ export interface ClmmPoolConfig {
 }
 
 export const MAX_PIPS = Pool.consts.MAX_PIPS;
+
+export type ClmmPositionInfo = PositionInfo
