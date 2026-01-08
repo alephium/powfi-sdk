@@ -14,6 +14,7 @@ export interface CpmmPoolContractState {
   token0Info: TokenInfo;
   token1Info: TokenInfo;
   totalSupply: bigint;
+  dexAccount: string;
 }
 
 export interface SwapParams {
