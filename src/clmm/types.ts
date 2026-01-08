@@ -135,4 +135,21 @@ export interface ClmmPoolConfig {
 
 export const MAX_PIPS = Pool.consts.MAX_PIPS;
 
+
 export type ClmmPositionInfo = PositionInfo
+
+export interface GetPositionAmountsFromPriceProps {
+  sqrtRatioX96: bigint;
+  tokenBaseId: string;
+  tokenQuoteId: string;
+  lowerTick: bigint;
+  upperTick: bigint;
+  amountBase: bigint;
+  amountQuote: bigint;
+}
+
+export interface GetPositionAmountsFromPriceReturn {
+  newAmountBase: bigint;
+  newAmountQuote: bigint;
+  liquidity: bigint;
+}
