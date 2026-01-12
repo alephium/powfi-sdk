@@ -42,6 +42,10 @@ export async function getBalances(address: string, tokenIds: string[]): Promise<
   return { alph: BigInt(balance.balance), tokens }
 }
 
+export function timeout(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 export async function assertBalancesChange(params: {
   pool: PoolInstance
   signer: SignerProvider
@@ -91,7 +95,7 @@ export class Fixture {
   ) {}
 
   static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 5_000n * ONE_ALPH)
+    const [deployer] = await getSigners(1, 20n * ONE_ALPH)
 
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
     powfi.setCurrentProviders()
@@ -121,8 +125,9 @@ export class Fixture {
           tickTemplate: tickTemplate.contractId,
           wordTemplate: wordTemplate.contractId,
           poolConfigTemplate: poolConfigTemplate.contractId,
-          dexAccountTemplate: dexAccountTemplate.contractId,
-          nextConfigIndex: 0n
+          dexAccountRoot: dexAccountTemplate.contractId,
+          nextConfigIndex: 0n,
+          feeCollector: deployer.address
         }
       })
     ).contractInstance

@@ -8,7 +8,8 @@ import {
   subContractId,
   codec,
   encodePrimitiveValues,
-  groupOfAddress
+  groupOfAddress,
+  addressToBytes
 } from '@alephium/web3'
 import { loadDeployments } from 'clmm/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -26,11 +27,21 @@ import type {
   ClmmSetRewardParamsRequest,
   ClmmSimulateSwapParams,
   ClmmSwapRequest,
+  ClmmSwapToRequest,
   ClmmRemoveLiquidityRequest,
-  ClmmPositionInfo
+  ClmmPositionInfo,
+  ClmmPoolRewardState
 } from './types'
 import type { PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts'
-import { CreateLiquidPool, Pool, PoolConfig, PoolFactory, PositionManager, SwapWithoutAccount } from 'clmm/artifacts/ts'
+import {
+  CreateLiquidPool,
+  Pool,
+  PoolConfig,
+  PoolFactory,
+  DexAccount,
+  PositionManager,
+  SwapWithoutAccount
+} from 'clmm/artifacts/ts'
 import { PoolUtils } from './pool'
 import { TickUtils } from './tick'
 import { ClmmLiquidityUtils } from './liquidity'
@@ -153,10 +164,28 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
-  /**
-   * Fetches the actual token balances held by the pool contract on-chain.
-   * @throws {PoolNotFoundError} If no pool exists for the given ID.
-   */
+  async getPoolRewardState(poolId: string): Promise<ClmmPoolRewardState> {
+    try {
+      const poolAddress = addressFromContractId(poolId)
+      const pool = Pool.at(poolAddress)
+      const state = await pool.fetchState()
+      const token2Info = await this.scope.token.getTokenById(state.fields.token2)
+
+      const rewardInfos = state.fields.rewardInfos.map((r) => ({
+        amount: r.amount,
+        openTime: r.nextOpenTime,
+        endTime: r.endTime
+      }))
+
+      return {
+        token2Info,
+        rewardInfos
+      }
+    } catch (error) {
+      this.logAndThrowError(`Failed to fetch CLMM pool reward state for ${poolId}`, error)
+    }
+  }
+
   async getPoolTokenBalances(poolId: string): Promise<{ token0Balance: bigint; token1Balance: bigint }> {
     try {
       const poolAddress = addressFromContractId(poolId)
@@ -579,23 +608,31 @@ export class ClmmModule extends ModuleBase {
     })
   }
 
-  /** Collects accumulated protocol fees from a pool. Admin only. */
-  async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
-    const poolFactoryAddress = addressFromContractId(this.config.factoryId)
-    const poolFactory = PoolFactory.at(poolFactoryAddress)
-    const result = await poolFactory.transact.collectProtocolFees({
+  async swapTo(p: ClmmSwapToRequest): Promise<SignExecuteScriptTxResult> {
+    const pool = this.getPool(p.tokenIn, p.tokenOut, p.configIndex)
+    const poolState = await pool.fetchState()
+    const zeroForOne = poolState.fields.token0 === p.tokenIn
+    const signerAccount = await this.scope.signer.getSelectedAccount()
+    const signerAddress = signerAccount.address
+
+    const MAX_AMOUNT = (1n << 127n) - 1n // close to I256 max
+
+    return await pool.transact.swap({
       signer: this.scope.signer,
       args: {
-        recipient: p.recipient,
-        configIndex: p.configIndex,
-        token0: p.token0,
-        token1: p.token1
-      }
+        payer: signerAddress,
+        recipient: signerAddress,
+        token: p.tokenOut,
+        zeroForOne,
+        amountSpecified: MAX_AMOUNT,
+        sqrtPriceLimitX96: p.targetSqrtPriceX96,
+        data: ''
+      },
+      tokens: [{ id: p.tokenIn, amount: p.amountInMax }],
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
-    return result
   }
 
-  /** Configures farming reward parameters (token, amount, and time window) for a pool. Admin only. */
   async setRewardParams(p: ClmmSetRewardParamsRequest): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId)
     const poolFactory = PoolFactory.at(poolFactoryAddress)
@@ -640,6 +677,55 @@ export class ClmmModule extends ModuleBase {
   private getAddLiquidityAttoAlphAmount(token0Id: string, token1Id: string): bigint {
     const nonAlphTokenCount = [token0Id, token1Id].filter((tokenId) => tokenId !== ALPH_TOKEN_ID).length
     return BigInt(nonAlphTokenCount) * DUST_AMOUNT
+  }
+  getCollectProtocolFeesData(token0: string, token1: string, configIndex: bigint): string {
+    const [t0, t1] = sortTokens(token0, token1)
+    const poolPath = t0 + t1 + this.getPoolConfigId(configIndex)
+    return t0 + poolPath
+  }
+
+  async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
+    const [t0] = sortTokens(p.token0, p.token1)
+    const data = this.getCollectProtocolFeesData(p.token0, p.token1, p.configIndex)
+    return await this.scope.staking.collectProtocolFees(this.config.factoryId, t0, data)
+  }
+
+  async setFeeCollector(): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    const newFeeCollector = addressFromContractId(this.scope.staking.getConfig().feeCollectorId)
+    return factory.transact.setFeeCollector({
+      signer: this.scope.signer,
+      args: { newFeeCollector }
+    })
+  }
+
+  async migrateFactory(newBytecode: string): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newBytecode }
+    })
+  }
+
+  async migrateDexAccount(newBytecode: string): Promise<SignExecuteScriptTxResult> {
+    const signerAccount = await this.scope.signer.getSelectedAccount()
+    const accountId = this.getDexAccountId(signerAccount.address)
+    const account = DexAccount.at(addressFromContractId(accountId))
+    const path = binToHex(addressToBytes(signerAccount.address))
+    return await account.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newCode: newBytecode, path }
+    })
+  }
+
+  getDexAccountId(owner: string): string {
+    const group = this.config.groupIndex
+    const path = binToHex(addressToBytes(owner))
+    return subContractId(this.config.accountRoot, path, group)
+  }
+
+  buildSwapPath(tokenId: string, configIndex: bigint): string {
+    return tokenId + configIndex.toString(16).padStart(4, '0')
   }
 
   private _getClmmConfig(): ClmmConfig {

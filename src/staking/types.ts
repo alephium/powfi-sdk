@@ -3,8 +3,9 @@ export interface StakingConfig {
   alphUnstakeVaultTemplateId: string
   xAlphTokenId: string
   xAlphTokenAddress: string
-  xAlphStakeVaultId: string
-  xAlphStakeVaultAddress: string
+  feeCollectorId: string
+  xAlphStakeVaultId?: string
+  xAlphStakeVaultAddress?: string
   rewardSharingTemplateId?: string
   governanceDemoTemplateId?: string
 }

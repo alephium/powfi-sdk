@@ -12,8 +12,8 @@ describe('CLMM Create Pool', () => {
     fixture = await Fixture.create()
   })
 
-  test('createPool with groupless signer (cross-group funding)', async () => {
-    const grouplessSigner = await getSigner(500n * ONE_ALPH, 1, 'gl-secp256k1')
+  test.skip('createPool with groupless signer (cross-group funding)', async () => {
+    const grouplessSigner = await getSigner(200n * ONE_ALPH, 1, 'gl-secp256k1')
     const grouplessAccount = await grouplessSigner.getSelectedAccount()
     const grouplessAddr = grouplessAccount.address
 

@@ -15,6 +15,8 @@ import type {
   AlphUnstakeVaultTypes,
   GovernanceDemoInstance,
   RewardSharingVaultInstance,
+  RewardFeeCollectorInstance,
+  RewardFeeCollectorTypes,
   XAlphStakeVaultInstance,
   XAlphStakeVaultTypes,
   XAlphTokenInstance,
@@ -24,9 +26,11 @@ import {
   AlphUnstakeVault,
   GovernanceDemo,
   RewardSharingVault,
+  RewardFeeCollector,
   XAlphStakeVault,
   XAlphToken,
-  XAlphUnlockAndStartUnstake
+  XAlphUnlockAndStartUnstake,
+  DistributorVault
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -44,21 +48,25 @@ import { getStakingSettings } from './settings'
 export class StakingModule extends ModuleBase {
   private config: StakingConfig
   private xAlphTokenContract: XAlphTokenInstance
-  private stakeVaultContract: XAlphStakeVaultInstance
+  private stakeVaultContract?: XAlphStakeVaultInstance
 
   constructor(scope: Powfi) {
     super({ scope, moduleName: 'StakingModule' })
 
     this.config = this.loadStakingConfig()
     this.xAlphTokenContract = XAlphToken.at(addressFromContractId(this.config.xAlphTokenId))
-    this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(this.config.xAlphStakeVaultId))
+    if (this.config.xAlphStakeVaultId) {
+      this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(this.config.xAlphStakeVaultId))
+    }
   }
 
   /** Overrides the deployment addresses used by this module. */
   setConfig(config: StakingConfig): void {
     this.config = config
     this.xAlphTokenContract = XAlphToken.at(addressFromContractId(config.xAlphTokenId))
-    this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(config.xAlphStakeVaultId))
+    if (config.xAlphStakeVaultId) {
+      this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(config.xAlphStakeVaultId))
+    }
   }
 
   /** Returns the current staking deployment configuration. */
@@ -71,8 +79,11 @@ export class StakingModule extends ModuleBase {
     return this.xAlphTokenContract
   }
 
-  /** Returns the xALPH StakeVault contract instance. */
-  getStakeVault(): XAlphStakeVaultInstance {
+  getRewardFeeCollector(contractId: string): RewardFeeCollectorInstance {
+    return RewardFeeCollector.at(addressFromContractId(contractId))
+  }
+
+  getStakeVault(): XAlphStakeVaultInstance | undefined {
     return this.stakeVaultContract
   }
 
@@ -86,13 +97,15 @@ export class StakingModule extends ModuleBase {
     return GovernanceDemo.at(addressFromContractId(contractId))
   }
 
-  /** Fetches the live on-chain state of the xALPH token contract. */
   async getXAlphTokenState(): Promise<XAlphTokenTypes.State> {
     return this.xAlphTokenContract.fetchState()
   }
 
   /** Fetches the live on-chain state of the StakeVault contract. */
   async getStakeVaultState(): Promise<XAlphStakeVaultTypes.State> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     return this.stakeVaultContract.fetchState()
   }
 
@@ -106,7 +119,15 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  /** Burns xALPH and begins the unstaking cooldown period. */
+  async donateReward(amount: bigint): Promise<XAlphTokenTypes.SignExecuteMethodResult<'depositReward'>> {
+    this.ensurePositiveAmount(amount, 'Donate amount')
+    return this.xAlphTokenContract.transact.depositReward({
+      signer: this.scope.signer,
+      args: { amount },
+      attoAlphAmount: amount
+    })
+  }
+
   async startUnstake(amount: bigint): Promise<XAlphTokenTypes.SignExecuteMethodResult<'startUnstake'>> {
     this.ensurePositiveAmount(amount, 'Unstake amount')
     return this.xAlphTokenContract.transact.startUnstake({
@@ -142,6 +163,9 @@ export class StakingModule extends ModuleBase {
 
   /** Stakes xALPH into the StakeVault for governance participation and rewards. */
   async stakeXAlph(amount: bigint): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'stake'>> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     this.ensurePositiveAmount(amount, 'Stake amount')
     return this.stakeVaultContract.transact.stake({
       signer: this.scope.signer,
@@ -151,8 +175,10 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  /** Unstakes xALPH from the StakeVault. */
   async unstakeXAlph(amount: bigint): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'unstake'>> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     this.ensurePositiveAmount(amount, 'Unstake amount')
     return this.stakeVaultContract.transact.unstake({
       signer: this.scope.signer,
@@ -163,6 +189,9 @@ export class StakingModule extends ModuleBase {
 
   /** Unstakes xALPH from the StakeVault and starts the ALPH unstaking cooldown in one transaction. */
   async unlockAndStartUnstake(amount: bigint): Promise<ExecuteScriptResult> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     return XAlphUnlockAndStartUnstake.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -197,6 +226,9 @@ export class StakingModule extends ModuleBase {
     contractId: string,
     merkleProof: HexString
   ): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'connectToDapp'>> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     return this.stakeVaultContract.transact.connectToDapp({
       signer: this.scope.signer,
       args: { contractId, merkleProof },
@@ -208,6 +240,9 @@ export class StakingModule extends ModuleBase {
   async disconnectFromDapp(
     contractId: string
   ): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'disconnectFromDapp'>> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     return this.stakeVaultContract.transact.disconnectFromDapp({
       signer: this.scope.signer,
       args: { contractId },
@@ -217,6 +252,9 @@ export class StakingModule extends ModuleBase {
 
   /** Returns the user's staked xALPH amount and list of connected dapps. */
   async getUserStakeVaultInfo(address: string): Promise<StakeVaultUserInfo> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.getUserStakingInfo({
       args: { user: stakerAddress }
@@ -229,6 +267,9 @@ export class StakingModule extends ModuleBase {
 
   /** Checks whether the user has an active stake in the StakeVault. */
   async isUserStaking(address: string): Promise<boolean> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.isStaking({ args: { user: stakerAddress } })
     return result.returns
@@ -236,6 +277,9 @@ export class StakingModule extends ModuleBase {
 
   /** Returns the user's governance weight based on their staked xALPH. */
   async getUserWeight(address: string): Promise<bigint> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.getWeight({ args: { user: stakerAddress } })
     return result.returns
@@ -259,7 +303,82 @@ export class StakingModule extends ModuleBase {
     return result.returns
   }
 
-  /** Returns network-specific staking parameters such as cooldown duration and limits. */
+  async distributeRewards(
+    contractId: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'distributeRewards'>> {
+    return this.getRewardFeeCollector(contractId).transact.distributeRewards({
+      signer: this.scope.signer,
+      attoAlphAmount: DUST_AMOUNT
+    })
+  }
+
+  async enableToken(token: string): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'enableToken'>> {
+    const vaultId = subContractId(
+      this.config.feeCollectorId,
+      token,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    try {
+      await this.scope.nodeProvider.contracts.getContractsAddressState(addressFromContractId(vaultId))
+      return {} as RewardFeeCollectorTypes.SignExecuteMethodResult<'enableToken'>
+    } catch {
+      return this.getRewardFeeCollector(this.config.feeCollectorId).transact.enableToken({
+        signer: this.scope.signer,
+        args: { token },
+        attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + DUST_AMOUNT
+      })
+    }
+  }
+
+  async setRewardRate(newRate: bigint): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setRewardRate'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setRewardRate({
+      signer: this.scope.signer,
+      args: { newRate }
+    })
+  }
+
+  async setBurnRate(newRate: bigint): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setBurnRate'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setBurnRate({
+      signer: this.scope.signer,
+      args: { newRate }
+    })
+  }
+
+  async collectProtocolFees(
+    protocolFeeCollector: string,
+    token: string,
+    data: HexString
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'collectProtocolFees'>> {
+    const vaultId = subContractId(
+      this.config.feeCollectorId,
+      token,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    const vaultAddress = addressFromContractId(vaultId)
+    const vault = DistributorVault.at(vaultAddress)
+    return await vault.transact.collectProtocolFees({
+      signer: this.scope.signer,
+      args: { protocolFeeCollector, data },
+      attoAlphAmount: DUST_AMOUNT
+    })
+  }
+
+  async migrateXAlphToken(newBytecode: string): Promise<XAlphTokenTypes.SignExecuteMethodResult<'upgrade'>> {
+    return this.xAlphTokenContract.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newBytecode }
+    })
+  }
+
+  async migrateRewardFeeCollector(
+    newBytecode: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
+      signer: this.scope.signer,
+      args: { newBytecode }
+    })
+  }
+
   getSettings(): StakingSettings {
     return getStakingSettings(this.scope.network.id)
   }
@@ -270,18 +389,26 @@ export class StakingModule extends ModuleBase {
       const deployments = loadDeployments(networkId)
       const alphUnstakeVault = deployments.contracts.AlphUnstakeVault.contractInstance
       const xAlphToken = deployments.contracts.XAlphToken.contractInstance
-      const stakeVault = deployments.contracts.XAlphStakeVault.contractInstance
-      const rewardVault = deployments.contracts.RewardSharingVault.contractInstance
-      const governance = deployments.contracts.GovernanceDemo.contractInstance
+      const feeCollector = deployments.contracts.RewardFeeCollector.contractInstance
+
+      const contracts = deployments.contracts as Record<
+        string,
+        { contractInstance: { contractId: string; address: string; groupIndex: number } }
+      >
+      const stakeVault = contracts.XAlphStakeVault?.contractInstance
+      const rewardVault = contracts.RewardSharingVault?.contractInstance
+      const governance = contracts.GovernanceDemo?.contractInstance
+
       return {
-        groupIndex: stakeVault.groupIndex,
+        groupIndex: stakeVault?.groupIndex ?? xAlphToken.groupIndex,
         alphUnstakeVaultTemplateId: alphUnstakeVault.contractId,
         xAlphTokenId: xAlphToken.contractId,
         xAlphTokenAddress: xAlphToken.address,
-        xAlphStakeVaultId: stakeVault.contractId,
-        xAlphStakeVaultAddress: stakeVault.address,
-        rewardSharingTemplateId: rewardVault.contractId,
-        governanceDemoTemplateId: governance.contractId
+        feeCollectorId: feeCollector.contractId,
+        xAlphStakeVaultId: stakeVault?.contractId,
+        xAlphStakeVaultAddress: stakeVault?.address,
+        rewardSharingTemplateId: rewardVault?.contractId,
+        governanceDemoTemplateId: governance?.contractId
       }
     } catch (error) {
       this.logAndThrowError(`Failed to load staking deployments on ${networkId}`, error)
@@ -296,7 +423,8 @@ export class StakingModule extends ModuleBase {
 
   private getStakerAddress(address: string): string {
     if (isGrouplessAddressWithoutGroupIndex(address)) {
-      return `${address}:${this.stakeVaultContract.groupIndex}`
+      const groupIndex = this.stakeVaultContract?.groupIndex ?? this.xAlphTokenContract.groupIndex
+      return `${address}:${groupIndex}`
     }
     return address
   }

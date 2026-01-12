@@ -8,6 +8,7 @@ export interface CpmmConfig {
   groupIndex: number
   factoryId: string
   routerId: string
+  accountRoot?: string
   feeCollectorFactoryId?: string
 }
 
@@ -116,4 +117,9 @@ export interface CpmmCreatePoolRequest {
     tokenAAmount: bigint
     tokenBAmount: bigint
   }
+}
+
+export interface CpmmCollectProtocolFeesRequest {
+  tokenAId: CpmmTokenId
+  tokenBId: CpmmTokenId
 }

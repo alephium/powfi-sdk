@@ -16,6 +16,8 @@ import {
   XAlphStakeVault,
   AlphUnstakeVault,
   RewardSharingVault,
+  RewardFeeCollector,
+  DistributorVault,
   type XAlphTokenInstance,
   type XAlphStakeVaultInstance,
   type AlphUnstakeVaultInstance
@@ -91,7 +93,7 @@ export class Fixture {
   }
 
   static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 10_000n * ONE_ALPH)
+    const [deployer] = await getSigners(1, 20n * ONE_ALPH)
 
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
     powfi.setCurrentProviders()
@@ -101,6 +103,7 @@ export class Fixture {
     const xAlphTokenContract = (
       await XAlphToken.deploy(deployer, {
         initialFields: {
+          owner: deployer.address,
           symbol: stringToHex('XALPH'),
           name: stringToHex('Staked ALPH'),
           decimals: 18n,
@@ -133,16 +136,28 @@ export class Fixture {
       })
     ).contractInstance
 
+    const distributorVaultTemplate = (await DistributorVault.deployTemplate(deployer)).contractInstance
+
+    const feeCollectorContract = (
+      await RewardFeeCollector.deploy(deployer, {
+        initialFields: {
+          owner: (await deployer.getSelectedAccount()).address,
+          xAlph: xAlphTokenContract.contractId,
+          distributorVaultTemplateId: distributorVaultTemplate.contractId,
+          lastUpdate: 0n,
+          rewardRate: 0n,
+          burnRate: 0n
+        }
+      })
+    ).contractInstance
+
     // Configure Powfi SDK to use the deployed contracts
     const stakingConfig: StakingConfig = {
-      groupIndex: stakeVaultContract.groupIndex,
+      groupIndex: xAlphTokenContract.groupIndex,
       alphUnstakeVaultTemplateId: unstakeVaultTemplate.contractId,
       xAlphTokenId: xAlphTokenContract.contractId,
       xAlphTokenAddress: xAlphTokenContract.address,
-      xAlphStakeVaultId: stakeVaultContract.contractId,
-      xAlphStakeVaultAddress: stakeVaultContract.address,
-      rewardSharingTemplateId: rewardSharingTemplate.contractId,
-      governanceDemoTemplateId: '' // Not needed for tests
+      feeCollectorId: feeCollectorContract.contractId
     }
     powfi.staking.setConfig(stakingConfig)
 
@@ -169,34 +184,12 @@ export class Fixture {
     return this.powfi.staking.cancelUnstake(vaultIndex)
   }
 
-  async stakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.stakeXAlph(amount)
-  }
-
-  async unstakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.unstakeXAlph(amount)
-  }
-
-  async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.unlockAndStartUnstake(amount)
-  }
-
   async getXAlphTokenState(): Promise<StakingState> {
     const state = await this.powfi.staking.getXAlphTokenState()
     return {
       totalDepositedAlph: state.fields.totalDepositedAlph,
       totalXAlphSupply: state.fields.totalXAlphSupply,
       lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex
-    }
-  }
-
-  async getStakeVaultState(): Promise<StakeVaultState> {
-    const state = await this.powfi.staking.getStakeVaultState()
-    return {
-      totalStakedAmount: state.fields.totalStakedAmount
     }
   }
 
@@ -208,18 +201,6 @@ export class Fixture {
   async getClaimableAmount(signer: SignerProvider, vaultIndex: bigint): Promise<bigint> {
     const account = await signer.getSelectedAccount()
     return this.powfi.staking.getClaimableAmount(account.address, vaultIndex)
-  }
-
-  async getUserStakingInfo(address: string): Promise<{ amount: bigint; connectedDapps: string[] }> {
-    return this.powfi.staking.getUserStakeVaultInfo(address)
-  }
-
-  async isUserStaking(address: string): Promise<boolean> {
-    return this.powfi.staking.isUserStaking(address)
-  }
-
-  async getUserWeight(address: string): Promise<bigint> {
-    return this.powfi.staking.getUserWeight(address)
   }
 
   getUnstakeVaultAddress(userAddress: string, vaultIndex: bigint): string {
