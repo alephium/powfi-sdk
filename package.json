@@ -1,6 +1,6 @@
 {
   "name": "@h0ngcha0/typescript-sdk",
-  "version": "0.0.1-rc.11",
+  "version": "0.0.1-rc.12",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -17,7 +17,7 @@
     "src"
   ],
   "scripts": {
-    "build": "bunx tsup src --format cjs,esm --dts --sourcemap --no-splitting -d lib",
+    "build": "bunx tsup",
     "dev": "bunx tsup src --watch --format cjs,esm --dts --sourcemap --no-splitting -d lib",
     "test": "bunx jest",
     "test:watch": "bunx jest --watch",
@@ -50,12 +50,12 @@
   "dependencies": {
     "@alephium/token-list": "0.0.20",
     "@alephium/web3": "^2.0.8",
-    "clmm": "workspace:*",
-    "cpmm": "workspace:*",
-    "decimal.js": "^10.6.0",
-    "staking": "workspace:*"
+    "decimal.js": "^10.6.0"
   },
   "devDependencies": {
+    "clmm": "workspace:*",
+    "cpmm": "workspace:*",
+    "staking": "workspace:*",
     "@alephium/web3-test": "^v2.0.8",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
