@@ -6,6 +6,7 @@ import {
   binToHex,
   codec,
   groupOfAddress,
+  isGrouplessAddressWithoutGroupIndex,
   subContractId,
 } from '@alephium/web3';
 import type {
@@ -36,9 +37,9 @@ import type { StakingSettings } from './settings';
 import { getStakingSettings } from './settings';
 
 export class StakingModule extends ModuleBase {
-  private readonly config: StakingConfig;
-  private readonly xAlphTokenContract: XAlphTokenInstance;
-  private readonly stakeVaultContract: XAlphStakeVaultInstance;
+  private config: StakingConfig;
+  private xAlphTokenContract: XAlphTokenInstance;
+  private stakeVaultContract: XAlphStakeVaultInstance;
 
   constructor(scope: Zeta) {
     super({ scope, moduleName: 'StakingModule' });
@@ -48,6 +49,12 @@ export class StakingModule extends ModuleBase {
     this.stakeVaultContract = XAlphStakeVault.at(
       addressFromContractId(this.config.xAlphStakeVaultId),
     );
+  }
+
+  setConfig(config: StakingConfig): void {
+    this.config = config;
+    this.xAlphTokenContract = XAlphToken.at(addressFromContractId(config.xAlphTokenId));
+    this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(config.xAlphStakeVaultId));
   }
 
   getConfig(): StakingConfig {
@@ -197,8 +204,12 @@ export class StakingModule extends ModuleBase {
   }
 
   async getUserStakeVaultInfo(address: string): Promise<StakeVaultUserInfo> {
+    let stakerAddress = address;
+    if (isGrouplessAddressWithoutGroupIndex(address)) {
+      stakerAddress = `${address}:${this.stakeVaultContract.groupIndex}`;
+    }
     const result = await this.stakeVaultContract.view.getUserStakingInfo({
-      args: { user: address },
+      args: { user: stakerAddress },
     });
     return {
       amount: result.returns.amount,
