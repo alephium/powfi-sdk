@@ -5,15 +5,15 @@ export * from './clmm';
 export * from './token';
 export * from './staking';
 
-export { TokenPairTypes as CpmmTokenPairTypes } from 'cpmm/artifacts/ts/TokenPair';
-export { TokenPairFactoryTypes as CpmmTokenPairFactoryTypes } from 'cpmm/artifacts/ts/TokenPairFactory';
-export { PoolTypes as ClmmPoolTypes } from 'clmm/artifacts/ts/Pool';
-export { PoolFactoryTypes as ClmmPoolFactoryTypes } from 'clmm/artifacts/ts/PoolFactory';
-export { PositionManagerTypes as ClmmPositionManagerTypes } from 'clmm/artifacts/ts/PositionManager';
-export { XAlphTokenTypes } from 'staking/artifacts/ts/XAlphToken';
-export { XAlphStakeVaultTypes } from 'staking/artifacts/ts/XAlphStakeVault';
-export { RewardSharingVaultTypes } from 'staking/artifacts/ts/RewardSharingVault';
-export { GovernanceDemoTypes } from 'staking/artifacts/ts/GovernanceDemo';
+export type { TokenPairTypes as CpmmTokenPairTypes } from 'cpmm/artifacts/ts/TokenPair';
+export type { TokenPairFactoryTypes as CpmmTokenPairFactoryTypes } from 'cpmm/artifacts/ts/TokenPairFactory';
+export type { PoolTypes as ClmmPoolTypes } from 'clmm/artifacts/ts/Pool';
+export type { PoolFactoryTypes as ClmmPoolFactoryTypes } from 'clmm/artifacts/ts/PoolFactory';
+export type { PositionManagerTypes as ClmmPositionManagerTypes } from 'clmm/artifacts/ts/PositionManager';
+export type { XAlphTokenTypes } from 'staking/artifacts/ts/XAlphToken';
+export type { XAlphStakeVaultTypes } from 'staking/artifacts/ts/XAlphStakeVault';
+export type { RewardSharingVaultTypes } from 'staking/artifacts/ts/RewardSharingVault';
+export type { GovernanceDemoTypes } from 'staking/artifacts/ts/GovernanceDemo';
 
 export * as CpmmContracts from 'cpmm/artifacts/ts';
 export * as ClmmContracts from 'clmm/artifacts/ts';
