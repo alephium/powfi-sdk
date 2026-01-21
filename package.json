@@ -1,6 +1,6 @@
 {
   "name": "@h0ngcha0/typescript-sdk",
-  "version": "0.0.1-rc.12",
+  "version": "0.0.1-rc.13",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -14,10 +14,15 @@
   },
   "files": [
     "lib",
-    "src"
+    "src",
+    "clmm",
+    "cpmm",
+    "staking"
   ],
   "scripts": {
+    "prebuild": "bun run copy-artifacts",
     "build": "bunx tsup",
+    "copy-artifacts": "rm -rf clmm cpmm staking && mkdir -p clmm cpmm staking && cp -r ../clmm/artifacts clmm/ && cp -r ../clmm/deployments clmm/ && cp -r ../cpmm/artifacts cpmm/ && cp -r ../cpmm/deployments cpmm/ && cp -r ../staking/artifacts staking/ && cp -r ../staking/deployments staking/",
     "dev": "bunx tsup src --watch --format cjs,esm --dts --sourcemap --no-splitting -d lib",
     "test": "bunx jest",
     "test:watch": "bunx jest --watch",
@@ -25,7 +30,7 @@
     "lint": "bunx eslint --max-warnings=0 . --ext .ts",
     "format": "bunx prettier --write .",
     "typecheck": "bunx tsc --noEmit",
-    "clean": "rm -rf lib",
+    "clean": "rm -rf lib clmm cpmm staking",
     "prepublishOnly": "bun run build",
     "lint:fix": "bun run lint -- --fix",
     "format:check": "bunx prettier --check ."

@@ -1,5 +1,8 @@
 /lib
 /node_modules
+/clmm
+/cpmm
+/staking
 .deployments.devnet.json
 .ralph-lsp
 
