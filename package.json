@@ -1,5 +1,5 @@
 {
-  "name": "@h0ngcha0/typescript-sdk",
+  "name": "@alephium/core-dapp-sdk",
   "version": "0.0.1-rc.13",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
