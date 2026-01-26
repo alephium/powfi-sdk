@@ -4,6 +4,7 @@ export interface Network {
   id: NetworkId;
   name: string;
   nodeUrl: string;
+  nodeApiKey?: string;
   explorerApiUrl: string;
   explorerUrl: string;
   tokenListUrl: string;

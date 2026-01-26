@@ -30,7 +30,7 @@ export class Zeta {
     const networkConfig: Network = { ...network, ...overrides };
 
     this._network = networkConfig;
-    this._nodeProvider = new NodeProvider(this._network.nodeUrl);
+    this._nodeProvider = new NodeProvider(this._network.nodeUrl, this._network.nodeApiKey);
     this._explorerProvider = new ExplorerProvider(this._network.explorerApiUrl);
     this._tokenListUrl = this._network.tokenListUrl;
     this._signer = params.signer;
