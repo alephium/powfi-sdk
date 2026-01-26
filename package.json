@@ -1,6 +1,6 @@
 {
   "name": "@alephium/core-dapp-sdk",
-  "version": "0.0.1-rc.13",
+  "version": "0.0.1-rc.14",
   "description": "Typescript SDK for Zeta Market",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
