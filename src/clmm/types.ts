@@ -49,7 +49,7 @@ export interface AddLiquidity {
   slippage: bigint;
   amount0: bigint;
   amount1: bigint;
-  tokenBalances: Map<string, bigint>;
+  existingPosition?: boolean;
 }
 
 export interface RemoveLiquidity {

@@ -274,6 +274,7 @@ export class Fixture {
     slippage: bigint,
     tickLower: bigint,
     tickUpper: bigint,
+    existingPosition?: boolean,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
     this.zeta.signer = lp;
@@ -287,10 +288,7 @@ export class Fixture {
       slippage,
       amount0,
       amount1,
-      tokenBalances: new Map([
-        [this.tokenId0, amount0],
-        [this.tokenId1, amount1],
-      ]),
+      existingPosition,
     });
   }
 
@@ -360,6 +358,7 @@ export class Fixture {
     amount0Desired,
     amount1Desired,
     slippage = 30n,
+    existingPosition,
   }: {
     lp: SignerProvider;
     pool: PoolInstance;
@@ -369,6 +368,7 @@ export class Fixture {
     amount0Desired: bigint;
     amount1Desired: bigint;
     slippage?: bigint;
+    existingPosition?: boolean;
   }): Promise<{ amount0: bigint; amount1: bigint; liquidity: bigint }> {
     const { newAmountBase: amount0, newAmountQuote: amount1, liquidity } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
       sqrtRatioX96: sqrtPriceCurrent,
@@ -396,6 +396,7 @@ export class Fixture {
           slippage,
           range.tickLower,
           range.tickUpper,
+          existingPosition,
         ),
       expect: {
         signer: {

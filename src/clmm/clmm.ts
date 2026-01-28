@@ -8,6 +8,7 @@ import {
   codec,
   encodePrimitiveValues,
   groupOfAddress,
+  isGrouplessAddressWithoutGroupIndex,
   ALPH_TOKEN_ID,
 } from '@alephium/web3';
 import { loadDeployments } from 'clmm/artifacts/ts/deployments';
@@ -42,6 +43,10 @@ import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
 import { PoolNotFoundError, sortTokens } from '../common';
+
+function normalizeAddress(address: string, group: number): string {
+  return isGrouplessAddressWithoutGroupIndex(address) ? `${address}:${group}` : address;
+}
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
@@ -281,6 +286,11 @@ export class ClmmModule extends ModuleBase {
 
     const signerAccount = await this.scope.signer.getSelectedAccount();
     const owner = p.owner || signerAccount.address;
+
+    const group = this.config.groupIndex;
+    const normalizedOwner = normalizeAddress(owner, group);
+    const normalizedPayer = normalizeAddress(signerAccount.address, group);
+
     const {
       returns: [sqrtPriceX96, sqrtRatioAX96, sqrtRatioBX96, deposit],
     } = await positionManager.view.getSqrtPricesX96({
@@ -288,7 +298,7 @@ export class ClmmModule extends ModuleBase {
         tickLower: p.tickLower,
         tickUpper: p.tickUpper,
         pool: pool.contractId,
-        owner,
+        owner: normalizedOwner,
       },
     });
     const currentTick = TickUtils.getTickAtSqrtRatio(sqrtPriceX96);
@@ -328,19 +338,19 @@ export class ClmmModule extends ModuleBase {
       { id: p.token0, amount: -minAmount0 },
       { id: p.token1, amount: -maxAmount1 },
     ];
-    const nftAmount = p.tokenBalances.get(positionId) || 0n;
-    if (nftAmount > 0n) {
-      tokens.push({ id: positionId, amount: nftAmount });
+
+    if (p.existingPosition) {
+      tokens.push({ id: positionId, amount: 1n });
     }
     const result = await positionManager.transact.addLiquidity({
       signer: this.scope.signer,
       args: {
-        payer: signerAccount.address,
+        payer: normalizedPayer,
         p: {
           token0: p.token0,
           token1: p.token1,
           configIndex: p.configIndex,
-          owner,
+          owner: normalizedOwner,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
           amount0Desired: -spotAmount0,
@@ -364,6 +374,10 @@ export class ClmmModule extends ModuleBase {
     const positionManager = PositionManager.at(positionManagerAddress);
     const signerAccount = await this.scope.signer.getSelectedAccount();
 
+    const group = this.config.groupIndex;
+    const normalizedOwner = normalizeAddress(p.owner, group);
+    const normalizedOperator = normalizeAddress(signerAccount.address, group);
+
     const positionId = PoolUtils.getPositionId(poolAddress, p.owner, p.tickLower, p.tickUpper);
 
     // Determine minimum amounts based on base token selection (Raydium pattern)
@@ -375,12 +389,12 @@ export class ClmmModule extends ModuleBase {
       signer: this.scope.signer,
       args: {
         liquidity: p.liquidity,
-        operator: signerAccount.address,
+        operator: normalizedOperator,
         p: {
           configIndex: p.configIndex,
           token0: p.token0,
           token1: p.token1,
-          owner: p.owner,
+          owner: normalizedOwner,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
           amount0Min: amount0Min,
@@ -406,18 +420,23 @@ export class ClmmModule extends ModuleBase {
     const positionManagerAddress = addressFromContractId(this.config.positionManagerId);
     const signerAccount = await this.scope.signer.getSelectedAccount();
 
+    const group = this.config.groupIndex;
+    const normalizedOwner = normalizeAddress(p.owner, group);
+    const normalizedOperator = normalizeAddress(signerAccount.address, group);
+    const normalizedRecipient = normalizeAddress(p.recipient, group);
+
     const positionManager = PositionManager.at(positionManagerAddress);
     const result = await positionManager.transact.collect({
       signer: this.scope.signer,
       args: {
         liquidity: p.liquidity,
-        operator: signerAccount.address,
+        operator: normalizedOperator,
         p: {
           configIndex: p.configIndex,
           token0: p.token0,
           token1: p.token1,
-          owner: p.owner,
-          recipient: p.recipient,
+          owner: normalizedOwner,
+          recipient: normalizedRecipient,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
           amount0Max: p.amount0Max,
