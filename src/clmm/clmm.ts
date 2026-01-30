@@ -230,6 +230,7 @@ export class ClmmModule extends ModuleBase {
     amount1: bigint,
     tickLower: bigint,
     tickUpper: bigint,
+    dustAmount?: bigint,
   ): Promise<{ poolAddress: string; result: SignExecuteScriptTxResult }> {
     const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(tick);
     const tokens = [token0, token1];
@@ -271,6 +272,7 @@ export class ClmmModule extends ModuleBase {
         { id: tokens[0], amount: amounts[0] },
         { id: tokens[1], amount: amounts[1] },
       ],
+      dustAmount: dustAmount ?? MINIMAL_CONTRACT_DEPOSIT * 2n,
     });
     const poolAddress = this.getPoolAddress(tokens[0], tokens[1], configIndex);
     return { poolAddress, result };
