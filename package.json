@@ -1,7 +1,7 @@
 {
-  "name": "@alephium/core-dapp-sdk",
-  "version": "0.0.1-rc.14",
-  "description": "Typescript SDK for Zeta Market",
+  "name": "@alephium/powfi-sdk",
+  "version": "0.0.1-rc.1",
+  "description": "Typescript SDK for Alephium PoWFi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
