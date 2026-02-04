@@ -38,16 +38,16 @@ export class PoolUtils {
     amount: bigint,
     feePips: bigint,
   ): [bigint, bigint, bigint, bigint] {
-    const zeroForOne = sqrtPriceX96 < sqrtPriceTargetX96;
-    const exactIn = amount > 0n;
+    const zeroForOne = sqrtPriceX96 >= sqrtPriceTargetX96;
+    const exactIn = amount >= 0n;
     let amountIn = 0n;
     let amountOut = 0n;
     let feeAmount = 0n;
     let sqrtPriceNextX96 = 0n;
     if (exactIn) {
       amountIn = -ClmmLiquidityUtils.getAmountDelta(
-        sqrtPriceX96,
         sqrtPriceTargetX96,
+        sqrtPriceX96,
         -liquidity,
         zeroForOne,
       );
@@ -68,44 +68,40 @@ export class PoolUtils {
         sqrtPriceTargetX96,
         sqrtPriceX96,
         liquidity,
-        zeroForOne,
+        !zeroForOne,
       );
       const sqrtPriceRealTargetX96 = TickUtils.getNextSqrtPrice(
         sqrtPriceX96,
         liquidity,
         amount,
-        zeroForOne,
+        !zeroForOne,
       );
       sqrtPriceNextX96 = -amount >= amountOut ? sqrtPriceTargetX96 : sqrtPriceRealTargetX96;
     }
     const max = sqrtPriceTargetX96 == sqrtPriceNextX96;
     if (zeroForOne) {
-      const amountIn2 = -ClmmLiquidityUtils.getAmountDelta(
+      const amountIn2 = -ClmmLiquidityUtils.getToken0Delta(
         sqrtPriceNextX96,
         sqrtPriceX96,
         -liquidity,
-        zeroForOne,
       );
-      const amountOut2 = ClmmLiquidityUtils.getAmountDelta(
+      const amountOut2 = ClmmLiquidityUtils.getToken1Delta(
         sqrtPriceNextX96,
         sqrtPriceX96,
         liquidity,
-        zeroForOne,
       );
       amountIn = max && exactIn ? amountIn : amountIn2;
       amountOut = max && !exactIn ? amountOut : amountOut2;
     } else {
-      const amountIn2 = -ClmmLiquidityUtils.getAmountDelta(
+      const amountIn2 = -ClmmLiquidityUtils.getToken1Delta(
         sqrtPriceX96,
         sqrtPriceNextX96,
         -liquidity,
-        zeroForOne,
       );
-      const amountOut2 = ClmmLiquidityUtils.getAmountDelta(
+      const amountOut2 = ClmmLiquidityUtils.getToken0Delta(
         sqrtPriceX96,
         sqrtPriceNextX96,
         liquidity,
-        zeroForOne,
       );
       amountIn = max && exactIn ? amountIn : amountIn2;
       amountOut = max && !exactIn ? amountOut : amountOut2;
@@ -115,7 +111,7 @@ export class PoolUtils {
     if (exactIn && sqrtPriceNextX96 != sqrtPriceTargetX96) {
       feeAmount = amount - amountIn;
     } else {
-      feeAmount = MathUtil.divFloor(amountIn * feePips, Pool.consts.MAX_PIPS - feePips);
+      feeAmount = -MathUtil.alphDiv(-amountIn * feePips, Pool.consts.MAX_PIPS - feePips);
     }
 
     return [sqrtPriceNextX96, amountIn, amountOut, feeAmount];
@@ -132,7 +128,7 @@ export class PoolUtils {
       const [sqrtPriceNextX96, amountIn, amountOut, feeAmount] = this.computeSwapStep(
         sqrtPriceX96,
         row.sqrtPriceX96,
-        liqDist.liquidity,
+        row.liquidity,
         amountSpecified,
         liqDist.fee,
       );

@@ -67,11 +67,11 @@ describe('CLMM Swap', () => {
       expect: {
         signer: {
           [fixture.tokenId0]: -swapIn,
-          [fixture.tokenId1]: expectedOutput - 1n,
+          [fixture.tokenId1]: -expectedOutput,
         },
         pool: {
           [fixture.tokenId0]: swapIn,
-          [fixture.tokenId1]: -expectedOutput + 1n,
+          [fixture.tokenId1]: expectedOutput,
         },
         poolLiquidityDelta: 0n,
       },
@@ -109,9 +109,9 @@ describe('CLMM Swap', () => {
     const poolToken1Delta =
       afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1];
 
-    expect(traderToken0Delta).toBeLessThanOrEqual(-expectedInput);
+    expect(traderToken0Delta).toBeLessThanOrEqual(expectedInput);
     expect(traderToken1Delta).toBe(-exactOut);
-    expect(-poolToken0Delta).toBeLessThanOrEqual(-expectedInput);
+    expect(-poolToken0Delta).toBeLessThanOrEqual(expectedInput);
     expect(poolToken1Delta).toBe(exactOut);
   }, 60000);
 

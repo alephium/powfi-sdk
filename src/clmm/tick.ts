@@ -247,19 +247,6 @@ export class TickUtils {
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn);
   }
 
-  static getNextSqrtPrice(
-    sqrtPriceX96: bigint,
-    liquidity: bigint,
-    amount: bigint,
-    zeroForOne: boolean,
-  ): bigint {
-    if (zeroForOne) {
-      return this.getNextSqrtPriceFromAmount0(sqrtPriceX96, liquidity, amount);
-    } else {
-      return this.getNextSqrtPriceFromAmount1(sqrtPriceX96, liquidity, amount);
-    }
-  }
-
   static getNextSqrtPriceFromAmount0(
     sqrtPriceX96: bigint,
     liquidity: bigint,
@@ -267,11 +254,11 @@ export class TickUtils {
   ): bigint {
     const numerator1 = liquidity * Q96;
     const product = amount * sqrtPriceX96;
-    if (product >= numerator1) {
+    const denominator = numerator1 - product;
+    if (denominator <= 0n) {
       throw new Error('Amount0 exceeds available liquidity for the swap');
     }
-    const denominator = numerator1 - product;
-    return MathUtil.alphDiv(numerator1 * sqrtPriceX96, denominator);
+    return -MathUtil.alphDiv(-numerator1 * sqrtPriceX96, denominator);
   }
 
   static getNextSqrtPriceFromAmount1(
@@ -281,6 +268,19 @@ export class TickUtils {
   ): bigint {
     const quotient = MathUtil.alphDiv(amount * Q96, liquidity);
     return sqrtPriceX96 + quotient;
+  }
+
+  static getNextSqrtPrice(
+    sqrtPX96: bigint,
+    liquidity: bigint,
+    amount: bigint,
+    zeroForOne: boolean,
+  ): bigint {
+    if (zeroForOne) {
+      return this.getNextSqrtPriceFromAmount0(sqrtPX96, liquidity, amount);
+    } else {
+      return this.getNextSqrtPriceFromAmount1(sqrtPX96, liquidity, amount);
+    }
   }
 
   static getSqrtPriceLimitX96(sqrtPriceX96: bigint, slippage: bigint, zeroForOne: boolean): bigint {
@@ -311,21 +311,9 @@ export class TickUtils {
     if (slippage < 0n || slippage >= BPS) {
       throw new Error('Invalid slippageBps; must be in [0, 10000)');
     }
-    const numMinus = (BPS - slippage) * Q128;
-    const numPlus = (BPS + slippage) * Q128;
-    const den = BPS * Q128;
-    const factorMinusQ96 = MathUtil.mulDivFloor(
-      MathUtil.sqrt(numMinus) * Q96,
-      1n,
-      MathUtil.sqrt(den),
-    );
-    const factorPlusQ96 = MathUtil.mulDivFloor(
-      MathUtil.sqrt(numPlus) * Q96,
-      1n,
-      MathUtil.sqrt(den),
-    );
-    const minSqrtPriceX96 = MathUtil.mulDivFloor(sqrtPriceX96, factorMinusQ96, Q96);
-    const maxSqrtPriceX96 = (sqrtPriceX96 * factorPlusQ96 + Q96 - 1n) / Q96;
+    const price = sqrtPriceX96 * sqrtPriceX96;
+    const minSqrtPriceX96 = MathUtil.sqrt(price * (BPS - slippage) / BPS);
+    const maxSqrtPriceX96 = MathUtil.sqrt(price * (BPS + slippage) / BPS);
     return [minSqrtPriceX96, maxSqrtPriceX96];
   }
 

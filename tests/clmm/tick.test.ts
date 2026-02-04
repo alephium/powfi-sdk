@@ -1,3 +1,4 @@
+import { BPS } from '../../src';
 import { TickUtils } from '../../src/clmm/tick';
 import {
   MIN_SQRT_RATIO,
@@ -256,6 +257,16 @@ describe('TickUtils', () => {
 
       expect(Number(fromTokenInfo.tick)).toBe(Number(direct.tick));
       expect(fromTokenInfo.price).toBeCloseTo(direct.price, 2);
+    });
+  });
+
+  describe('getSqrtPriceLimitX96', () => {
+    it('returns correct bounds', () => {
+      const sqrtPriceX96 = Q96;
+      const slippage = BPS / 4n;
+      const [minBound, maxBound] = TickUtils.getSqrtPriceX96Bounds(sqrtPriceX96, slippage);
+      expect(minBound).toBe(TickUtils.priceToSqrtPriceX96(0.75, 6, 6));
+      expect(maxBound).toBe(TickUtils.priceToSqrtPriceX96(1.25, 6, 6));
     });
   });
 

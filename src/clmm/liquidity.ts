@@ -147,7 +147,7 @@ export class ClmmLiquidityUtils {
     if (zeroForOne) {
       return this.getToken0Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity);
     } else {
-      return this.getToken1Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity);
+      return this.getToken1Delta(sqrtRatioBX96, sqrtRatioAX96, liquidity);
     }
   }
 
