@@ -1,6 +1,6 @@
 import type { SignerProvider } from '@alephium/web3';
-import { ONE_ALPH, web3 } from '@alephium/web3';
-import { getSigners } from '@alephium/web3-test';
+import { ONE_ALPH, web3, groupOfAddress } from '@alephium/web3';
+import { getSigners, getSigner } from '@alephium/web3-test';
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { TickUtils } from '../../../src/clmm/tick';
 import { UNLIMITED_AMOUNT } from '../../../src';

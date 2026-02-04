@@ -3,7 +3,6 @@ import {
   contractIdFromAddress,
   encodePrimitiveValues,
   groupOfAddress,
-  isGrouplessAddressWithoutGroupIndex,
   subContractId,
 } from '@alephium/web3';
 import { Pool } from 'clmm/artifacts/ts/Pool';
@@ -11,10 +10,7 @@ import { TickUtils } from './tick';
 import type { LiquidityDistribution } from './types';
 import { ClmmLiquidityUtils } from './liquidity';
 import { MathUtil } from '../common/math';
-
-function normalizeAddress(address: string, group: number): string {
-  return isGrouplessAddressWithoutGroupIndex(address) ? `${address}:${group}` : address;
-}
+import { normalizeAddress } from '../common';
 
 export class PoolUtils {
   static getPositionId(

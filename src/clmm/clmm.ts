@@ -8,7 +8,6 @@ import {
   codec,
   encodePrimitiveValues,
   groupOfAddress,
-  isGrouplessAddressWithoutGroupIndex,
   ALPH_TOKEN_ID,
 } from '@alephium/web3';
 import { loadDeployments } from 'clmm/artifacts/ts/deployments';
@@ -42,11 +41,7 @@ import {
 import { PoolUtils } from './pool';
 import { TickUtils } from './tick';
 import { ClmmLiquidityUtils } from './liquidity';
-import { PoolNotFoundError, sortTokens } from '../common';
-
-function normalizeAddress(address: string, group: number): string {
-  return isGrouplessAddressWithoutGroupIndex(address) ? `${address}:${group}` : address;
-}
+import { normalizeAddress, PoolNotFoundError, sortTokens } from '../common';
 
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
