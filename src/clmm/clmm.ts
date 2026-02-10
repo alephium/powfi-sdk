@@ -524,7 +524,7 @@ export class ClmmModule extends ModuleBase {
         sqrtPriceLimitX96,
         data: '',
       },
-      tokens: [{ id: tokenIn, amount: p.amount }],
+      tokens: [{ id: tokenIn, amount: p.amountIn }],
       attoAlphAmount: DUST_AMOUNT * 2n,
     });
   }

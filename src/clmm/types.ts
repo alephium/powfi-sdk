@@ -14,6 +14,7 @@ export interface ClmmSwapParams {
   token0: string;
   token1: string;
   amount: bigint;
+  amountIn: bigint;
   slippage: bigint;
   routePlan: bigint[];
 }

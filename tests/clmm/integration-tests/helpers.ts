@@ -94,7 +94,7 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly zeta: Zeta,
     readonly deployer: SignerProvider,
-  ) {}
+  ) { }
 
   static async create(): Promise<Fixture> {
     const [deployer] = await getSigners(1, 5_000n * ONE_ALPH);
@@ -242,6 +242,7 @@ export class Fixture {
       token0,
       token1,
       amount: amountIn,
+      amountIn,
       routePlan: [configIndex],
       slippage: BigInt(slippage),
     });
