@@ -179,7 +179,8 @@ export class StakingModule extends ModuleBase {
     userAddress: string,
     vaultIndex: bigint,
   ): Promise<AlphUnstakeVaultTypes.State> {
-    return this.getAlphUnstakeVault(userAddress, vaultIndex).fetchState();
+    const stakerAddress = this.getStakerAddress(userAddress);
+    return this.getAlphUnstakeVault(stakerAddress, vaultIndex).fetchState();
   }
 
   async connectToDapp(
@@ -204,10 +205,7 @@ export class StakingModule extends ModuleBase {
   }
 
   async getUserStakeVaultInfo(address: string): Promise<StakeVaultUserInfo> {
-    let stakerAddress = address;
-    if (isGrouplessAddressWithoutGroupIndex(address)) {
-      stakerAddress = `${address}:${this.stakeVaultContract.groupIndex}`;
-    }
+    const stakerAddress = this.getStakerAddress(address);
     const result = await this.stakeVaultContract.view.getUserStakingInfo({
       args: { user: stakerAddress },
     });
@@ -218,25 +216,29 @@ export class StakingModule extends ModuleBase {
   }
 
   async isUserStaking(address: string): Promise<boolean> {
-    const result = await this.stakeVaultContract.view.isStaking({ args: { user: address } });
+    const stakerAddress = this.getStakerAddress(address);
+    const result = await this.stakeVaultContract.view.isStaking({ args: { user: stakerAddress } });
     return result.returns;
   }
 
   async getUserWeight(address: string): Promise<bigint> {
-    const result = await this.stakeVaultContract.view.getWeight({ args: { user: address } });
+    const stakerAddress = this.getStakerAddress(address);
+    const result = await this.stakeVaultContract.view.getWeight({ args: { user: stakerAddress } });
     return result.returns;
   }
 
   async getActiveUnstakeVaultIndexes(address: string): Promise<bigint[]> {
+    const stakerAddress = this.getStakerAddress(address);
     const result = await this.xAlphTokenContract.view.getActiveUnstakeVaultIndexes({
-      args: { caller: address },
+      args: { caller: stakerAddress },
     });
     return decodeU256List(result.returns);
   }
 
   async getClaimableAmount(address: string, vaultIndex: bigint): Promise<bigint> {
+    const stakerAddress = this.getStakerAddress(address);
     const result = await this.xAlphTokenContract.view.getClaimableAmount({
-      args: { user: address, vaultIndex },
+      args: { user: stakerAddress, vaultIndex },
     });
     return result.returns;
   }
@@ -273,5 +275,12 @@ export class StakingModule extends ModuleBase {
     if (amount <= 0n) {
       throw new Error(`${label} must be greater than zero`);
     }
+  }
+
+  private getStakerAddress(address: string): string {
+    if (isGrouplessAddressWithoutGroupIndex(address)) {
+      return `${address}:${this.stakeVaultContract.groupIndex}`;
+    }
+    return address;
   }
 }
