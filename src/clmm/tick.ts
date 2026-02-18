@@ -284,8 +284,8 @@ export class TickUtils {
   }
 
   static getSqrtPriceLimitX96(sqrtPriceX96: bigint, slippage: bigint, zeroForOne: boolean): bigint {
-    if (slippage <= 0n || slippage >= BPS) {
-      throw new Error('slippageBps must be in (0, 10000)');
+    if (slippage < 0n || slippage >= BPS) {
+      throw new Error('slippageBps must be in [0, 10000)');
     }
 
     const [minBound, maxBound] = this.getSqrtPriceX96Bounds(sqrtPriceX96, slippage);
