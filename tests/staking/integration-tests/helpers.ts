@@ -36,7 +36,8 @@ export interface Balances {
 }
 
 export interface StakingState {
-  totalStaked: bigint;
+  totalDepositedAlph: bigint;
+  totalXAlphSupply: bigint;
   lastUnstakeVaultIndex: bigint;
 }
 
@@ -106,7 +107,8 @@ export class Fixture {
           unstakeVaultTemplateId: unstakeVaultTemplate.contractId,
           maxActiveUnstakeRequestsPerUser: MAX_ACTIVE_UNSTAKE_REQUESTS,
           unstakeDuration: UNSTAKE_DURATION,
-          totalStaked: 0n,
+          totalDepositedAlph: 0n,
+          totalXAlphSupply: 0n,
           lastUnstakeVaultIndex: 0n,
         },
         issueTokenAmount: MAX_U256,
@@ -186,7 +188,8 @@ export class Fixture {
   async getXAlphTokenState(): Promise<StakingState> {
     const state = await this.zeta.staking.getXAlphTokenState();
     return {
-      totalStaked: state.fields.totalStaked,
+      totalDepositedAlph: state.fields.totalDepositedAlph,
+      totalXAlphSupply: state.fields.totalXAlphSupply,
       lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex,
     };
   }
