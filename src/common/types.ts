@@ -42,7 +42,7 @@ export const defaultNetworks: Network[] = [
 ];
 export type NetworkOverrides = Partial<Omit<Network, 'id'>>;
 
-export interface ZetaLoadParams {
+export interface PowFiLoadParams {
   networkId: NetworkId;
   signer?: SignerProvider;
   networkOverrides?: NetworkOverrides;

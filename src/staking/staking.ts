@@ -30,7 +30,7 @@ import {
 } from 'staking/artifacts/ts';
 import { loadDeployments } from 'staking/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
-import type { Zeta } from '../zeta';
+import type { PowFi } from '../powfi';
 import type { StakeVaultUserInfo, StakingConfig } from './types';
 import { decodeContractIdList, decodeU256List } from './utils';
 import type { StakingSettings } from './settings';
@@ -41,7 +41,7 @@ export class StakingModule extends ModuleBase {
   private xAlphTokenContract: XAlphTokenInstance;
   private stakeVaultContract: XAlphStakeVaultInstance;
 
-  constructor(scope: Zeta) {
+  constructor(scope: PowFi) {
     super({ scope, moduleName: 'StakingModule' });
 
     this.config = this.loadStakingConfig();

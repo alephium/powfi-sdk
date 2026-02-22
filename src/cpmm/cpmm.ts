@@ -39,7 +39,7 @@ import type {
   CpmmSwapQuoteParams,
   CpmmSwapRequest,
 } from './types';
-import type { Zeta } from '../zeta';
+import type { PowFi } from '../powfi';
 import ModuleBase from '../moduleBase';
 import BigNumber from 'bignumber.js';
 import { MathUtil } from '../common/math';
@@ -50,7 +50,7 @@ import { InsufficientLiquidityError } from '../common/error';
 export class CpmmModule extends ModuleBase {
   private config: CpmmConfig;
 
-  constructor(scope: Zeta) {
+  constructor(scope: PowFi) {
     super({ scope, moduleName: 'CpmmModule' });
 
     this.config = this.getCpmmConfig();

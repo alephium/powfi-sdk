@@ -1,13 +1,13 @@
 import type { SignerProvider, Account } from '@alephium/web3';
 import { NodeProvider, ExplorerProvider, web3 } from '@alephium/web3';
 import { CpmmModule } from './cpmm/cpmm';
-import type { Network, ZetaLoadParams } from './common/types';
+import type { Network, PowFiLoadParams } from './common/types';
 import { defaultNetworks } from './common/types';
 import { ClmmModule } from './clmm/clmm';
 import { TokenModule } from './token/token';
 import { StakingModule } from './staking/staking';
 
-export class Zeta {
+export class PowFi {
   public cpmm: CpmmModule;
   public clmm: ClmmModule;
   public token: TokenModule;
@@ -20,7 +20,7 @@ export class Zeta {
   private _account?: Account;
   private _network: Network;
 
-  constructor(params: ZetaLoadParams) {
+  constructor(params: PowFiLoadParams) {
     const network = defaultNetworks.find((n) => n.id === params.networkId);
     if (!network) {
       throw new Error(`Network ${params.networkId} not found`);
@@ -42,8 +42,8 @@ export class Zeta {
     this.staking = new StakingModule(this);
   }
 
-  static load(config: ZetaLoadParams): Zeta {
-    return new Zeta(config);
+  static load(config: PowFiLoadParams): PowFi {
+    return new PowFi(config);
   }
 
   public set signer(signer: SignerProvider) {

@@ -194,7 +194,7 @@ describe('CLMM Add Liquidity', () => {
     const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
 
     // Get initial pool balances
-    const balancesBefore = await fixture.zeta.clmm.getPoolTokenBalances(pool.contractId);
+    const balancesBefore = await fixture.powfi.clmm.getPoolTokenBalances(pool.contractId);
 
     const amount0Desired = 100n * ONE_ALPH;
     const { amount0, amount1 } = await fixture.addRangePosition({
@@ -208,7 +208,7 @@ describe('CLMM Add Liquidity', () => {
     });
 
     // Get pool balances after adding liquidity
-    const balancesAfter = await fixture.zeta.clmm.getPoolTokenBalances(pool.contractId);
+    const balancesAfter = await fixture.powfi.clmm.getPoolTokenBalances(pool.contractId);
 
     // Verify the exact difference matches what was added
     expect(balancesAfter.token0Balance - balancesBefore.token0Balance).toBe(amount0);

@@ -26,7 +26,7 @@ describe('CLMM Create Pool', () => {
 
     const configIndex = await fixture.createConfigIndex(1n, 3_000n, 0n);
 
-    fixture.zeta.signer = grouplessSigner;
+    fixture.powfi.signer = grouplessSigner;
 
     const amount0 = 10n * ONE_ALPH;
     const amount1 = 100n * ONE_ALPH;
@@ -35,7 +35,7 @@ describe('CLMM Create Pool', () => {
     const tickLower = TickUtils.getAlignedTick(price * 0.9, 18, 18, 1n);
     const tickUpper = TickUtils.getAlignedTick(price * 1.1, 18, 18, 1n);
 
-    const { poolAddress, result } = await fixture.zeta.clmm.createPool(
+    const { poolAddress, result } = await fixture.powfi.clmm.createPool(
       configIndex,
       fixture.tokenId0,
       fixture.tokenId1,
@@ -50,7 +50,7 @@ describe('CLMM Create Pool', () => {
     expect(poolAddress).toBeDefined();
     expect(result.txId).toBeDefined();
 
-    const pool = fixture.zeta.clmm.getPool(fixture.tokenId0, fixture.tokenId1, configIndex);
+    const pool = fixture.powfi.clmm.getPool(fixture.tokenId0, fixture.tokenId1, configIndex);
     const poolState = await pool.fetchState();
     expect(poolState.fields.slot0.sqrtPriceX96).toBeDefined();
   }, 120000);

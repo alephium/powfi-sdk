@@ -1,7 +1,7 @@
 import { TickUtils } from '../../src/clmm/tick';
 import { UNLIMITED_AMOUNT } from '../../src/clmm/constants';
 import type { TokenInfo } from '@alephium/token-list';
-import { Zeta } from '../../src/zeta';
+import { PowFi } from '../../src/powfi';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
 import { GetPositionAmountsFromPriceReturn } from '../../src';
 
@@ -512,14 +512,14 @@ describe('LiquidityUtils', () => {
 
   describe('poolExists function', () => {
     test('should return false for non-existent pool', async () => {
-      const zeta = new Zeta({ networkId: 'devnet' });
-      zeta.setCurrentProviders();
+      const powfi = new PowFi({ networkId: 'devnet' });
+      powfi.setCurrentProviders();
 
       const fakeToken0 = '0000000000000000000000000000000000000000000000000000000000000001';
       const fakeToken1 = '0000000000000000000000000000000000000000000000000000000000000002';
       const configIndex = 0n;
 
-      const exists = await zeta.clmm.poolExists(fakeToken0, fakeToken1, configIndex);
+      const exists = await powfi.clmm.poolExists(fakeToken0, fakeToken1, configIndex);
       expect(exists).toBe(false);
     });
   });

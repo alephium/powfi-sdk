@@ -28,7 +28,7 @@ import {
   PositionManager,
 } from 'clmm/artifacts/ts';
 import { TickUtils } from '../../../src/clmm/tick';
-import { Zeta } from '../../../src/zeta';
+import { PowFi } from '../../../src/powfi';
 import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src';
 
 export interface Balances {
@@ -92,15 +92,15 @@ export class Fixture {
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly tokenDecimal: number,
-    readonly zeta: Zeta,
+    readonly powfi: PowFi,
     readonly deployer: SignerProvider,
   ) { }
 
   static async create(): Promise<Fixture> {
     const [deployer] = await getSigners(1, 5_000n * ONE_ALPH);
 
-    const zeta = new Zeta({ networkId: 'devnet', signer: deployer });
-    zeta.setCurrentProviders();
+    const powfi = new PowFi({ networkId: 'devnet', signer: deployer });
+    powfi.setCurrentProviders();
 
     const poolTemplate = (await Pool.deployTemplate(deployer)).contractInstance;
     const positionTemplate = (await Position.deployTemplate(deployer)).contractInstance;
@@ -144,7 +144,7 @@ export class Fixture {
     const { tokenId: tokenB } = await mintToken(deployer.address, initialAmount);
     const [tokenId0, tokenId1] = sortTokens(tokenA, tokenB);
 
-    zeta.clmm.setConfig({
+    powfi.clmm.setConfig({
       groupIndex: 0,
       factoryId: factory.contractId,
       positionManagerId: positionManager.contractId,
@@ -152,7 +152,7 @@ export class Fixture {
       accountRoot: dexAccountTemplate.contractId,
     });
 
-    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, 18, zeta, deployer);
+    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, 18, powfi, deployer);
   }
 
   async createConfigIndex(tickSpacing: bigint, fee: bigint, feeProtocol: bigint): Promise<bigint> {
@@ -167,7 +167,7 @@ export class Fixture {
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
     });
-    const configEvents = await this.zeta.nodeProvider.events.getEventsTxIdTxid(configTx.txId);
+    const configEvents = await this.powfi.nodeProvider.events.getEventsTxIdTxid(configTx.txId);
     const configCreated = configEvents.events.find((e) => e.eventIndex === 0);
     if (
       !configCreated ||
@@ -191,7 +191,7 @@ export class Fixture {
     const tickLower = TickUtils.getAlignedTick(price * 0.9, 18, 18, tickSpacing);
     const tickUpper = TickUtils.getAlignedTick(price * 1.1, 18, 18, tickSpacing);
 
-    await this.zeta.clmm.createPool(
+    await this.powfi.clmm.createPool(
       configIndex,
       this.tokenId0,
       this.tokenId1,
@@ -203,7 +203,7 @@ export class Fixture {
       tickUpper,
     );
 
-    return this.zeta.clmm.getPool(this.tokenId0, this.tokenId1, configIndex);
+    return this.powfi.clmm.getPool(this.tokenId0, this.tokenId1, configIndex);
   }
 
   getPoolAddress(
@@ -235,10 +235,10 @@ export class Fixture {
     slippage: number,
     opts?: { token0?: string; token1?: string },
   ) {
-    this.zeta.signer = trader;
+    this.powfi.signer = trader;
     const token0 = opts?.token0 ?? this.tokenId0;
     const token1 = opts?.token1 ?? this.tokenId1;
-    return await this.zeta.clmm.swap({
+    return await this.powfi.clmm.swap({
       token0,
       token1,
       amount: amountIn,
@@ -278,8 +278,8 @@ export class Fixture {
     existingPosition?: boolean,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
-    this.zeta.signer = lp;
-    return await this.zeta.clmm.addLiquidity({
+    this.powfi.signer = lp;
+    return await this.powfi.clmm.addLiquidity({
       token0: this.tokenId0,
       token1: this.tokenId1,
       configIndex: configIndex,
@@ -299,7 +299,7 @@ export class Fixture {
     token1: string,
     amountIn: bigint,
   ): Promise<bigint> {
-    const distribution = await this.zeta.clmm.simulateSwap({
+    const distribution = await this.powfi.clmm.simulateSwap({
       configIndex: configIndex,
       token0: token0,
       token1: token1,
@@ -316,7 +316,7 @@ export class Fixture {
     token1: string,
     amountOut: bigint,
   ): Promise<bigint> {
-    const distribution = await this.zeta.clmm.simulateSwap({
+    const distribution = await this.powfi.clmm.simulateSwap({
       configIndex: configIndex,
       token0: token0,
       token1: token1,
@@ -425,8 +425,8 @@ export class Fixture {
     amount1: bigint,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
-    this.zeta.signer = lp;
-    return await this.zeta.clmm.removeLiquidity({
+    this.powfi.signer = lp;
+    return await this.powfi.clmm.removeLiquidity({
       token0: this.tokenId0,
       token1: this.tokenId1,
       configIndex,
@@ -450,8 +450,8 @@ export class Fixture {
     liquidity: bigint = 0n,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address;
-    this.zeta.signer = lp;
-    return await this.zeta.clmm.collectTokens({
+    this.powfi.signer = lp;
+    return await this.powfi.clmm.collectTokens({
       token0: this.tokenId0,
       token1: this.tokenId1,
       configIndex,

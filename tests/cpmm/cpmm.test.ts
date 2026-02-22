@@ -5,7 +5,7 @@ import { MathUtil } from '../../src/common/math';
 import type { TokenInfo } from '@alephium/token-list';
 import type { CpmmConfig, CpmmPoolContractState } from '../../src/cpmm/types';
 import { ONE_ALPH } from '@alephium/web3';
-import type { Zeta } from '../../src/zeta';
+import type { PowFi } from '../../src/powfi';
 
 describe('CpmmModule functions', () => {
   const createTokenInfo = (id: string, decimals: number): TokenInfo => ({
@@ -265,7 +265,7 @@ describe('CpmmModule functions', () => {
       }
 
       constructor(
-        scope: Zeta,
+        scope: PowFi,
         private mockState: CpmmPoolContractState,
       ) {
         super(scope);
@@ -288,7 +288,7 @@ describe('CpmmModule functions', () => {
       const mockScope = {
         network: { id: 'testnet' },
         token: { getTokenById: jest.fn((id: string) => (id === token0.id ? token0 : token1)) },
-      } as unknown as Zeta;
+      } as unknown as PowFi;
 
       const mockState: CpmmPoolContractState = {
         poolId: 'pool-id',

@@ -114,11 +114,11 @@ describe('CLMM Managing Positions', () => {
 
   test('findBestRoute throws PoolNotFoundError for non-existent pool', async () => {
     await expect(
-      fixture.zeta.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
+      fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
     ).rejects.toThrow(PoolNotFoundError);
 
     await expect(
-      fixture.zeta.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
+      fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
     ).rejects.toThrow('No concentrated liquidity pool found for token pair');
   });
 });

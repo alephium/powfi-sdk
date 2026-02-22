@@ -21,7 +21,7 @@ import {
   type AlphUnstakeVaultInstance,
 } from 'staking/artifacts/ts';
 import { buildMerkleWhitelist, type MerkleWhitelist } from 'staking/src/merkle-whitelist';
-import { Zeta } from '../../../src/zeta';
+import { PowFi } from '../../../src/powfi';
 import type { StakingConfig } from '../../../src/staking/types';
 
 export const UNSTAKE_DURATION = 10n * 1000n; // 10 seconds for testing
@@ -70,16 +70,16 @@ export function timeout(ms: number): Promise<void> {
 }
 
 export class Fixture {
-  readonly zeta: Zeta;
+  readonly powfi: PowFi;
 
   constructor(
     readonly xAlphTokenContract: XAlphTokenInstance,
     readonly stakeVaultContract: XAlphStakeVaultInstance,
     readonly deployer: SignerProvider,
     readonly whitelist: MerkleWhitelist,
-    zeta: Zeta,
+    powfi: PowFi,
   ) {
-    this.zeta = zeta;
+    this.powfi = powfi;
   }
 
   get xAlphTokenId(): string {
@@ -93,8 +93,8 @@ export class Fixture {
   static async create(): Promise<Fixture> {
     const [deployer] = await getSigners(1, 10_000n * ONE_ALPH);
 
-    const zeta = new Zeta({ networkId: 'devnet', signer: deployer });
-    zeta.setCurrentProviders();
+    const powfi = new PowFi({ networkId: 'devnet', signer: deployer });
+    powfi.setCurrentProviders();
 
     const unstakeVaultTemplate = (await AlphUnstakeVault.deployTemplate(deployer)).contractInstance;
 
@@ -134,7 +134,7 @@ export class Fixture {
       })
     ).contractInstance;
 
-    // Configure Zeta SDK to use the deployed contracts
+    // Configure PowFi SDK to use the deployed contracts
     const stakingConfig: StakingConfig = {
       groupIndex: stakeVaultContract.groupIndex,
       alphUnstakeVaultTemplateId: unstakeVaultTemplate.contractId,
@@ -145,53 +145,53 @@ export class Fixture {
       rewardSharingTemplateId: rewardSharingTemplate.contractId,
       governanceDemoTemplateId: '', // Not needed for tests
     };
-    zeta.staking.setConfig(stakingConfig);
+    powfi.staking.setConfig(stakingConfig);
 
-    return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, zeta);
+    return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, powfi);
   }
 
   async stakeAlph(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.stakeAlph(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.stakeAlph(amount);
   }
 
   async startUnstake(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.startUnstake(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.startUnstake(amount);
   }
 
   async claimUnstaked(signer: SignerProvider, vaultIndex: bigint, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.claimUnstaked(vaultIndex, amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.claimUnstaked(vaultIndex, amount);
   }
 
   async cancelUnstake(signer: SignerProvider, vaultIndex: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.cancelUnstake(vaultIndex);
+    this.powfi.signer = signer;
+    return this.powfi.staking.cancelUnstake(vaultIndex);
   }
 
   async stakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.stakeXAlph(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.stakeXAlph(amount);
   }
 
   async unstakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.unstakeXAlph(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.unstakeXAlph(amount);
   }
 
   async stakeAndLockAlph(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.stakeAndLockAlph(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.stakeAndLockAlph(amount);
   }
 
   async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.unlockAndStartUnstake(amount);
+    this.powfi.signer = signer;
+    return this.powfi.staking.unlockAndStartUnstake(amount);
   }
 
   async getXAlphTokenState(): Promise<StakingState> {
-    const state = await this.zeta.staking.getXAlphTokenState();
+    const state = await this.powfi.staking.getXAlphTokenState();
     return {
       totalDepositedAlph: state.fields.totalDepositedAlph,
       totalXAlphSupply: state.fields.totalXAlphSupply,
@@ -200,7 +200,7 @@ export class Fixture {
   }
 
   async getStakeVaultState(): Promise<StakeVaultState> {
-    const state = await this.zeta.staking.getStakeVaultState();
+    const state = await this.powfi.staking.getStakeVaultState();
     return {
       totalStakedAmount: state.fields.totalStakedAmount,
     };
@@ -208,24 +208,24 @@ export class Fixture {
 
   async getActiveUnstakeVaultIndexes(signer: SignerProvider): Promise<bigint[]> {
     const account = await signer.getSelectedAccount();
-    return this.zeta.staking.getActiveUnstakeVaultIndexes(account.address);
+    return this.powfi.staking.getActiveUnstakeVaultIndexes(account.address);
   }
 
   async getClaimableAmount(signer: SignerProvider, vaultIndex: bigint): Promise<bigint> {
     const account = await signer.getSelectedAccount();
-    return this.zeta.staking.getClaimableAmount(account.address, vaultIndex);
+    return this.powfi.staking.getClaimableAmount(account.address, vaultIndex);
   }
 
   async getUserStakingInfo(address: string): Promise<{ amount: bigint; connectedDapps: string[] }> {
-    return this.zeta.staking.getUserStakeVaultInfo(address);
+    return this.powfi.staking.getUserStakeVaultInfo(address);
   }
 
   async isUserStaking(address: string): Promise<boolean> {
-    return this.zeta.staking.isUserStaking(address);
+    return this.powfi.staking.isUserStaking(address);
   }
 
   async getUserWeight(address: string): Promise<bigint> {
-    return this.zeta.staking.getUserWeight(address);
+    return this.powfi.staking.getUserWeight(address);
   }
 
   getUnstakeVaultAddress(userAddress: string, vaultIndex: bigint): string {
@@ -240,11 +240,11 @@ export class Fixture {
   }
 
   getUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
-    return this.zeta.staking.getAlphUnstakeVault(userAddress, vaultIndex);
+    return this.powfi.staking.getAlphUnstakeVault(userAddress, vaultIndex);
   }
 
   async getUnstakeVaultState(userAddress: string, vaultIndex: bigint): Promise<UnstakeVaultState> {
-    const state = await this.zeta.staking.getAlphUnstakeVaultState(userAddress, vaultIndex);
+    const state = await this.powfi.staking.getAlphUnstakeVaultState(userAddress, vaultIndex);
     return {
       totalUnstakeAmount: state.fields.totalUnstakeAmount,
       withdrawnAmount: state.fields.withdrawnAmount,

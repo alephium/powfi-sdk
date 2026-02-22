@@ -12,7 +12,7 @@ import {
 } from '@alephium/web3';
 import { loadDeployments } from 'clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
-import type { Zeta } from '../zeta';
+import type { PowFi } from '../powfi';
 import type {
   ClmmAddLiquidityRequest,
   ClmmConfig,
@@ -47,7 +47,7 @@ export class ClmmModule extends ModuleBase {
   private config: ClmmConfig;
   private configsByIndex = new Map<bigint, ClmmPoolConfig>();
 
-  constructor(scope: Zeta) {
+  constructor(scope: PowFi) {
     super({ scope, moduleName: 'ClmmModule' });
 
     this.config = this._getClmmConfig();

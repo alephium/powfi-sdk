@@ -1,9 +1,9 @@
 import type { Logger } from './common/logger';
 import { createLogger } from './common/logger';
-import type { Zeta } from './zeta';
+import type { PowFi } from './powfi';
 
 export interface ModuleBaseProps {
-  scope: Zeta;
+  scope: PowFi;
   moduleName: string;
 }
 
@@ -28,7 +28,7 @@ const joinMsg = (...args: unknown[]): string =>
     .join(', ');
 
 export default class ModuleBase {
-  public scope: Zeta;
+  public scope: PowFi;
   private disabled = false;
   protected logger: Logger;
 

@@ -1,4 +1,4 @@
-export * from './zeta';
+export * from './powfi';
 export * from './common';
 export * from './cpmm';
 export * from './clmm';
