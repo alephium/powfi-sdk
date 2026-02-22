@@ -165,6 +165,11 @@ export class Fixture {
     return this.zeta.staking.claimUnstaked(vaultIndex, amount);
   }
 
+  async cancelUnstake(signer: SignerProvider, vaultIndex: bigint) {
+    this.zeta.signer = signer;
+    return this.zeta.staking.cancelUnstake(vaultIndex);
+  }
+
   async stakeXAlph(signer: SignerProvider, amount: bigint) {
     this.zeta.signer = signer;
     return this.zeta.staking.stakeXAlph(amount);

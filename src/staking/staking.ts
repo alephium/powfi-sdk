@@ -119,6 +119,15 @@ export class StakingModule extends ModuleBase {
     });
   }
 
+  async cancelUnstake(
+    vaultIndex: bigint,
+  ): Promise<XAlphTokenTypes.SignExecuteMethodResult<'cancelUnstake'>> {
+    return this.xAlphTokenContract.transact.cancelUnstake({
+      signer: this.scope.signer,
+      args: { vaultIndex },
+    });
+  }
+
   async stakeXAlph(amount: bigint): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'stake'>> {
     this.ensurePositiveAmount(amount, 'Stake amount');
     return this.stakeVaultContract.transact.stake({
