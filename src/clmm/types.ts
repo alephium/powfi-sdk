@@ -19,7 +19,7 @@ export interface ClmmSwapRequest {
   routePlan: bigint[];
 }
 
-export interface ClmmSimulateSwapRequest {
+export interface ClmmSimulateSwapParams {
   configIndex: bigint;
   token0: string;
   token1: string;
@@ -32,7 +32,7 @@ export interface LiquidityForPrice {
   sqrtPriceX96: bigint;
 }
 
-export interface LiquidityDistribution {
+export interface ClmmSimulateSwapQuote {
   baseSqrtPriceX96: bigint;
   sqrtPriceX96: bigint;
   liquidity: bigint;

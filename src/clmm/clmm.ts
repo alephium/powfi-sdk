@@ -19,12 +19,12 @@ import type {
   ClmmCollectProtocolFeesRequest,
   ClmmCollectTokensRequest,
   ClmmExtendRewardsRequest,
-  LiquidityDistribution,
+  ClmmSimulateSwapQuote,
   ClmmPositionInfoRequest,
   ClmmPoolContractState,
   ClmmPoolConfig,
   ClmmSetRewardParamsRequest,
-  ClmmSimulateSwapRequest,
+  ClmmSimulateSwapParams,
   ClmmSwapRequest,
   ClmmRemoveLiquidityRequest,
   ClmmPositionInfo,
@@ -473,7 +473,7 @@ export class ClmmModule extends ModuleBase {
     return index;
   }
 
-  async simulateSwap(p: ClmmSimulateSwapRequest): Promise<LiquidityDistribution> {
+  async simulateSwap(p: ClmmSimulateSwapParams): Promise<ClmmSimulateSwapQuote> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
     const result = await pool.view.simulateSwap({

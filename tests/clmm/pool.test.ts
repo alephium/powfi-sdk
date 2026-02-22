@@ -1,7 +1,7 @@
 import { PoolUtils } from '../../src/clmm/pool';
 import { TickUtils } from '../../src/clmm/tick';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
-import type { LiquidityDistribution } from '../../src/clmm/types';
+import type { ClmmSimulateSwapQuote } from '../../src/clmm/types';
 
 describe('PoolUtils', () => {
   it('computeSwapStep exact-in zeroForOne reaches target price', () => {
@@ -102,7 +102,7 @@ describe('PoolUtils', () => {
     const fee = 3000n;
     const amountSpecified = 100n;
 
-    const distribution: LiquidityDistribution = {
+    const distribution: ClmmSimulateSwapQuote = {
       baseSqrtPriceX96,
       fee,
       liquidity,
@@ -142,7 +142,7 @@ describe('PoolUtils', () => {
     const liquidity = 3162n;
     const fee = 3000n;
 
-    const liqDist2: LiquidityDistribution = {
+    const liqDist2: ClmmSimulateSwapQuote = {
       sqrtPriceX96: sqrtStart,
       baseSqrtPriceX96,
       liquidity,

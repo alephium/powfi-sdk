@@ -31,7 +31,7 @@ export interface CpmmSwapRequest {
   ttlMinutes?: number; // defaults to 60
 }
 
-export interface CpmmSwapQuoteRequest {
+export interface CpmmSwapQuoteParams {
   state: CpmmPoolContractState;
   tokenInId: CpmmTokenId;
   tokenOutId: CpmmTokenId;
@@ -63,7 +63,7 @@ export interface CpmmAddLiquidityRequest {
   ttlMinutes?: number; // defaults to 60
 }
 
-export interface CpmmAddLiquidityQuoteRequest {
+export interface CpmmAddLiquidityQuoteParams {
   poolState?: CpmmPoolContractState;
   tokenAId: CpmmTokenId;
   tokenBId: CpmmTokenId;

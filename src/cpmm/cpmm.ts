@@ -27,7 +27,7 @@ import {
 } from '../common/error';
 import type {
   CpmmAddLiquidityQuote,
-  CpmmAddLiquidityQuoteRequest,
+  CpmmAddLiquidityQuoteParams,
   CpmmAddLiquidityRequest,
   CpmmClaimableAmounts,
   CpmmConfig,
@@ -36,7 +36,7 @@ import type {
   CpmmRemoveLiquidityQuote,
   CpmmRemoveLiquidityRequest,
   CpmmSwapQuote,
-  CpmmSwapQuoteRequest,
+  CpmmSwapQuoteParams,
   CpmmSwapRequest,
 } from './types';
 import type { Zeta } from '../zeta';
@@ -412,7 +412,7 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
-  static computeSwapAmount(params: CpmmSwapQuoteRequest): CpmmSwapQuote {
+  static computeSwapAmount(params: CpmmSwapQuoteParams): CpmmSwapQuote {
     const { state, tokenInId, tokenOutId, amountIn, amountOut, slippageBps } = params;
     const tokenInInfo = this.getTokenInfoFromPoolState(state, tokenInId, 'tokenInId');
     const tokenOutInfo = this.getTokenInfoFromPoolState(state, tokenOutId, 'tokenOutId');
@@ -458,7 +458,7 @@ export class CpmmModule extends ModuleBase {
   }
 
   static computeLiquidityAmounts(
-    params: CpmmAddLiquidityQuoteRequest,
+    params: CpmmAddLiquidityQuoteParams,
   ): CpmmAddLiquidityQuote {
     const { poolState, tokenAId, tokenBId, amountA, amountB, inputType = 'TokenA' } = params;
 

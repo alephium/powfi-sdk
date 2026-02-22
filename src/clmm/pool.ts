@@ -7,7 +7,7 @@ import {
 } from '@alephium/web3';
 import { Pool } from 'clmm/artifacts/ts/Pool';
 import { TickUtils } from './tick';
-import type { LiquidityDistribution } from './types';
+import type { ClmmSimulateSwapQuote } from './types';
 import { ClmmLiquidityUtils } from './liquidity';
 import { MathUtil } from '../common/math';
 import { normalizeAddress } from '../common';
@@ -118,7 +118,7 @@ export class PoolUtils {
   }
 
   static offlineSwap(
-    liqDist: LiquidityDistribution,
+    liqDist: ClmmSimulateSwapQuote,
     amountSpecified: bigint,
     sqrtPriceX96: bigint,
   ): bigint {
