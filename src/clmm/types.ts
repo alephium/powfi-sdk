@@ -10,7 +10,7 @@ export interface ClmmConfig {
   accountRoot: string;
 }
 
-export interface ClmmSwapParams {
+export interface ClmmSwapRequest {
   token0: string;
   token1: string;
   amount: bigint;
@@ -19,7 +19,7 @@ export interface ClmmSwapParams {
   routePlan: bigint[];
 }
 
-export interface SimulateSwap {
+export interface ClmmSimulateSwapRequest {
   configIndex: bigint;
   token0: string;
   token1: string;
@@ -40,7 +40,7 @@ export interface LiquidityDistribution {
   rows: Array<LiquidityForPrice>;
 }
 
-export interface AddLiquidity {
+export interface ClmmAddLiquidityRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
@@ -53,7 +53,7 @@ export interface AddLiquidity {
   existingPosition?: boolean;
 }
 
-export interface RemoveLiquidity {
+export interface ClmmRemoveLiquidityRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
@@ -66,7 +66,7 @@ export interface RemoveLiquidity {
   otherAmountMax: bigint;
 }
 
-export interface CollectTokens {
+export interface ClmmCollectTokensRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
@@ -79,7 +79,7 @@ export interface CollectTokens {
   amount1Max: bigint;
 }
 
-export interface PositionPath {
+export interface ClmmPositionInfoRequest {
   poolId: string;
   owner: string;
   tickLower: bigint;
@@ -91,14 +91,14 @@ export interface PositionPath {
   acct0: bigint;
 }
 
-export interface CollectProtocolFees {
+export interface ClmmCollectProtocolFeesRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
   recipient: string;
 }
 
-export interface SetRewardParams {
+export interface ClmmSetRewardParamsRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
@@ -109,7 +109,7 @@ export interface SetRewardParams {
   endTime: bigint;
 }
 
-export interface ExtendRewards {
+export interface ClmmExtendRewardsRequest {
   token0: string;
   token1: string;
   configIndex: bigint;
@@ -136,8 +136,7 @@ export interface ClmmPoolConfig {
 
 export const MAX_PIPS = Pool.consts.MAX_PIPS;
 
-
-export type ClmmPositionInfo = PositionInfo
+export type ClmmPositionInfo = PositionInfo;
 
 export interface GetPositionAmountsFromPriceProps {
   sqrtRatioX96: bigint;

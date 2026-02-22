@@ -14,19 +14,19 @@ import { loadDeployments } from 'clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
 import type { Zeta } from '../zeta';
 import type {
-  AddLiquidity,
+  ClmmAddLiquidityRequest,
   ClmmConfig,
-  CollectProtocolFees,
-  CollectTokens,
+  ClmmCollectProtocolFeesRequest,
+  ClmmCollectTokensRequest,
+  ClmmExtendRewardsRequest,
   LiquidityDistribution,
-  RemoveLiquidity,
-  SimulateSwap,
-  ClmmSwapParams,
+  ClmmPositionInfoRequest,
   ClmmPoolContractState,
   ClmmPoolConfig,
-  SetRewardParams,
-  ExtendRewards,
-  PositionPath,
+  ClmmSetRewardParamsRequest,
+  ClmmSimulateSwapRequest,
+  ClmmSwapRequest,
+  ClmmRemoveLiquidityRequest,
   ClmmPositionInfo,
 } from './types';
 import type { PoolInstance, PoolTypes } from 'clmm/artifacts/ts';
@@ -274,7 +274,7 @@ export class ClmmModule extends ModuleBase {
   }
 
   async addLiquidity(
-    p: AddLiquidity,
+    p: ClmmAddLiquidityRequest,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
@@ -364,7 +364,7 @@ export class ClmmModule extends ModuleBase {
   }
 
   async removeLiquidity(
-    p: RemoveLiquidity,
+    p: ClmmRemoveLiquidityRequest,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const positionManagerAddress = addressFromContractId(this.config.positionManagerId);
@@ -404,13 +404,13 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result };
   }
 
-  async positionInfo({ poolId, ...args }: PositionPath): Promise<ClmmPositionInfo> {
+  async positionInfo({ poolId, ...args }: ClmmPositionInfoRequest): Promise<ClmmPositionInfo> {
     const pool = Pool.at(addressFromContractId(poolId));
     const { returns } = await pool.view.positionInfo({ args });
     return returns;
   }
   async collectTokens(
-    p: CollectTokens,
+    p: ClmmCollectTokensRequest,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const positionId = PoolUtils.getPositionId(poolAddress, p.owner, p.tickLower, p.tickUpper);
@@ -473,7 +473,7 @@ export class ClmmModule extends ModuleBase {
     return index;
   }
 
-  async simulateSwap(p: SimulateSwap): Promise<LiquidityDistribution> {
+  async simulateSwap(p: ClmmSimulateSwapRequest): Promise<LiquidityDistribution> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
     const result = await pool.view.simulateSwap({
@@ -502,7 +502,7 @@ export class ClmmModule extends ModuleBase {
     };
   }
 
-  async swap(p: ClmmSwapParams): Promise<SignExecuteScriptTxResult> {
+  async swap(p: ClmmSwapRequest): Promise<SignExecuteScriptTxResult> {
     const configIndex = p.routePlan[0];
     const pool = this.getPool(p.token0, p.token1, configIndex);
     const poolState = await pool.fetchState();
@@ -529,7 +529,9 @@ export class ClmmModule extends ModuleBase {
     });
   }
 
-  async collectProtocolFees(p: CollectProtocolFees): Promise<SignExecuteScriptTxResult> {
+  async collectProtocolFees(
+    p: ClmmCollectProtocolFeesRequest,
+  ): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId);
     const poolFactory = PoolFactory.at(poolFactoryAddress);
     const result = await poolFactory.transact.collectProtocolFees({
@@ -544,7 +546,7 @@ export class ClmmModule extends ModuleBase {
     return result;
   }
 
-  async setRewardParams(p: SetRewardParams): Promise<SignExecuteScriptTxResult> {
+  async setRewardParams(p: ClmmSetRewardParamsRequest): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId);
     const poolFactory = PoolFactory.at(poolFactoryAddress);
     const index = p.rewardToken === p.token0 ? 0n : p.rewardToken === p.token1 ? 1n : 2n;
@@ -567,7 +569,7 @@ export class ClmmModule extends ModuleBase {
     return result;
   }
 
-  async extendRewards(p: ExtendRewards): Promise<SignExecuteScriptTxResult> {
+  async extendRewards(p: ClmmExtendRewardsRequest): Promise<SignExecuteScriptTxResult> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
     const index = p.rewardToken === p.token0 ? 0n : p.rewardToken === p.token1 ? 1n : 2n;

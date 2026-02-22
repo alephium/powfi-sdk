@@ -1,5 +1,9 @@
 import type { TokenInfo } from '@alephium/token-list';
 
+export type CpmmTokenId = string;
+export type CpmmSlippageBps = bigint;
+export type CpmmInputType = 'TokenA' | 'TokenB';
+
 export interface CpmmConfig {
   groupIndex: number;
   factoryId: string;
@@ -17,17 +21,26 @@ export interface CpmmPoolContractState {
   dexAccount: string;
 }
 
-export interface SwapParams {
-  tokenIn: TokenInfo;
-  tokenOut: TokenInfo;
+export interface CpmmSwapRequest {
+  tokenInId: CpmmTokenId;
+  tokenOutId: CpmmTokenId;
   amountIn?: bigint;
   amountOut?: bigint;
-  slippage: bigint; // bps
+  slippageBps: CpmmSlippageBps;
   sender: string;
-  ttl?: number; // Time to live in minutes, default 60
+  ttlMinutes?: number; // defaults to 60
 }
 
-export interface SwapDetails {
+export interface CpmmSwapQuoteRequest {
+  state: CpmmPoolContractState;
+  tokenInId: CpmmTokenId;
+  tokenOutId: CpmmTokenId;
+  amountIn?: bigint;
+  amountOut?: bigint;
+  slippageBps: CpmmSlippageBps;
+}
+
+export interface CpmmSwapQuote {
   swapType: 'ExactIn' | 'ExactOut';
   state: CpmmPoolContractState;
   tokenInInfo: TokenInfo;
@@ -39,18 +52,27 @@ export interface SwapDetails {
   priceImpact: number;
 }
 
-export interface AddLiquidityParams {
-  cpmmPoolState: CpmmPoolContractState;
-  tokenA: TokenInfo;
-  tokenB: TokenInfo;
+export interface CpmmAddLiquidityRequest {
+  poolState: CpmmPoolContractState;
+  tokenAId: CpmmTokenId;
+  tokenBId: CpmmTokenId;
   amountA: bigint;
   amountB: bigint;
-  slippage: bigint; // bps
+  slippageBps: CpmmSlippageBps;
   sender: string;
-  ttl?: number;
+  ttlMinutes?: number; // defaults to 60
 }
 
-export interface AddLiquidityDetails {
+export interface CpmmAddLiquidityQuoteRequest {
+  poolState?: CpmmPoolContractState;
+  tokenAId: CpmmTokenId;
+  tokenBId: CpmmTokenId;
+  amountA?: bigint;
+  amountB?: bigint;
+  inputType?: CpmmInputType;
+}
+
+export interface CpmmAddLiquidityQuote {
   state?: CpmmPoolContractState;
   tokenAId: string;
   tokenBId: string;
@@ -60,16 +82,16 @@ export interface AddLiquidityDetails {
   sharePercentage: number;
 }
 
-export interface RemoveLiquidityParams {
-  state: CpmmPoolContractState;
+export interface CpmmRemoveLiquidityRequest {
+  poolState: CpmmPoolContractState;
   liquidity: bigint;
   totalLiquidityAmount?: bigint;
-  slippage: bigint; // bps
+  slippageBps: CpmmSlippageBps;
   sender: string;
-  ttl?: number;
+  ttlMinutes?: number; // defaults to 60
 }
 
-export interface RemoveLiquidityDetails {
+export interface CpmmRemoveLiquidityQuote {
   state: CpmmPoolContractState;
   token0: TokenInfo;
   amount0: bigint;
@@ -79,35 +101,19 @@ export interface RemoveLiquidityDetails {
   remainSharePercentage: number;
 }
 
-export interface ClaimableAmounts {
+export interface CpmmClaimableAmounts {
   token0: TokenInfo;
   amount0: bigint;
   token1: TokenInfo;
   amount1: bigint;
 }
 
-export interface CreatePoolParams {
-  tokenA: TokenInfo;
-  tokenB: TokenInfo;
+export interface CpmmCreatePoolRequest {
+  tokenAId: CpmmTokenId;
+  tokenBId: CpmmTokenId;
   sender: string;
-  tokenAAmount?: bigint;
-  tokenBAmount?: bigint;
-}
-
-export interface ComputeSwapParams {
-  state: CpmmPoolContractState;
-  tokenIn: TokenInfo;
-  tokenOut: TokenInfo;
-  amountIn?: bigint;
-  amountOut?: bigint;
-  slippage: bigint; // bps
-}
-
-export interface ComputeLiquidityParams {
-  state?: CpmmPoolContractState;
-  tokenA: TokenInfo;
-  tokenB: TokenInfo;
-  amountA?: bigint;
-  amountB?: bigint;
-  inputType?: 'TokenA' | 'TokenB';
+  initialLiquidity?: {
+    tokenAAmount: bigint;
+    tokenBAmount: bigint;
+  };
 }

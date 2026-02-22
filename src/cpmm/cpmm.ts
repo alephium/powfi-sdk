@@ -17,7 +17,7 @@ import {
   CreatePairAndAddLiquidity,
 } from 'cpmm/artifacts/ts';
 import { loadDeployments } from 'cpmm/artifacts/ts/deployments';
-import type { CpmmPoolContractState } from './types';
+import type { TokenInfo } from '@alephium/token-list';
 import { sortTokens } from '../common/utils';
 import { MAX_PRICE_IMPACT } from './constants';
 import {
@@ -26,17 +26,18 @@ import {
   PoolNotFoundError,
 } from '../common/error';
 import type {
-  SwapParams,
-  SwapDetails,
-  AddLiquidityParams,
-  AddLiquidityDetails,
-  RemoveLiquidityParams,
-  RemoveLiquidityDetails,
-  ClaimableAmounts,
-  CreatePoolParams,
-  ComputeSwapParams,
-  ComputeLiquidityParams,
+  CpmmAddLiquidityQuote,
+  CpmmAddLiquidityQuoteRequest,
+  CpmmAddLiquidityRequest,
+  CpmmClaimableAmounts,
   CpmmConfig,
+  CpmmCreatePoolRequest,
+  CpmmPoolContractState,
+  CpmmRemoveLiquidityQuote,
+  CpmmRemoveLiquidityRequest,
+  CpmmSwapQuote,
+  CpmmSwapQuoteRequest,
+  CpmmSwapRequest,
 } from './types';
 import type { Zeta } from '../zeta';
 import ModuleBase from '../moduleBase';
@@ -108,19 +109,22 @@ export class CpmmModule extends ModuleBase {
       });
   }
 
-  async swap(params: SwapParams, balances?: Map<string, bigint>): Promise<ExecuteScriptResult> {
+  async swap(
+    params: CpmmSwapRequest,
+    balances?: Map<string, bigint>,
+  ): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for swap operation');
     }
 
-    const poolState = await this.getPoolState(params.tokenIn.id, params.tokenOut.id);
+    const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId);
     const swapDetails = CpmmModule.computeSwapAmount({
       state: poolState,
-      tokenIn: params.tokenIn,
-      tokenOut: params.tokenOut,
+      tokenInId: params.tokenInId,
+      tokenOutId: params.tokenOutId,
       amountIn: params.amountIn,
       amountOut: params.amountOut,
-      slippage: params.slippage,
+      slippageBps: params.slippageBps,
     });
 
     if (swapDetails.priceImpact >= MAX_PRICE_IMPACT) {
@@ -139,7 +143,7 @@ export class CpmmModule extends ModuleBase {
       }
     }
 
-    const ttl = params.ttl ?? 60;
+    const ttlMinutes = params.ttlMinutes ?? 60;
 
     if (swapDetails.swapType === 'ExactIn') {
       let attoAlphAmount = this.getExtraAlphAmount(
@@ -164,7 +168,7 @@ export class CpmmModule extends ModuleBase {
           tokenInId: swapDetails.tokenInInfo.id,
           amountIn: swapDetails.tokenInAmount,
           amountOutMin: swapDetails.minimalTokenOutAmount!,
-          deadline: deadline(ttl),
+          deadline: deadline(ttlMinutes),
         },
         attoAlphAmount,
         tokens,
@@ -192,7 +196,7 @@ export class CpmmModule extends ModuleBase {
           tokenInId: swapDetails.tokenInInfo.id,
           amountInMax: swapDetails.maximalTokenInAmount!,
           amountOut: swapDetails.tokenOutAmount,
-          deadline: deadline(ttl),
+          deadline: deadline(ttlMinutes),
         },
         attoAlphAmount,
         tokens,
@@ -202,62 +206,73 @@ export class CpmmModule extends ModuleBase {
   }
 
   async addLiquidity(
-    params: AddLiquidityParams,
+    params: CpmmAddLiquidityRequest,
     balances?: Map<string, bigint>,
   ): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for addLiquidity operation');
     }
 
-    const { cpmmPoolState, tokenA, tokenB, amountA, amountB, slippage, sender, ttl = 60 } = params;
+    const {
+      poolState,
+      tokenAId,
+      tokenBId,
+      amountA,
+      amountB,
+      slippageBps,
+      sender,
+      ttlMinutes = 60,
+    } = params;
+    const tokenAInfo = CpmmModule.getTokenInfoFromPoolState(poolState, tokenAId, 'tokenAId');
+    const tokenBInfo = CpmmModule.getTokenInfoFromPoolState(poolState, tokenBId, 'tokenBId');
 
     if (amountA === 0n || amountB === 0n) {
       throw new Error('The input amount must be greater than 0');
     }
 
     if (balances) {
-      const tokenAAvailable = balances.get(tokenA.id) ?? 0n;
+      const tokenAAvailable = balances.get(tokenAInfo.id) ?? 0n;
       if (tokenAAvailable < amountA) {
         throw new InsufficientBalanceError(
-          tokenA.symbol,
-          prettifyTokenAmount(amountA, tokenA.decimals) ?? `${amountA}`,
-          prettifyTokenAmount(tokenAAvailable, tokenA.decimals) ?? `${tokenAAvailable}`,
+          tokenAInfo.symbol,
+          prettifyTokenAmount(amountA, tokenAInfo.decimals) ?? `${amountA}`,
+          prettifyTokenAmount(tokenAAvailable, tokenAInfo.decimals) ?? `${tokenAAvailable}`,
         );
       }
 
-      const tokenBAvailable = balances.get(tokenB.id) ?? 0n;
+      const tokenBAvailable = balances.get(tokenBInfo.id) ?? 0n;
       if (tokenBAvailable < amountB) {
         throw new InsufficientBalanceError(
-          tokenB.symbol,
-          prettifyTokenAmount(amountB, tokenB.decimals) ?? `${amountB}`,
-          prettifyTokenAmount(tokenBAvailable, tokenB.decimals) ?? `${tokenBAvailable}`,
+          tokenBInfo.symbol,
+          prettifyTokenAmount(amountB, tokenBInfo.decimals) ?? `${amountB}`,
+          prettifyTokenAmount(tokenBAvailable, tokenBInfo.decimals) ?? `${tokenBAvailable}`,
         );
       }
     }
 
-    const isInitial = cpmmPoolState.reserve0 === 0n && cpmmPoolState.reserve1 === 0n;
-    const amountAMin = isInitial ? amountA : CpmmModule.minimalAmount(amountA, slippage);
-    const amountBMin = isInitial ? amountB : CpmmModule.minimalAmount(amountB, slippage);
+    const isInitial = poolState.reserve0 === 0n && poolState.reserve1 === 0n;
+    const amountAMin = isInitial ? amountA : CpmmModule.minimalAmount(amountA, slippageBps);
+    const amountBMin = isInitial ? amountB : CpmmModule.minimalAmount(amountB, slippageBps);
 
     const [amount0Desired, amount1Desired, amount0Min, amount1Min] =
-      tokenA.id === cpmmPoolState.token0Info.id
+      tokenAId === poolState.token0Info.id
         ? [amountA, amountB, amountAMin, amountBMin]
         : [amountB, amountA, amountBMin, amountAMin];
 
     // Calculate ALPH amounts properly
-    const extraAlph = this.getExtraAlphAmount(tokenA.id, tokenB.id);
+    const extraAlph = this.getExtraAlphAmount(tokenAId, tokenBId);
     let attoAlphAmount = extraAlph + DUST_AMOUNT;
     const tokens: Array<{ id: string; amount: bigint }> = [];
 
     // Handle ALPH token properly - don't double count it
-    if (tokenA.id === ALPH_TOKEN_ID) {
+    if (tokenAId === ALPH_TOKEN_ID) {
       attoAlphAmount += amountA;
-      tokens.push({ id: tokenB.id, amount: amountB });
-    } else if (tokenB.id === ALPH_TOKEN_ID) {
+      tokens.push({ id: tokenBId, amount: amountB });
+    } else if (tokenBId === ALPH_TOKEN_ID) {
       attoAlphAmount += amountB;
-      tokens.push({ id: tokenA.id, amount: amountA });
+      tokens.push({ id: tokenAId, amount: amountA });
     } else {
-      tokens.push({ id: tokenA.id, amount: amountA }, { id: tokenB.id, amount: amountB });
+      tokens.push({ id: tokenAId, amount: amountA }, { id: tokenBId, amount: amountB });
     }
 
     const result = await AddLiquidity.execute({
@@ -265,12 +280,12 @@ export class CpmmModule extends ModuleBase {
       initialFields: {
         sender,
         router: this.config.routerId,
-        pair: cpmmPoolState.poolId,
+        pair: poolState.poolId,
         amount0Desired,
         amount1Desired,
         amount0Min,
         amount1Min,
-        deadline: deadline(ttl),
+        deadline: deadline(ttlMinutes),
       },
       attoAlphAmount,
       tokens,
@@ -278,32 +293,39 @@ export class CpmmModule extends ModuleBase {
     return result;
   }
 
-  async removeLiquidity(params: RemoveLiquidityParams): Promise<ExecuteScriptResult> {
+  async removeLiquidity(params: CpmmRemoveLiquidityRequest): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for removeLiquidity operation');
     }
 
-    const { state, liquidity, totalLiquidityAmount, slippage, sender, ttl = 60 } = params;
-    const ownedLiquidity = totalLiquidityAmount ?? state.totalSupply;
-    const details = CpmmModule.computeRemoveLiquidityAmounts(state, ownedLiquidity, liquidity);
+    const {
+      poolState,
+      liquidity,
+      totalLiquidityAmount,
+      slippageBps,
+      sender,
+      ttlMinutes = 60,
+    } = params;
+    const ownedLiquidity = totalLiquidityAmount ?? poolState.totalSupply;
+    const details = CpmmModule.computeRemoveLiquidityAmounts(poolState, ownedLiquidity, liquidity);
 
-    const amount0Min = CpmmModule.minimalAmount(details.amount0, slippage);
-    const amount1Min = CpmmModule.minimalAmount(details.amount1, slippage);
+    const amount0Min = CpmmModule.minimalAmount(details.amount0, slippageBps);
+    const amount1Min = CpmmModule.minimalAmount(details.amount1, slippageBps);
 
     const result = await RemoveLiquidity.execute({
       signer: this.scope.signer,
       initialFields: {
         sender,
         router: this.config.routerId,
-        pairId: state.poolId,
+        pairId: poolState.poolId,
         liquidity,
         amount0Min,
         amount1Min,
-        deadline: deadline(ttl),
+        deadline: deadline(ttlMinutes),
       },
       attoAlphAmount:
-        this.getExtraAlphAmount(state.token0Info.id, state.token1Info.id) + DUST_AMOUNT,
-      tokens: [{ id: state.poolId, amount: liquidity }],
+        this.getExtraAlphAmount(poolState.token0Info.id, poolState.token1Info.id) + DUST_AMOUNT,
+      tokens: [{ id: poolState.poolId, amount: liquidity }],
     });
     return result;
   }
@@ -312,7 +334,7 @@ export class CpmmModule extends ModuleBase {
     tokenAId: string,
     tokenBId: string,
     liquidityBalance: bigint,
-  ): Promise<ClaimableAmounts> {
+  ): Promise<CpmmClaimableAmounts> {
     const state = await this.getPoolState(tokenAId, tokenBId);
     const details = CpmmModule.computeClaimableAmounts(state, liquidityBalance);
     return {
@@ -323,18 +345,21 @@ export class CpmmModule extends ModuleBase {
     };
   }
 
-  async createPool(params: CreatePoolParams): Promise<ExecuteScriptResult & { poolId: string }> {
+  async createPool(
+    params: CpmmCreatePoolRequest,
+  ): Promise<ExecuteScriptResult & { poolId: string }> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for createPool operation');
     }
 
-    const { tokenA, tokenB, sender, tokenAAmount, tokenBAmount } = params;
-    const poolId = this.getPoolId(tokenA.id, tokenB.id);
+    const { tokenAId, tokenBId, sender, initialLiquidity } = params;
+    const poolId = this.getPoolId(tokenAId, tokenBId);
 
-    if (tokenAAmount !== undefined && tokenBAmount !== undefined) {
-      const [token0Id, token1Id] = sortTokens(tokenA.id, tokenB.id);
+    if (initialLiquidity) {
+      const { tokenAAmount, tokenBAmount } = initialLiquidity;
+      const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId);
       const [amount0, amount1] =
-        token0Id === tokenA.id ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount];
+        token0Id === tokenAId ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount];
       const result = await CreatePairAndAddLiquidity.execute({
         signer: this.scope.signer,
         initialFields: {
@@ -346,7 +371,7 @@ export class CpmmModule extends ModuleBase {
           amount0,
           amount1,
         },
-        attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenA.id, tokenB.id),
+        attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenAId, tokenBId),
         tokens: [
           { id: token0Id, amount: amount0 },
           { id: token1Id, amount: amount1 },
@@ -361,13 +386,13 @@ export class CpmmModule extends ModuleBase {
         payer: sender,
         factory: this.config.factoryId,
         alphAmount: ONE_ALPH,
-        tokenAId: tokenA.id,
-        tokenBId: tokenB.id,
+        tokenAId,
+        tokenBId,
       },
-      attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenA.id, tokenB.id),
+      attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenAId, tokenBId),
       tokens: [
-        { id: tokenA.id, amount: 1n },
-        { id: tokenB.id, amount: 1n },
+        { id: tokenAId, amount: 1n },
+        { id: tokenBId, amount: 1n },
       ],
     });
     return { ...result, poolId };
@@ -387,8 +412,10 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
-  static computeSwapAmount(params: ComputeSwapParams): SwapDetails {
-    const { state, tokenIn, tokenOut, amountIn, amountOut, slippage } = params;
+  static computeSwapAmount(params: CpmmSwapQuoteRequest): CpmmSwapQuote {
+    const { state, tokenInId, tokenOutId, amountIn, amountOut, slippageBps } = params;
+    const tokenInInfo = this.getTokenInfoFromPoolState(state, tokenInId, 'tokenInId');
+    const tokenOutInfo = this.getTokenInfoFromPoolState(state, tokenOutId, 'tokenOutId');
 
     let swapType: 'ExactIn' | 'ExactOut';
     let tokenInAmount: bigint;
@@ -397,10 +424,10 @@ export class CpmmModule extends ModuleBase {
     if (amountIn !== undefined) {
       swapType = 'ExactIn';
       tokenInAmount = amountIn;
-      tokenOutAmount = CpmmModule.getAmountOut(state, tokenIn.id, amountIn);
+      tokenOutAmount = CpmmModule.getAmountOut(state, tokenInInfo.id, amountIn);
     } else if (amountOut !== undefined) {
       swapType = 'ExactOut';
-      tokenInAmount = CpmmModule.getAmountIn(state, tokenOut.id, amountOut);
+      tokenInAmount = CpmmModule.getAmountIn(state, tokenOutInfo.id, amountOut);
       tokenOutAmount = amountOut;
     } else {
       throw new Error('Either amountIn or amountOut must be specified');
@@ -409,7 +436,7 @@ export class CpmmModule extends ModuleBase {
     const priceImpact = this.calcPriceImpact(
       state.reserve0,
       state.reserve1,
-      tokenIn.id,
+      tokenInInfo.id,
       state.token0Info.id,
       tokenInAmount,
       tokenOutAmount,
@@ -418,45 +445,47 @@ export class CpmmModule extends ModuleBase {
     return {
       swapType,
       state,
-      tokenInInfo: tokenIn,
-      tokenOutInfo: tokenOut,
+      tokenInInfo,
+      tokenOutInfo,
       tokenInAmount,
       tokenOutAmount,
       priceImpact,
       minimalTokenOutAmount:
-        swapType === 'ExactIn' ? this.minimalAmount(tokenOutAmount, slippage) : undefined,
+        swapType === 'ExactIn' ? this.minimalAmount(tokenOutAmount, slippageBps) : undefined,
       maximalTokenInAmount:
-        swapType === 'ExactOut' ? this.maximalAmount(tokenInAmount, slippage) : undefined,
+        swapType === 'ExactOut' ? this.maximalAmount(tokenInAmount, slippageBps) : undefined,
     };
   }
 
-  static computeLiquidityAmounts(params: ComputeLiquidityParams): AddLiquidityDetails {
-    const { state, tokenA, tokenB, amountA, amountB, inputType = 'TokenA' } = params;
+  static computeLiquidityAmounts(
+    params: CpmmAddLiquidityQuoteRequest,
+  ): CpmmAddLiquidityQuote {
+    const { poolState, tokenAId, tokenBId, amountA, amountB, inputType = 'TokenA' } = params;
 
-    if (!state) {
+    if (!poolState) {
       // Initial liquidity
-      if (!amountA || !amountB) {
+      if (amountA === undefined || amountB === undefined) {
         throw new Error('Both amountA and amountB are required for initial liquidity');
       }
-      return this.getInitLiquidityDetails(tokenA.id, tokenB.id, amountA, amountB);
+      return this.getInitLiquidityDetails(tokenAId, tokenBId, amountA, amountB);
     }
 
     // Adding to existing pool
-    const inputTokenId = inputType === 'TokenA' ? tokenA.id : tokenB.id;
+    const inputTokenId = inputType === 'TokenA' ? tokenAId : tokenBId;
     const inputAmount = inputType === 'TokenA' ? amountA : amountB;
 
-    if (!inputAmount) {
+    if (inputAmount === undefined) {
       throw new Error(`Amount for ${inputType} is required`);
     }
 
-    return this.getLiquidityDetails(state, inputTokenId, inputAmount, inputType);
+    return this.getLiquidityDetails(poolState, inputTokenId, inputAmount, inputType);
   }
 
   static computeRemoveLiquidityAmounts(
     state: CpmmPoolContractState,
     totalLiquidity: bigint,
     liquidityToRemove: bigint,
-  ): RemoveLiquidityDetails {
+  ): CpmmRemoveLiquidityQuote {
     if (liquidityToRemove > totalLiquidity) {
       throw new Error('Liquidity exceeds total liquidity amount');
     }
@@ -483,7 +512,7 @@ export class CpmmModule extends ModuleBase {
   static computeClaimableAmounts(
     state: CpmmPoolContractState,
     liquidityBalance: bigint,
-  ): RemoveLiquidityDetails {
+  ): CpmmRemoveLiquidityQuote {
     return this.computeRemoveLiquidityAmounts(state, liquidityBalance, liquidityBalance);
   }
 
@@ -527,15 +556,7 @@ export class CpmmModule extends ModuleBase {
     inputTokenId: string,
     inputAmount: bigint,
     inputType: 'TokenA' | 'TokenB', // First or second token in the token input box
-  ): {
-    state: CpmmPoolContractState;
-    tokenAId: string;
-    tokenBId: string;
-    amountA: bigint;
-    amountB: bigint;
-    shareAmount: bigint;
-    sharePercentage: number;
-  } {
+  ): CpmmAddLiquidityQuote {
     const isInputToken0 = inputTokenId === state.token0Info.id;
     const [reserveA, reserveB] = isInputToken0
       ? [state.reserve0, state.reserve1]
@@ -588,14 +609,7 @@ export class CpmmModule extends ModuleBase {
     tokenBId: string,
     amountA: bigint,
     amountB: bigint,
-  ): {
-    tokenAId: string;
-    tokenBId: string;
-    amountA: bigint;
-    amountB: bigint;
-    shareAmount: bigint;
-    sharePercentage: number;
-  } {
+  ): CpmmAddLiquidityQuote {
     const liquidity = MathUtil.sqrt(amountA * amountB);
     if (liquidity <= MINIMUM_LIQUIDITY) {
       throw new InsufficientLiquidityError('Insufficient initial liquidity');
@@ -608,6 +622,20 @@ export class CpmmModule extends ModuleBase {
       shareAmount: liquidity - MINIMUM_LIQUIDITY,
       sharePercentage: 100,
     };
+  }
+
+  private static getTokenInfoFromPoolState(
+    state: CpmmPoolContractState,
+    tokenId: string,
+    tokenLabel: string,
+  ): TokenInfo {
+    if (state.token0Info.id === tokenId) {
+      return state.token0Info;
+    }
+    if (state.token1Info.id === tokenId) {
+      return state.token1Info;
+    }
+    throw new Error(`Unknown ${tokenLabel} ${tokenId} for pool ${state.poolId}`);
   }
 
   private static _getAmountOut(amountIn: bigint, reserveIn: bigint, reserveOut: bigint): bigint {
