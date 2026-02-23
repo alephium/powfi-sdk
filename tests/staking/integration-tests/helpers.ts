@@ -175,11 +175,6 @@ export class Fixture {
     return this.zeta.staking.unstakeXAlph(amount);
   }
 
-  async stakeAndLockAlph(signer: SignerProvider, amount: bigint) {
-    this.zeta.signer = signer;
-    return this.zeta.staking.stakeAndLockAlph(amount);
-  }
-
   async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
     this.zeta.signer = signer;
     return this.zeta.staking.unlockAndStartUnstake(amount);

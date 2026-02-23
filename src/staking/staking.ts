@@ -20,7 +20,6 @@ import type {
   XAlphTokenTypes,
 } from 'staking/artifacts/ts';
 import {
-  AlphStakeAndLock,
   AlphUnstakeVault,
   GovernanceDemo,
   RewardSharingVault,
@@ -137,18 +136,6 @@ export class StakingModule extends ModuleBase {
       signer: this.scope.signer,
       args: { amount },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
-    });
-  }
-
-  async stakeAndLockAlph(amount: bigint): Promise<ExecuteScriptResult> {
-    return AlphStakeAndLock.execute({
-      signer: this.scope.signer,
-      initialFields: {
-        xAlphToken: this.xAlphTokenContract.contractId,
-        xAlphStakeVault: this.stakeVaultContract.contractId,
-        amount,
-      },
-      attoAlphAmount: amount + MINIMAL_CONTRACT_DEPOSIT,
     });
   }
 
