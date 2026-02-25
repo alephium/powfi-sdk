@@ -1,13 +1,13 @@
 import type { SignerProvider, Account } from '@alephium/web3';
 import { NodeProvider, ExplorerProvider, web3 } from '@alephium/web3';
 import { CpmmModule } from './cpmm/cpmm';
-import type { Network, PowFiLoadParams } from './common/types';
+import type { Network, PowfiLoadParams } from './common/types';
 import { defaultNetworks } from './common/types';
 import { ClmmModule } from './clmm/clmm';
 import { TokenModule } from './token/token';
 import { StakingModule } from './staking/staking';
 
-export class PowFi {
+export class Powfi {
   public cpmm: CpmmModule;
   public clmm: ClmmModule;
   public token: TokenModule;
@@ -20,7 +20,7 @@ export class PowFi {
   private _account?: Account;
   private _network: Network;
 
-  constructor(params: PowFiLoadParams) {
+  constructor(params: PowfiLoadParams) {
     const network = defaultNetworks.find((n) => n.id === params.networkId);
     if (!network) {
       throw new Error(`Network ${params.networkId} not found`);
@@ -42,8 +42,8 @@ export class PowFi {
     this.staking = new StakingModule(this);
   }
 
-  static load(config: PowFiLoadParams): PowFi {
-    return new PowFi(config);
+  static load(config: PowfiLoadParams): Powfi {
+    return new Powfi(config);
   }
 
   public set signer(signer: SignerProvider) {

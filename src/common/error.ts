@@ -1,39 +1,39 @@
-export class PowFiSDKError extends Error {
+export class PowfiSDKError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);
-    this.name = 'PowFiSDKError';
+    this.name = 'PowfiSDKError';
   }
 }
 
-export class InsufficientLiquidityError extends PowFiSDKError {
+export class InsufficientLiquidityError extends PowfiSDKError {
   constructor(message: string = 'Insufficient liquidity') {
     super(message);
     this.name = 'InsufficientLiquidityError';
   }
 }
 
-export class PriceImpactTooHighError extends PowFiSDKError {
+export class PriceImpactTooHighError extends PowfiSDKError {
   constructor(priceImpact: number, maxPriceImpact: number) {
     super(`Price impact too high: ${priceImpact.toFixed(2)}% > ${maxPriceImpact}%`);
     this.name = 'PriceImpactTooHighError';
   }
 }
 
-export class PoolNotFoundError extends PowFiSDKError {
+export class PoolNotFoundError extends PowfiSDKError {
   constructor(poolId: string) {
     super(`Pool does not exist for ${poolId}`);
     this.name = 'PoolNotFoundError';
   }
 }
 
-export class InsufficientBalanceError extends PowFiSDKError {
+export class InsufficientBalanceError extends PowfiSDKError {
   constructor(token: string, required: string, available: string) {
     super(`Not enough ${token} balance. Required: ${required}, Available: ${available}`);
     this.name = 'InsufficientBalanceError';
   }
 }
 
-export class TokenListFetchError extends PowFiSDKError {
+export class TokenListFetchError extends PowfiSDKError {
   public readonly status?: number;
 
   constructor(url: string, options?: { status?: number; cause?: unknown }) {

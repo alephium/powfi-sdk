@@ -1,7 +1,7 @@
 import { TickUtils } from '../../src/clmm/tick';
 import { UNLIMITED_AMOUNT } from '../../src/clmm/constants';
 import type { TokenInfo } from '@alephium/token-list';
-import { PowFi } from '../../src/powfi';
+import { Powfi } from '../../src/powfi';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
 import { GetPositionAmountsFromPriceReturn } from '../../src';
 
@@ -512,7 +512,7 @@ describe('LiquidityUtils', () => {
 
   describe('poolExists function', () => {
     test('should return false for non-existent pool', async () => {
-      const powfi = new PowFi({ networkId: 'devnet' });
+      const powfi = new Powfi({ networkId: 'devnet' });
       powfi.setCurrentProviders();
 
       const fakeToken0 = '0000000000000000000000000000000000000000000000000000000000000001';

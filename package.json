@@ -1,7 +1,7 @@
 {
   "name": "@alephium/powfi-sdk",
   "version": "0.0.1-rc.5",
-  "description": "Typescript SDK for Alephium PowFi",
+  "description": "Typescript SDK for Alephium Powfi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
@@ -46,7 +46,7 @@
     "sdk",
     "powfi"
   ],
-  "author": "PowFi",
+  "author": "Powfi",
   "license": "LGPL-3.0-only",
   "repository": {
     "type": "git",

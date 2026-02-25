@@ -28,7 +28,7 @@ import {
   PositionManager,
 } from 'clmm/artifacts/ts';
 import { TickUtils } from '../../../src/clmm/tick';
-import { PowFi } from '../../../src/powfi';
+import { Powfi } from '../../../src/powfi';
 import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src';
 
 export interface Balances {
@@ -92,14 +92,14 @@ export class Fixture {
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly tokenDecimal: number,
-    readonly powfi: PowFi,
+    readonly powfi: Powfi,
     readonly deployer: SignerProvider,
   ) { }
 
   static async create(): Promise<Fixture> {
     const [deployer] = await getSigners(1, 5_000n * ONE_ALPH);
 
-    const powfi = new PowFi({ networkId: 'devnet', signer: deployer });
+    const powfi = new Powfi({ networkId: 'devnet', signer: deployer });
     powfi.setCurrentProviders();
 
     const poolTemplate = (await Pool.deployTemplate(deployer)).contractInstance;

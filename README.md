@@ -1,10 +1,10 @@
-# PowFi SDK (`@alephium/powfi-sdk`)
+# Powfi SDK (`@alephium/powfi-sdk`)
 
-TypeScript SDK for PowFi on Alephium. This package provides high-level modules for CPMM, CLMM, staking, and token operations, and re-exports generated contract artifacts/deployments.
+TypeScript SDK for Powfi on Alephium. This package provides high-level modules for CPMM, CLMM, staking, and token operations, and re-exports generated contract artifacts/deployments.
 
 ## Scope
 
-- `PowFi` entrypoint for network/provider/signer configuration
+- `Powfi` entrypoint for network/provider/signer configuration
 - `powfi.cpmm` for constant-product liquidity pools
 - `powfi.clmm` for concentrated-liquidity pools
 - `powfi.staking` for xALPH staking flows
@@ -28,9 +28,9 @@ bun install
 ## Quick Start
 
 ```ts
-import { PowFi, CpmmModule } from '@alephium/powfi-sdk'
+import { Powfi, CpmmModule } from '@alephium/powfi-sdk'
 
-const powfi = PowFi.load({ networkId: 'testnet' })
+const powfi = Powfi.load({ networkId: 'testnet' })
 
 const poolState = await powfi.cpmm.getPoolState(tokenAId, tokenBId)
 const quote = CpmmModule.computeSwapAmount({
@@ -57,7 +57,7 @@ const simulation = await powfi.clmm.simulateSwap({
 For write operations (swap, add/remove liquidity, staking), pass a signer when loading the SDK:
 
 ```ts
-const powfi = PowFi.load({ networkId: 'testnet', signer })
+const powfi = Powfi.load({ networkId: 'testnet', signer })
 ```
 
 ## Development Commands

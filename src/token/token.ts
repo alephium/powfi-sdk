@@ -1,6 +1,6 @@
 import type { TokenInfo } from '@alephium/token-list';
 import ModuleBase from '../moduleBase';
-import type { PowFi } from '../powfi';
+import type { Powfi } from '../powfi';
 import { TokenListFetchError } from '../common/error';
 
 interface TokenCache {
@@ -17,7 +17,7 @@ export class TokenModule extends ModuleBase {
   private readonly cacheTimeMs: number;
 
   constructor(
-    scope: PowFi,
+    scope: Powfi,
     private readonly cacheTimeDays: number = 1,
   ) {
     super({ scope, moduleName: 'TokenModule' });

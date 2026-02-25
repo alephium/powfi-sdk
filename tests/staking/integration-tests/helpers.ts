@@ -21,7 +21,7 @@ import {
   type AlphUnstakeVaultInstance,
 } from 'staking/artifacts/ts';
 import { buildMerkleWhitelist, type MerkleWhitelist } from 'staking/src/merkle-whitelist';
-import { PowFi } from '../../../src/powfi';
+import { Powfi } from '../../../src/powfi';
 import type { StakingConfig } from '../../../src/staking/types';
 
 export const UNSTAKE_DURATION = 10n * 1000n; // 10 seconds for testing
@@ -70,14 +70,14 @@ export function timeout(ms: number): Promise<void> {
 }
 
 export class Fixture {
-  readonly powfi: PowFi;
+  readonly powfi: Powfi;
 
   constructor(
     readonly xAlphTokenContract: XAlphTokenInstance,
     readonly stakeVaultContract: XAlphStakeVaultInstance,
     readonly deployer: SignerProvider,
     readonly whitelist: MerkleWhitelist,
-    powfi: PowFi,
+    powfi: Powfi,
   ) {
     this.powfi = powfi;
   }
@@ -93,7 +93,7 @@ export class Fixture {
   static async create(): Promise<Fixture> {
     const [deployer] = await getSigners(1, 10_000n * ONE_ALPH);
 
-    const powfi = new PowFi({ networkId: 'devnet', signer: deployer });
+    const powfi = new Powfi({ networkId: 'devnet', signer: deployer });
     powfi.setCurrentProviders();
 
     const unstakeVaultTemplate = (await AlphUnstakeVault.deployTemplate(deployer)).contractInstance;
@@ -134,7 +134,7 @@ export class Fixture {
       })
     ).contractInstance;
 
-    // Configure PowFi SDK to use the deployed contracts
+    // Configure Powfi SDK to use the deployed contracts
     const stakingConfig: StakingConfig = {
       groupIndex: stakeVaultContract.groupIndex,
       alphUnstakeVaultTemplateId: unstakeVaultTemplate.contractId,

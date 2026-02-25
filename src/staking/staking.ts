@@ -29,7 +29,7 @@ import {
 } from 'staking/artifacts/ts';
 import { loadDeployments } from 'staking/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
-import type { PowFi } from '../powfi';
+import type { Powfi } from '../powfi';
 import type { StakeVaultUserInfo, StakingConfig } from './types';
 import { decodeContractIdList, decodeU256List } from './utils';
 import type { StakingSettings } from './settings';
@@ -40,7 +40,7 @@ export class StakingModule extends ModuleBase {
   private xAlphTokenContract: XAlphTokenInstance;
   private stakeVaultContract: XAlphStakeVaultInstance;
 
-  constructor(scope: PowFi) {
+  constructor(scope: Powfi) {
     super({ scope, moduleName: 'StakingModule' });
 
     this.config = this.loadStakingConfig();
