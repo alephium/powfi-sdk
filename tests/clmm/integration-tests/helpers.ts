@@ -248,14 +248,6 @@ export class Fixture {
     });
   }
 
-  async getTokenBalance(address: string, tokenId: string): Promise<bigint> {
-    const balances = await web3
-      .getCurrentNodeProvider()
-      .addresses.getAddressesAddressBalance(address);
-    const tokenBalance = balances.tokenBalances?.find((t) => t.id === tokenId);
-    return tokenBalance === undefined ? 0n : BigInt(tokenBalance.amount);
-  }
-
   async transferToken(tokenId: string, amount: bigint, to: SignerProvider) {
     const fromAddress = (await this.deployer.getSelectedAccount()).address;
     const toAddress = (await to.getSelectedAccount()).address;

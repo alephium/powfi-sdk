@@ -1,5 +1,6 @@
 import type { SignExecuteScriptTxResult, Token } from '@alephium/web3';
 import {
+  ALPH_TOKEN_ID,
   addressFromContractId,
   binToHex,
   DUST_AMOUNT,
@@ -8,7 +9,6 @@ import {
   codec,
   encodePrimitiveValues,
   groupOfAddress,
-  ALPH_TOKEN_ID,
 } from '@alephium/web3';
 import { loadDeployments } from 'clmm/artifacts/ts/deployments';
 import ModuleBase from '../moduleBase';
@@ -151,7 +151,6 @@ export class ClmmModule extends ModuleBase {
       const { token0, token1 } = state.fields;
 
       const balance = await this.scope.nodeProvider.addresses.getAddressesAddressBalance(poolAddress);
-
       const getBalance = (tokenId: string) =>
         tokenId === ALPH_TOKEN_ID
           ? BigInt(balance.balance)

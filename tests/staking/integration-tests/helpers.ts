@@ -180,11 +180,6 @@ export class Fixture {
     return this.powfi.staking.unstakeXAlph(amount);
   }
 
-  async stakeAndLockAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.stakeAndLockAlph(amount);
-  }
-
   async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
     this.powfi.signer = signer;
     return this.powfi.staking.unlockAndStartUnstake(amount);
