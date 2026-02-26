@@ -1,6 +1,6 @@
 {
   "name": "@alephium/powfi-sdk",
-  "version": "0.0.1-rc.5",
+  "version": "0.0.1-rc.10",
   "description": "Typescript SDK for Alephium Powfi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -62,6 +62,7 @@
     "cpmm": "workspace:*",
     "staking": "workspace:*",
     "@alephium/web3-test": "^v2.0.8",
+    "@alephium/web3-wallet": "^v2.0.8",
     "@types/jest": "^29.5.12",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",

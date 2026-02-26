@@ -1,23 +1,29 @@
 import type { SignerProvider } from '@alephium/web3';
-import { ONE_ALPH, web3, groupOfAddress } from '@alephium/web3';
-import { getSigners, getSigner } from '@alephium/web3-test';
+import { ONE_ALPH, web3, ALPH_TOKEN_ID, NodeProvider, addressFromContractId } from '@alephium/web3';
+import { getSigners } from '@alephium/web3-test';
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { TickUtils } from '../../../src/clmm/tick';
-import { UNLIMITED_AMOUNT } from '../../../src';
+import { UNLIMITED_AMOUNT, Zeta } from '../../../src';
 import { Fixture } from './helpers';
+import { PrivateKeyWallet } from '@alephium/web3-wallet';
+import { Position } from 'clmm';
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
 
 describe('CLMM Add Liquidity', () => {
   let fixture: Fixture;
   let lp: SignerProvider;
+  let lp2: SignerProvider;
 
   beforeEach(async () => {
     fixture = await Fixture.create();
     const signers = await getSigners(2, 3_000n * ONE_ALPH);
     lp = signers[0];
+    lp2 = signers[1];
     await fixture.transferToken(fixture.tokenId0, 2_000n * ONE_ALPH, lp);
     await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp);
+    await fixture.transferToken(fixture.tokenId0, 2_000n * ONE_ALPH, lp2);
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp2);
   });
 
   test('current price inside range (token0 and token1 provided)', async () => {
@@ -174,7 +180,82 @@ describe('CLMM Add Liquidity', () => {
     });
   });
 
-  test('fails when LP lacks sufficient tokens for provided range', async () => {
+  test.skip('testnet add liquidity', async () => {
+    const nodeProvider = new NodeProvider('https://node.testnet.alephium.org');
+    web3.setCurrentNodeProvider(nodeProvider);
+    const signer = new PrivateKeyWallet({
+      privateKey: process.env.TESTNET_PRIVATE_KEY!,
+      keyType: 'gl-secp256k1',
+    });
+
+    const amount0 = 195_144_381_020_422_385_005n;
+    const amount1 = 20_000_000n;
+    const slippage = 0n;
+
+    const tickLower = -300148n;
+    const tickUpper = -299148n;
+    const configIndex = 1n;
+
+
+    const token0 = ALPH_TOKEN_ID
+    const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
+    const zeta = new Zeta({
+      signer,
+      networkId: "testnet"
+    })
+    const result = await zeta.clmm.addLiquidity({
+      token0,
+      token1,
+      configIndex: configIndex,
+      owner: signer.address,
+      tickLower,
+      tickUpper,
+      slippage,
+      amount0,
+      amount1,
+      existingPosition: true,
+    });
+    console.log(result)
+  });
+
+  test.skip('testnet remove liquidity', async () => {
+    const nodeProvider = new NodeProvider('https://node.testnet.alephium.org');
+    web3.setCurrentNodeProvider(nodeProvider);
+    const signer = new PrivateKeyWallet({
+      privateKey: process.env.TESTNET_PRIVATE_KEY!,
+      keyType: 'gl-secp256k1'
+    });
+
+    const tickLower = -300148n;
+    const tickUpper = -299148n;
+    const configIndex = 1n;
+    const amount1 = 19_000_000n;
+
+    const token0 = ALPH_TOKEN_ID
+    const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
+    const zeta = new Zeta({
+      signer,
+      networkId: "testnet"
+    })
+    const poolId = zeta.clmm.getPoolId(token0, token1, configIndex)
+    const positionId = zeta.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper)
+    const position = await Position.at(addressFromContractId(positionId)).fetchState();
+    const result = await zeta.clmm.removeLiquidity({
+      token0,
+      token1,
+      configIndex: configIndex,
+      owner: signer.address,
+      tickLower,
+      tickUpper,
+      liquidity: position.fields.liquidity,
+      base: "token1",
+      baseAmount: 0n,
+      otherAmountMax: 0n
+    });
+    console.log(result)
+  });
+
+  test('testing failing case', async () => {
     const { configIndex, pool } = await fixture.setupPool();
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
@@ -185,6 +266,151 @@ describe('CLMM Add Liquidity', () => {
     await expect(
       fixture.addLiquidity(lp, configIndex, hugeAmount, hugeAmount, 30n, tickLower, tickUpper),
     ).rejects.toThrow();
+  });
+
+  test('mint only part of liquidity, because of slippage', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.8, 1.2);
+
+    const token0 = fixture.tokenId0;
+    const token1 = fixture.tokenId1;
+
+    const [amount0, amount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      sqrtPriceCurrent,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      10_000n,
+    );
+    const slippage = 250n;
+
+    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+      token0,
+      token1,
+      configIndex,
+      tickLower,
+      tickUpper,
+      amount0,
+      amount1,
+      slippage,
+      existingPosition: false,
+    });
+
+    const maxLiquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
+      sqrtPriceCurrent,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      amount0,
+      amount1
+    );
+
+    await fixture.swap(lp2, configIndex, 20n * ONE_ALPH, 250);
+
+    await fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params);
+
+    const positionAddress = addressFromContractId(positionId);
+    const positionState = await Position.at(positionAddress).fetchState();
+
+    expect(positionState.fields.liquidity).toBeLessThanOrEqual(maxLiquidity * 9n / 10n);
+    expect(positionState.fields.liquidity).toBeGreaterThan(0n);
+  });
+
+  test('add liquidity with 0 slippage fails after swap', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const lpAddress = (await lp.getSelectedAccount()).address;
+    fixture.zeta.signer = lp;
+
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+
+    const token0 = fixture.tokenId0;
+    const token1 = fixture.tokenId1;
+
+    const [amount0, amount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      sqrtPriceCurrent,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      10_000n,
+    );
+    const slippage = 0n;
+
+    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+      token0,
+      token1,
+      configIndex,
+      owner: lpAddress,
+      tickLower,
+      tickUpper,
+      amount0,
+      amount1,
+      slippage,
+      existingPosition: false,
+    });
+
+    await fixture.swap(lp2, configIndex, ONE_ALPH, 30);
+
+    params.signer = lp;
+    await expect(fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params))
+      .rejects.toThrow(/Error Code: 850/);
+  });
+
+  test('add liquidity with 0 slippage succeeds without swap', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+
+    const [amount0, amount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      sqrtPriceCurrent,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      10_000n,
+    );
+    const slippage = 0n;
+
+    await fixture.addLiquidity(lp, configIndex, amount0, amount1, slippage, tickLower, tickUpper);
+  });
+
+  test('mint no liquidity, because of slippage', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.0);
+    const token0 = fixture.tokenId0;
+    const token1 = fixture.tokenId1;
+    const owner = (await lp.getSelectedAccount()).address;
+
+    // Get add liquidity params
+    const amount0 = 0n;
+    const amount1 = ONE_ALPH;
+    const slippage = 30n;
+
+    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+      token0,
+      token1,
+      configIndex,
+      owner,
+      tickLower,
+      tickUpper,
+      amount0,
+      amount1,
+      slippage,
+      existingPosition: false,
+    });
+
+    await fixture.swap(lp2, configIndex, ONE_ALPH, 30);
+
+    try {
+      await fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params);
+
+      const positionAddress = addressFromContractId(positionId);
+      const positionState = await Position.at(positionAddress).fetchState();
+      expect(positionState.fields.liquidity).toBe(0n);
+    } catch (error: any) {
+      expect(error.message).toMatch(/Error Code: 107/);
+    }
   });
 
   test('getPoolTokenBalances returns correct balances after adding liquidity', async () => {

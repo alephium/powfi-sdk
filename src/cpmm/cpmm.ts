@@ -15,6 +15,7 @@ import {
   RemoveLiquidity,
   CreatePair,
   CreatePairAndAddLiquidity,
+  TokenPairFactory,
 } from 'cpmm/artifacts/ts';
 import { loadDeployments } from 'cpmm/artifacts/ts/deployments';
 import type { TokenInfo } from '@alephium/token-list';
@@ -137,7 +138,7 @@ export class CpmmModule extends ModuleBase {
         throw new InsufficientBalanceError(
           swapDetails.tokenInInfo.symbol,
           prettifyTokenAmount(swapDetails.tokenInAmount, swapDetails.tokenInInfo.decimals) ??
-            `${swapDetails.tokenInAmount}`,
+          `${swapDetails.tokenInAmount}`,
           prettifyTokenAmount(available, swapDetails.tokenInInfo.decimals) ?? `${available}`,
         );
       }
@@ -360,6 +361,8 @@ export class CpmmModule extends ModuleBase {
       const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId);
       const [amount0, amount1] =
         token0Id === tokenAId ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount];
+      const state = await TokenPairFactory.at(addressFromContractId(this.config.factoryId)).fetchState();
+
       const result = await CreatePairAndAddLiquidity.execute({
         signer: this.scope.signer,
         initialFields: {
@@ -370,6 +373,7 @@ export class CpmmModule extends ModuleBase {
           token1Id,
           amount0,
           amount1,
+          dexAccount: state.fields.dexAccount0
         },
         attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenAId, tokenBId),
         tokens: [
