@@ -29,7 +29,7 @@ import type {
   PositionPath,
   ClmmPositionInfo,
 } from './types';
-import type { PoolInstance, PoolTypes } from 'clmm/artifacts/ts';
+import type { PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts';
 import {
   CreateLiquidPool,
   Pool,
@@ -275,6 +275,13 @@ export class ClmmModule extends ModuleBase {
   async addLiquidity(
     p: AddLiquidity,
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
+    const [positionId, positionManager, params] = await this.getAddLiquidityParams(p);
+    return await this.addLiquidityFromParams(positionId, positionManager, params);
+  }
+
+  async getAddLiquidityParams(
+    p: AddLiquidity,
+  ): Promise<[string, PositionManagerInstance, PositionManagerTypes.SignExecuteMethodParams<'addLiquidity'>]> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex);
     const pool = Pool.at(poolAddress);
     const positionManagerAddress = addressFromContractId(this.config.positionManagerId);
@@ -297,48 +304,47 @@ export class ClmmModule extends ModuleBase {
         owner: normalizedOwner,
       },
     });
-    const currentTick = TickUtils.getTickAtSqrtRatio(sqrtPriceX96);
-    const minTick = currentTick - p.slippage;
-    const maxTick = currentTick + p.slippage;
-    const minSqrtPriceX96 = TickUtils.getSqrtRatioAtTick(minTick);
-    const maxSqrtPriceX96 = TickUtils.getSqrtRatioAtTick(maxTick);
+    const minSqrtPriceX96 = TickUtils.getSqrtPriceLimitX96(sqrtPriceX96, p.slippage, true);
+    const maxSqrtPriceX96 = TickUtils.getSqrtPriceLimitX96(sqrtPriceX96, p.slippage, false);
 
-    const liquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
-      sqrtPriceX96,
+    const minLiquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
+      minSqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
       p.amount0,
       p.amount1,
     );
-    const [spotAmount0, spotAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
-      sqrtPriceX96,
-      sqrtRatioAX96,
-      sqrtRatioBX96,
-      -liquidity,
-    );
-    const [minAmount0, minAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+    const [, minAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
       minSqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
-      -liquidity,
+      -minLiquidity,
     );
-    const [maxAmount0, maxAmount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+    const maxLiquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
       maxSqrtPriceX96,
       sqrtRatioAX96,
       sqrtRatioBX96,
-      -liquidity,
+      p.amount0,
+      p.amount1,
+    );
+    const [maxAmount0] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      maxSqrtPriceX96,
+      sqrtRatioAX96,
+      sqrtRatioBX96,
+      -maxLiquidity,
     );
 
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper);
     const tokens: Token[] = [
-      { id: p.token0, amount: -minAmount0 },
-      { id: p.token1, amount: -maxAmount1 },
+      { id: p.token0, amount: p.amount0 },
+      { id: p.token1, amount: p.amount1 },
     ];
 
     if (p.existingPosition) {
       tokens.push({ id: positionId, amount: 1n });
     }
-    const result = await positionManager.transact.addLiquidity({
+
+    const params = {
       signer: this.scope.signer,
       args: {
         payer: normalizedPayer,
@@ -349,16 +355,26 @@ export class ClmmModule extends ModuleBase {
           owner: normalizedOwner,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
-          amount0Desired: -spotAmount0,
-          amount1Desired: -spotAmount1,
+          amount0Desired: p.amount0,
+          amount1Desired: p.amount1,
           amount0Min: -maxAmount0,
           amount1Min: -minAmount1,
         },
       },
       tokens,
-      attoAlphAmount: deposit,
-    });
+      attoAlphAmount: deposit + 2n * DUST_AMOUNT,
+      positionId,
+    };
+    return [positionId, positionManager, params];
+  }
 
+  async addLiquidityFromParams(
+    positionId: string,
+    positionManager: PositionManagerInstance,
+    params: PositionManagerTypes.SignExecuteMethodParams<'addLiquidity'>,
+  ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
+
+    const result = await positionManager.transact.addLiquidity(params);
     return { positionId, result };
   }
 
