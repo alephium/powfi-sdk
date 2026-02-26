@@ -3,7 +3,8 @@ import { ONE_ALPH, web3, ALPH_TOKEN_ID, NodeProvider, addressFromContractId } fr
 import { getSigners } from '@alephium/web3-test';
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { TickUtils } from '../../../src/clmm/tick';
-import { UNLIMITED_AMOUNT, Zeta } from '../../../src';
+import { UNLIMITED_AMOUNT } from '../../../src';
+import { Powfi } from '../../../src/powfi';
 import { Fixture } from './helpers';
 import { PrivateKeyWallet } from '@alephium/web3-wallet';
 import { Position } from 'clmm';
@@ -199,11 +200,11 @@ describe('CLMM Add Liquidity', () => {
 
     const token0 = ALPH_TOKEN_ID
     const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
-    const zeta = new Zeta({
+    const powfi = new Powfi({
       signer,
       networkId: "testnet"
     })
-    const result = await zeta.clmm.addLiquidity({
+    const result = await powfi.clmm.addLiquidity({
       token0,
       token1,
       configIndex: configIndex,
@@ -233,14 +234,14 @@ describe('CLMM Add Liquidity', () => {
 
     const token0 = ALPH_TOKEN_ID
     const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
-    const zeta = new Zeta({
+    const powfi = new Powfi({
       signer,
       networkId: "testnet"
     })
-    const poolId = zeta.clmm.getPoolId(token0, token1, configIndex)
-    const positionId = zeta.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper)
+    const poolId = powfi.clmm.getPoolId(token0, token1, configIndex)
+    const positionId = powfi.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper)
     const position = await Position.at(addressFromContractId(positionId)).fetchState();
-    const result = await zeta.clmm.removeLiquidity({
+    const result = await powfi.clmm.removeLiquidity({
       token0,
       token1,
       configIndex: configIndex,
@@ -285,7 +286,7 @@ describe('CLMM Add Liquidity', () => {
     );
     const slippage = 250n;
 
-    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+    const [positionId, positionManager, params] = await fixture.powfi.clmm.getAddLiquidityParams({
       token0,
       token1,
       configIndex,
@@ -307,7 +308,7 @@ describe('CLMM Add Liquidity', () => {
 
     await fixture.swap(lp2, configIndex, 20n * ONE_ALPH, 250);
 
-    await fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params);
+    await fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params);
 
     const positionAddress = addressFromContractId(positionId);
     const positionState = await Position.at(positionAddress).fetchState();
@@ -319,7 +320,7 @@ describe('CLMM Add Liquidity', () => {
   test('add liquidity with 0 slippage fails after swap', async () => {
     const { configIndex, pool } = await fixture.setupPool();
     const lpAddress = (await lp.getSelectedAccount()).address;
-    fixture.zeta.signer = lp;
+    fixture.powfi.signer = lp;
 
     const poolStateBefore = await pool.fetchState();
     const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
@@ -336,7 +337,7 @@ describe('CLMM Add Liquidity', () => {
     );
     const slippage = 0n;
 
-    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+    const [positionId, positionManager, params] = await fixture.powfi.clmm.getAddLiquidityParams({
       token0,
       token1,
       configIndex,
@@ -352,7 +353,7 @@ describe('CLMM Add Liquidity', () => {
     await fixture.swap(lp2, configIndex, ONE_ALPH, 30);
 
     params.signer = lp;
-    await expect(fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params))
+    await expect(fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params))
       .rejects.toThrow(/Error Code: 850/);
   });
 
@@ -387,7 +388,7 @@ describe('CLMM Add Liquidity', () => {
     const amount1 = ONE_ALPH;
     const slippage = 30n;
 
-    const [positionId, positionManager, params] = await fixture.zeta.clmm.getAddLiquidityParams({
+    const [positionId, positionManager, params] = await fixture.powfi.clmm.getAddLiquidityParams({
       token0,
       token1,
       configIndex,
@@ -403,7 +404,7 @@ describe('CLMM Add Liquidity', () => {
     await fixture.swap(lp2, configIndex, ONE_ALPH, 30);
 
     try {
-      await fixture.zeta.clmm.addLiquidityFromParams(positionId, positionManager, params);
+      await fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params);
 
       const positionAddress = addressFromContractId(positionId);
       const positionState = await Position.at(positionAddress).fetchState();
