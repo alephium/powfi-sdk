@@ -1,5 +1,6 @@
 import type { ExecuteScriptResult, HexString } from '@alephium/web3';
 import {
+  DUST_AMOUNT,
   MINIMAL_CONTRACT_DEPOSIT,
   addressFromContractId,
   addressToBytes,
@@ -124,6 +125,7 @@ export class StakingModule extends ModuleBase {
     return this.xAlphTokenContract.transact.cancelUnstake({
       signer: this.scope.signer,
       args: { vaultIndex },
+      attoAlphAmount: DUST_AMOUNT
     });
   }
 
