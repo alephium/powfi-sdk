@@ -1,5 +1,12 @@
 import type { SignerProvider } from '@alephium/web3';
-import { ONE_ALPH, web3, ALPH_TOKEN_ID, NodeProvider, addressFromContractId } from '@alephium/web3';
+import {
+  ONE_ALPH,
+  web3,
+  ALPH_TOKEN_ID,
+  MINIMAL_CONTRACT_DEPOSIT,
+  NodeProvider,
+  addressFromContractId,
+} from '@alephium/web3';
 import { getSigners } from '@alephium/web3-test';
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity';
 import { TickUtils } from '../../../src/clmm/tick';
@@ -179,6 +186,64 @@ describe('CLMM Add Liquidity', () => {
       amount0Desired: 70n * ONE_ALPH,
       amount1Desired: UNLIMITED_AMOUNT,
     });
+  });
+
+  test('add liquidity succeeds for a fresh ALPH/token position', async () => {
+    const configIndex = await fixture.createConfigIndex(1n, 3_000n, 0n);
+    const token0 = ALPH_TOKEN_ID;
+    const token1 = fixture.tokenId0;
+    const currentTick = TickUtils.getAlignedTick(10, 18, 18, 1n);
+
+    await fixture.factory.transact.create({
+      signer: fixture.deployer,
+      args: {
+        token0,
+        token1,
+        configIndex,
+        sqrtPriceX96: TickUtils.getSqrtRatioAtTick(currentTick),
+        rewardToken: '',
+      },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT,
+    });
+
+    const pool = fixture.powfi.clmm.getPool(token0, token1, configIndex);
+    const poolStateBefore = await pool.fetchState();
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+    const { newAmountBase: amount0, newAmountQuote: amount1 } =
+      ClmmLiquidityUtils.getPositionAmountsFromPrice({
+        sqrtRatioX96: sqrtPriceCurrent,
+        tokenBaseId: token0,
+        tokenQuoteId: token1,
+        lowerTick: tickLower,
+        upperTick: tickUpper,
+        amountBase: 10n * ONE_ALPH,
+        amountQuote: 100n * ONE_ALPH,
+      });
+    const balancesBefore = await fixture.powfi.clmm.getPoolTokenBalances(pool.contractId);
+    const lpAddress = (await lp.getSelectedAccount()).address;
+
+    fixture.powfi.signer = lp;
+    const { positionId } = await fixture.powfi.clmm.addLiquidity({
+      token0,
+      token1,
+      configIndex,
+      owner: lpAddress,
+      tickLower,
+      tickUpper,
+      slippage: 30n,
+      amount0,
+      amount1,
+      existingPosition: false,
+    });
+
+    const balancesAfter = await fixture.powfi.clmm.getPoolTokenBalances(pool.contractId);
+    const positionAddress = addressFromContractId(positionId);
+    const positionState = await Position.at(positionAddress).fetchState();
+
+    expect(balancesAfter.token0Balance - balancesBefore.token0Balance).toBe(amount0);
+    expect(balancesAfter.token1Balance - balancesBefore.token1Balance).toBe(amount1);
+    expect(positionState.fields.liquidity).toBeGreaterThan(0n);
   });
 
   test.skip('testnet add liquidity', async () => {
