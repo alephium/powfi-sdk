@@ -362,7 +362,7 @@ export class ClmmModule extends ModuleBase {
         },
       },
       tokens,
-      attoAlphAmount: deposit + 2n * DUST_AMOUNT,
+      dustAmount: deposit + 2n * DUST_AMOUNT,
       positionId,
     };
     return [positionId, positionManager, params];
