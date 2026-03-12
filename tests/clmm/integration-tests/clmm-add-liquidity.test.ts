@@ -266,13 +266,12 @@ describe('CLMM Add Liquidity', () => {
     const tickUpper = -299148n;
     const configIndex = 1n;
 
-
-    const token0 = ALPH_TOKEN_ID
+    const token0 = ALPH_TOKEN_ID;
     const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
     const powfi = new Powfi({
       signer,
-      networkId: "testnet"
-    })
+      networkId: 'testnet',
+    });
     const result = await powfi.clmm.addLiquidity({
       token0,
       token1,
@@ -285,7 +284,7 @@ describe('CLMM Add Liquidity', () => {
       amount1,
       existingPosition: true,
     });
-    console.log(result)
+    console.log(result);
   });
 
   test.skip('testnet remove liquidity', async () => {
@@ -293,7 +292,7 @@ describe('CLMM Add Liquidity', () => {
     web3.setCurrentNodeProvider(nodeProvider);
     const signer = new PrivateKeyWallet({
       privateKey: process.env.TESTNET_PRIVATE_KEY!,
-      keyType: 'gl-secp256k1'
+      keyType: 'gl-secp256k1',
     });
 
     const tickLower = -300148n;
@@ -301,14 +300,14 @@ describe('CLMM Add Liquidity', () => {
     const configIndex = 1n;
     const amount1 = 19_000_000n;
 
-    const token0 = ALPH_TOKEN_ID
+    const token0 = ALPH_TOKEN_ID;
     const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203';
     const powfi = new Powfi({
       signer,
-      networkId: "testnet"
-    })
-    const poolId = powfi.clmm.getPoolId(token0, token1, configIndex)
-    const positionId = powfi.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper)
+      networkId: 'testnet',
+    });
+    const poolId = powfi.clmm.getPoolId(token0, token1, configIndex);
+    const positionId = powfi.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper);
     const position = await Position.at(addressFromContractId(positionId)).fetchState();
     const result = await powfi.clmm.removeLiquidity({
       token0,
@@ -318,11 +317,11 @@ describe('CLMM Add Liquidity', () => {
       tickLower,
       tickUpper,
       liquidity: position.fields.liquidity,
-      base: "token1",
+      base: 'token1',
       baseAmount: 0n,
-      otherAmountMax: 0n
+      otherAmountMax: 0n,
     });
-    console.log(result)
+    console.log(result);
   });
 
   test('testing failing case', async () => {
@@ -366,13 +365,14 @@ describe('CLMM Add Liquidity', () => {
       slippage,
       existingPosition: false,
     });
+    expect(params.attoAlphAmount).toBe(2n * DUST_AMOUNT);
 
     const maxLiquidity = ClmmLiquidityUtils.getLiquidityFromAmounts(
       sqrtPriceCurrent,
       TickUtils.getSqrtRatioAtTick(tickLower),
       TickUtils.getSqrtRatioAtTick(tickUpper),
       amount0,
-      amount1
+      amount1,
     );
 
     await fixture.swap(lp2, configIndex, 20n * ONE_ALPH, 250);
@@ -382,7 +382,7 @@ describe('CLMM Add Liquidity', () => {
     const positionAddress = addressFromContractId(positionId);
     const positionState = await Position.at(positionAddress).fetchState();
 
-    expect(positionState.fields.liquidity).toBeLessThanOrEqual(maxLiquidity * 9n / 10n);
+    expect(positionState.fields.liquidity).toBeLessThanOrEqual((maxLiquidity * 9n) / 10n);
     expect(positionState.fields.liquidity).toBeGreaterThan(0n);
   });
 
@@ -422,8 +422,9 @@ describe('CLMM Add Liquidity', () => {
     await fixture.swap(lp2, configIndex, ONE_ALPH, 30);
 
     params.signer = lp;
-    await expect(fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params))
-      .rejects.toThrow(/Error Code: 850/);
+    await expect(
+      fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params),
+    ).rejects.toThrow(/Error Code: 850/);
   });
 
   test('add liquidity with 0 slippage succeeds without swap', async () => {
