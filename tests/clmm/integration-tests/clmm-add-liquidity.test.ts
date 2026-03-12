@@ -3,6 +3,7 @@ import {
   ONE_ALPH,
   web3,
   ALPH_TOKEN_ID,
+  DUST_AMOUNT,
   MINIMAL_CONTRACT_DEPOSIT,
   NodeProvider,
   addressFromContractId,
@@ -224,7 +225,7 @@ describe('CLMM Add Liquidity', () => {
     const lpAddress = (await lp.getSelectedAccount()).address;
 
     fixture.powfi.signer = lp;
-    const { positionId } = await fixture.powfi.clmm.addLiquidity({
+    const [positionId, positionManager, params] = await fixture.powfi.clmm.getAddLiquidityParams({
       token0,
       token1,
       configIndex,
@@ -236,6 +237,9 @@ describe('CLMM Add Liquidity', () => {
       amount1,
       existingPosition: false,
     });
+    expect(params.attoAlphAmount).toBe(DUST_AMOUNT);
+
+    await fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params);
 
     const balancesAfter = await fixture.powfi.clmm.getPoolTokenBalances(pool.contractId);
     const positionAddress = addressFromContractId(positionId);

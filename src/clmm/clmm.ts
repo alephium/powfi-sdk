@@ -362,7 +362,8 @@ export class ClmmModule extends ModuleBase {
         },
       },
       tokens,
-      dustAmount: deposit + 2n * DUST_AMOUNT,
+      attoAlphAmount: this.getAddLiquidityAttoAlphAmount(p.token0, p.token1),
+      dustAmount: deposit,
       positionId,
     };
     return [positionId, positionManager, params];
@@ -599,6 +600,11 @@ export class ClmmModule extends ModuleBase {
       attoAlphAmount: DUST_AMOUNT,
     });
     return result;
+  }
+
+  private getAddLiquidityAttoAlphAmount(token0Id: string, token1Id: string): bigint {
+    const nonAlphTokenCount = [token0Id, token1Id].filter((tokenId) => tokenId !== ALPH_TOKEN_ID).length;
+    return BigInt(nonAlphTokenCount) * DUST_AMOUNT;
   }
 
   private _getClmmConfig(): ClmmConfig {
