@@ -124,11 +124,12 @@ export class PoolUtils {
   ): bigint {
     const exactIn = amountSpecified > 0n;
     let amountCalculated = 0n;
+    let liquidity = liqDist.liquidity;
     for (const row of liqDist.rows) {
       const [sqrtPriceNextX96, amountIn, amountOut, feeAmount] = this.computeSwapStep(
         sqrtPriceX96,
         row.sqrtPriceX96,
-        row.liquidity,
+        liquidity,
         amountSpecified,
         liqDist.fee,
       );
@@ -140,6 +141,7 @@ export class PoolUtils {
         amountCalculated += amountIn + feeAmount;
       }
       sqrtPriceX96 = sqrtPriceNextX96;
+      liquidity = row.liquidity;
     }
     return amountCalculated;
   }

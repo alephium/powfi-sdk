@@ -106,9 +106,9 @@ describe('PoolUtils', () => {
       baseSqrtPriceX96,
       fee,
       liquidity,
-      rows : [
-        {sqrtPriceX96: sqrtMid, liquidity},
-        {sqrtPriceX96: sqrtEnd, liquidity}
+      rows: [
+        { sqrtPriceX96: sqrtMid, liquidity },
+        { sqrtPriceX96: sqrtEnd, liquidity }
       ],
       sqrtPriceX96: sqrtStart
     };
@@ -174,5 +174,22 @@ describe('PoolUtils', () => {
 
     expect(offlineAmount).toBe(expectedAmount);
     expect(amountSpecified2).toBe(amountSpecified);
+  });
+
+  it('from rawDistribution', () => {
+    const rowPrice = 78176380880017919227392388763n
+    const distribution = {
+      sqrtPriceX96: 78176765044886728469386896698n,
+      baseSqrtPriceX96: 79188560314459151373725315960n,
+      liquidity: 1989892799096425407221438n,
+      fee: 9000n,
+      rows: [
+        { sqrtPriceX96: rowPrice, liquidity: 15119535298402684906972n }
+      ]
+    } as ClmmSimulateSwapQuote
+
+    const amountSpecified = 10000000000000000000n;
+    const offlineAmount = -PoolUtils.offlineSwap(distribution, amountSpecified, distribution.sqrtPriceX96);
+    expect(offlineAmount).toBeGreaterThan(96n * amountSpecified / 100n)
   });
 });
