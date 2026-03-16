@@ -112,6 +112,63 @@ describe('CLMM Managing Positions', () => {
     expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n);
   });
 
+  test('collecting accrued fees + destroy position', async () => {
+    const { configIndex, pool } = await fixture.setupPool();
+    const poolState = await pool.fetchState();
+    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96;
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+
+    await fixture.addRangePosition({
+      lp,
+      pool,
+      configIndex,
+      sqrtPriceCurrent,
+      range: { tickLower, tickUpper },
+      amount0Desired: 80n * ONE_ALPH,
+      amount1Desired: UNLIMITED_AMOUNT,
+    });
+
+    // Generate fees: trader swaps token0 -> token1
+    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300);
+
+    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
+    const lpAddr = (await lp.getSelectedAccount()).address;
+    const beforeLp = await getBalances(lpAddr, tokenIds);
+    const beforePool = await getBalances(pool.address, tokenIds);
+    const beforeState = await pool.fetchState();
+    const liquidity = beforeState.fields.liquidity - poolState.fields.liquidity;
+
+    const posId = fixture.powfi.clmm.getPositionId(pool.contractId, lpAddr, tickLower, tickUpper);
+    const beforeLp2 = await getBalances(lpAddr, [posId]);
+    expect(beforeLp2.tokens[posId]).toBe(1n);
+    await fixture.collectTokens(
+      lp,
+      configIndex,
+      tickLower,
+      tickUpper,
+      UNLIMITED_AMOUNT,
+      UNLIMITED_AMOUNT,
+      liquidity,
+    );
+
+    const afterLp = await getBalances(lpAddr, [posId]);
+    expect(afterLp.tokens[posId]).toBe(0n);
+
+    await fixture.addRangePosition({
+      lp,
+      pool,
+      configIndex,
+      sqrtPriceCurrent: beforeState.fields.slot0.sqrtPriceX96,
+      range: { tickLower, tickUpper },
+      amount0Desired: 80n * ONE_ALPH,
+      amount1Desired: UNLIMITED_AMOUNT,
+    });
+
+    const afterLp2 = await getBalances(lpAddr, [posId]);
+    expect(afterLp2.tokens[posId]).toBe(1n);
+  });
+
+
   test('findBestRoute throws PoolNotFoundError for non-existent pool', async () => {
     await expect(
       fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')

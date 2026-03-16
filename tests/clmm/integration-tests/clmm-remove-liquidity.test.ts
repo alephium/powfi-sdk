@@ -111,7 +111,7 @@ describe('CLMM Remove Liquidity', () => {
       amt0Out,
       amt1Out,
     );
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, amt0Out, amt1Out);
+    expect(fixture.collectTokens(lp, configIndex, tickLower, tickUpper, amt0Out, amt1Out)).rejects.toThrow('expected: 1, got: 0')
 
     const afterLp = await getBalances(lpAddr, tokenIds);
     const afterPool = await getBalances(pool.address, tokenIds);
