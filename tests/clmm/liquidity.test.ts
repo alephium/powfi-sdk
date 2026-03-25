@@ -522,6 +522,107 @@ describe('LiquidityUtils', () => {
     });
   });
 
+  describe('TickUtils.getNextTick', () => {
+    test('moves tick by +/-tickSpacing depending on token order, baseIn and isAdd', () => {
+      const tokenA = createToken('a', 6);
+      const tokenB = createToken('b', 18);
+      const tick = 100n;
+      const tickSpacing = 10n;
+
+      const cases: Array<{
+        name: string;
+        tokenBase: TokenInfo;
+        tokenQuote: TokenInfo;
+        baseIn: boolean;
+        isAdd: boolean;
+        expected: bigint;
+      }> = [
+        // tokenBase.id < tokenQuote.id
+        {
+          name: 'base<quote, baseIn=true, isAdd=true',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: true,
+          isAdd: true,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=true, isAdd=false',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: true,
+          isAdd: false,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=false, isAdd=true',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: false,
+          isAdd: true,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=false, isAdd=false',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: false,
+          isAdd: false,
+          expected: tick + tickSpacing,
+        },
+
+        // tokenBase.id > tokenQuote.id
+        {
+          name: 'base>quote, baseIn=true, isAdd=true',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: true,
+          isAdd: true,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=true, isAdd=false',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: true,
+          isAdd: false,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=false, isAdd=true',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: false,
+          isAdd: true,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=false, isAdd=false',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: false,
+          isAdd: false,
+          expected: tick - tickSpacing,
+        },
+      ];
+
+      for (const c of cases) {
+        expect(
+          TickUtils.getNextTick(tick, tickSpacing, c.tokenBase, c.tokenQuote, c.baseIn, c.isAdd),
+        ).toBe(c.expected);
+      }
+    });
+
+    test('returns the same tick when tickSpacing is 0', () => {
+      const tokenA = createToken('a', 6);
+      const tokenB = createToken('b', 18);
+      const tick = -123n;
+
+      expect(TickUtils.getNextTick(tick, 0n, tokenA, tokenB, true, true)).toBe(tick);
+      expect(TickUtils.getNextTick(tick, 0n, tokenB, tokenA, false, false)).toBe(tick);
+    });
+  });
+
   describe('poolExists function', () => {
     test('should return false for non-existent pool', async () => {
       const powfi = new Powfi({ networkId: 'devnet' });
