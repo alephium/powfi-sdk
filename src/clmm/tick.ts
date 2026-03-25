@@ -189,7 +189,7 @@ export class TickUtils {
     isAdd: boolean,
   ): bigint {
     const reverse = tokenBase.id > tokenQuote.id == baseIn;
-    const delta = isAdd == reverse ? tickSpacing : -tickSpacing;
+    const delta = isAdd == reverse ? -tickSpacing : tickSpacing;
     return tick + delta;
   }
 
