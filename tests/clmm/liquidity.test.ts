@@ -3,7 +3,7 @@ import { UNLIMITED_AMOUNT } from '../../src/clmm/constants';
 import type { TokenInfo } from '@alephium/token-list';
 import { Powfi } from '../../src/powfi';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
-import { GetPositionAmountsFromPriceReturn } from '../../src';
+import type { GetPositionAmountsFromPriceReturn } from '../../src';
 
 describe('LiquidityUtils', () => {
   const createToken = (id: string, decimals: number): TokenInfo => ({
@@ -148,7 +148,11 @@ describe('LiquidityUtils', () => {
       const amountWETH = 5n * 10n ** 17n; // 0.5 WETH
       const amountUSDC = 1000n * 10n ** 6n; // 1000 USDC
 
-      const { newAmountBase: usedWETH, newAmountQuote: usedUSDC, liquidity } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      const {
+        newAmountBase: usedWETH,
+        newAmountQuote: usedUSDC,
+        liquidity,
+      } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
         sqrtRatioX96: sqrtPriceX96,
         tokenBaseId: WETH.id,
         tokenQuoteId: USDC.id,
@@ -220,7 +224,11 @@ describe('LiquidityUtils', () => {
       });
 
       const { newAmountBase: usedUSDC, newAmountQuote: usedWETH, liquidity } = normalResult;
-      const { newAmountBase: usedWETHReversed, newAmountQuote: usedUSDCReversed, liquidity: liquidityReversed } = reversedResult;
+      const {
+        newAmountBase: usedWETHReversed,
+        newAmountQuote: usedUSDCReversed,
+        liquidity: liquidityReversed,
+      } = reversedResult;
 
       expect(liquidity).toBeGreaterThan(0n);
       expect(liquidityReversed).toBeGreaterThan(0n);
@@ -271,26 +279,28 @@ describe('LiquidityUtils', () => {
       const upperTick = priceResult.tick + 3000n;
 
       const limitedUSDC = 5000n * 10n ** 6n;
-      const { newAmountBase: usedUSDC1, liquidity: liquidity1 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-        sqrtRatioX96: sqrtPriceX96,
-        tokenBaseId: USDC.id,
-        tokenQuoteId: WETH.id,
-        lowerTick,
-        upperTick,
-        amountBase: limitedUSDC,
-        amountQuote: UNLIMITED_AMOUNT,
-      });
+      const { newAmountBase: usedUSDC1, liquidity: liquidity1 } =
+        ClmmLiquidityUtils.getPositionAmountsFromPrice({
+          sqrtRatioX96: sqrtPriceX96,
+          tokenBaseId: USDC.id,
+          tokenQuoteId: WETH.id,
+          lowerTick,
+          upperTick,
+          amountBase: limitedUSDC,
+          amountQuote: UNLIMITED_AMOUNT,
+        });
 
       const limitedWETH = 3n * 10n ** 18n;
-      const { newAmountQuote: usedWETH2, liquidity: liquidity2 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-        sqrtRatioX96: sqrtPriceX96,
-        tokenBaseId: USDC.id,
-        tokenQuoteId: WETH.id,
-        lowerTick,
-        upperTick,
-        amountBase: UNLIMITED_AMOUNT,
-        amountQuote: limitedWETH,
-      });
+      const { newAmountQuote: usedWETH2, liquidity: liquidity2 } =
+        ClmmLiquidityUtils.getPositionAmountsFromPrice({
+          sqrtRatioX96: sqrtPriceX96,
+          tokenBaseId: USDC.id,
+          tokenQuoteId: WETH.id,
+          lowerTick,
+          upperTick,
+          amountBase: UNLIMITED_AMOUNT,
+          amountQuote: limitedWETH,
+        });
 
       expect(usedUSDC1).toBeLessThanOrEqual(limitedUSDC);
       expect(usedWETH2).toBeLessThanOrEqual(limitedWETH);
@@ -478,25 +488,27 @@ describe('LiquidityUtils', () => {
       ];
 
       for (const testCase of testCases) {
-        const { newAmountBase: usedUSDC, liquidity: liquidityUSDC } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-          sqrtRatioX96: sqrtPriceX96,
-          tokenBaseId: USDC.id,
-          tokenQuoteId: WETH.id,
-          lowerTick,
-          upperTick,
-          amountBase: testCase.amount,
-          amountQuote: UNLIMITED_AMOUNT,
-        });
+        const { newAmountBase: usedUSDC, liquidity: liquidityUSDC } =
+          ClmmLiquidityUtils.getPositionAmountsFromPrice({
+            sqrtRatioX96: sqrtPriceX96,
+            tokenBaseId: USDC.id,
+            tokenQuoteId: WETH.id,
+            lowerTick,
+            upperTick,
+            amountBase: testCase.amount,
+            amountQuote: UNLIMITED_AMOUNT,
+          });
 
-        const { newAmountQuote: usedWETH2, liquidity: liquidityWETH } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-          sqrtRatioX96: sqrtPriceX96,
-          tokenBaseId: USDC.id,
-          tokenQuoteId: WETH.id,
-          lowerTick,
-          upperTick,
-          amountBase: UNLIMITED_AMOUNT,
-          amountQuote: testCase.amount,
-        });
+        const { newAmountQuote: usedWETH2, liquidity: liquidityWETH } =
+          ClmmLiquidityUtils.getPositionAmountsFromPrice({
+            sqrtRatioX96: sqrtPriceX96,
+            tokenBaseId: USDC.id,
+            tokenQuoteId: WETH.id,
+            lowerTick,
+            upperTick,
+            amountBase: UNLIMITED_AMOUNT,
+            amountQuote: testCase.amount,
+          });
 
         expect(usedUSDC).toBeGreaterThanOrEqual(0n);
         expect(usedWETH2).toBeGreaterThanOrEqual(0n);
