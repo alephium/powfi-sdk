@@ -109,7 +109,7 @@ export class CpmmModule extends ModuleBase {
     return this.scope.nodeProvider.addresses
       .getAddressesAddressGroup(address)
       .then((_) => true)
-      .catch((e: any) => {
+      .catch((e: unknown) => {
         if (e instanceof Error && e.message.indexOf('Group not found') !== -1) {
           return false
         }

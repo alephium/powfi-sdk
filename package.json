@@ -80,7 +80,12 @@
     "vitest": "^4.1.4",
     "typescript": "^5.9.3"
   },
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
+    "node": ">=20.0.0",
     "bun": ">=1.0.0"
   }
 }

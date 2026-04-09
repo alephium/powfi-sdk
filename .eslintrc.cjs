@@ -30,7 +30,7 @@ module.exports = {
     {
       files: ['**/*.test.ts', '**/*.spec.ts'],
       env: {
-        jest: true
+        node: true
       },
       rules: {
         '@typescript-eslint/unbound-method': 'off'
