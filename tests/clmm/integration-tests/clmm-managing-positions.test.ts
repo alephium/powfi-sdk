@@ -1,28 +1,28 @@
-import type { SignerProvider } from '@alephium/web3';
-import { ONE_ALPH, web3 } from '@alephium/web3';
-import { getSigner } from '@alephium/web3-test';
-import { UNLIMITED_AMOUNT } from '../../../src';
-import { PoolNotFoundError } from '../../../src/common';
-import { Fixture, getBalances } from './helpers';
+import type { SignerProvider } from '@alephium/web3'
+import { ONE_ALPH, web3 } from '@alephium/web3'
+import { getSigner } from '@alephium/web3-test'
+import { UNLIMITED_AMOUNT } from '../../../src'
+import { PoolNotFoundError } from '../../../src/common'
+import { Fixture, getBalances } from './helpers'
 
-web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch);
+web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch)
 
 describe('CLMM Managing Positions', () => {
-  let fixture: Fixture;
-  let lp: SignerProvider;
+  let fixture: Fixture
+  let lp: SignerProvider
 
   beforeEach(async () => {
-    fixture = await Fixture.create();
-    lp = await getSigner(3_000n * ONE_ALPH);
-    await fixture.transferToken(fixture.tokenId0, 2_000n * ONE_ALPH, lp);
-    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp);
-  });
+    fixture = await Fixture.create()
+    lp = await getSigner(3_000n * ONE_ALPH)
+    await fixture.transferToken(fixture.tokenId0, 2_000n * ONE_ALPH, lp)
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp)
+  })
 
   test('collecting with zero liquidity does not change balances or pool liquidity', async () => {
-    const { configIndex, pool } = await fixture.setupPool();
-    const poolState = await pool.fetchState();
-    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96;
-    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+    const { configIndex, pool } = await fixture.setupPool()
+    const poolState = await pool.fetchState()
+    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1)
 
     await fixture.addRangePosition({
       lp,
@@ -31,41 +31,33 @@ describe('CLMM Managing Positions', () => {
       sqrtPriceCurrent,
       range: { tickLower, tickUpper },
       amount0Desired: 50n * ONE_ALPH,
-      amount1Desired: UNLIMITED_AMOUNT,
-    });
+      amount1Desired: UNLIMITED_AMOUNT
+    })
 
-    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
-    const lpAddr = (await lp.getSelectedAccount()).address;
-    const beforeLp = await getBalances(lpAddr, tokenIds);
-    const beforePool = await getBalances(pool.address, tokenIds);
-    const beforeState = await pool.fetchState();
+    const tokenIds = [fixture.tokenId0, fixture.tokenId1]
+    const lpAddr = (await lp.getSelectedAccount()).address
+    const beforeLp = await getBalances(lpAddr, tokenIds)
+    const beforePool = await getBalances(pool.address, tokenIds)
+    const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(
-      lp,
-      configIndex,
-      tickLower,
-      tickUpper,
-      UNLIMITED_AMOUNT,
-      UNLIMITED_AMOUNT,
-      0n,
-    );
+    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, 0n)
 
-    const afterLp = await getBalances(lpAddr, tokenIds);
-    const afterPool = await getBalances(pool.address, tokenIds);
-    const afterState = await pool.fetchState();
+    const afterLp = await getBalances(lpAddr, tokenIds)
+    const afterPool = await getBalances(pool.address, tokenIds)
+    const afterState = await pool.fetchState()
 
-    expect(afterLp.tokens[fixture.tokenId0] - beforeLp.tokens[fixture.tokenId0]).toBe(0n);
-    expect(afterLp.tokens[fixture.tokenId1] - beforeLp.tokens[fixture.tokenId1]).toBe(0n);
-    expect(afterPool.tokens[fixture.tokenId0] - beforePool.tokens[fixture.tokenId0]).toBe(0n);
-    expect(afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1]).toBe(0n);
-    expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n);
-  });
+    expect(afterLp.tokens[fixture.tokenId0] - beforeLp.tokens[fixture.tokenId0]).toBe(0n)
+    expect(afterLp.tokens[fixture.tokenId1] - beforeLp.tokens[fixture.tokenId1]).toBe(0n)
+    expect(afterPool.tokens[fixture.tokenId0] - beforePool.tokens[fixture.tokenId0]).toBe(0n)
+    expect(afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1]).toBe(0n)
+    expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n)
+  })
 
   test('collecting accrued fees without burning liquidity', async () => {
-    const { configIndex, pool } = await fixture.setupPool();
-    const poolState = await pool.fetchState();
-    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96;
-    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+    const { configIndex, pool } = await fixture.setupPool()
+    const poolState = await pool.fetchState()
+    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1)
 
     await fixture.addRangePosition({
       lp,
@@ -74,49 +66,41 @@ describe('CLMM Managing Positions', () => {
       sqrtPriceCurrent,
       range: { tickLower, tickUpper },
       amount0Desired: 80n * ONE_ALPH,
-      amount1Desired: UNLIMITED_AMOUNT,
-    });
+      amount1Desired: UNLIMITED_AMOUNT
+    })
 
     // Generate fees: trader swaps token0 -> token1
-    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300);
+    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300)
 
-    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
-    const lpAddr = (await lp.getSelectedAccount()).address;
-    const beforeLp = await getBalances(lpAddr, tokenIds);
-    const beforePool = await getBalances(pool.address, tokenIds);
-    const beforeState = await pool.fetchState();
+    const tokenIds = [fixture.tokenId0, fixture.tokenId1]
+    const lpAddr = (await lp.getSelectedAccount()).address
+    const beforeLp = await getBalances(lpAddr, tokenIds)
+    const beforePool = await getBalances(pool.address, tokenIds)
+    const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(
-      lp,
-      configIndex,
-      tickLower,
-      tickUpper,
-      UNLIMITED_AMOUNT,
-      UNLIMITED_AMOUNT,
-      0n,
-    );
+    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, 0n)
 
-    const afterLp = await getBalances(lpAddr, tokenIds);
-    const afterPool = await getBalances(pool.address, tokenIds);
-    const afterState = await pool.fetchState();
+    const afterLp = await getBalances(lpAddr, tokenIds)
+    const afterPool = await getBalances(pool.address, tokenIds)
+    const afterState = await pool.fetchState()
 
-    const deltaLp0 = afterLp.tokens[fixture.tokenId0] - beforeLp.tokens[fixture.tokenId0];
-    const deltaLp1 = afterLp.tokens[fixture.tokenId1] - beforeLp.tokens[fixture.tokenId1];
-    const deltaPool0 = afterPool.tokens[fixture.tokenId0] - beforePool.tokens[fixture.tokenId0];
-    const deltaPool1 = afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1];
+    const deltaLp0 = afterLp.tokens[fixture.tokenId0] - beforeLp.tokens[fixture.tokenId0]
+    const deltaLp1 = afterLp.tokens[fixture.tokenId1] - beforeLp.tokens[fixture.tokenId1]
+    const deltaPool0 = afterPool.tokens[fixture.tokenId0] - beforePool.tokens[fixture.tokenId0]
+    const deltaPool1 = afterPool.tokens[fixture.tokenId1] - beforePool.tokens[fixture.tokenId1]
 
-    expect(deltaLp0).toBeGreaterThan(0n);
-    expect(deltaLp1).toBe(0n);
-    expect(deltaPool0).toBe(-deltaLp0);
-    expect(deltaPool1).toBe(0n);
-    expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n);
-  });
+    expect(deltaLp0).toBeGreaterThan(0n)
+    expect(deltaLp1).toBe(0n)
+    expect(deltaPool0).toBe(-deltaLp0)
+    expect(deltaPool1).toBe(0n)
+    expect(afterState.fields.liquidity - beforeState.fields.liquidity).toBe(0n)
+  })
 
   test('collecting accrued fees + destroy position', async () => {
-    const { configIndex, pool } = await fixture.setupPool();
-    const poolState = await pool.fetchState();
-    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96;
-    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1);
+    const { configIndex, pool } = await fixture.setupPool()
+    const poolState = await pool.fetchState()
+    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1)
 
     await fixture.addRangePosition({
       lp,
@@ -125,34 +109,26 @@ describe('CLMM Managing Positions', () => {
       sqrtPriceCurrent,
       range: { tickLower, tickUpper },
       amount0Desired: 80n * ONE_ALPH,
-      amount1Desired: UNLIMITED_AMOUNT,
-    });
+      amount1Desired: UNLIMITED_AMOUNT
+    })
 
     // Generate fees: trader swaps token0 -> token1
-    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300);
+    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300)
 
-    const tokenIds = [fixture.tokenId0, fixture.tokenId1];
-    const lpAddr = (await lp.getSelectedAccount()).address;
-    const beforeLp = await getBalances(lpAddr, tokenIds);
-    const beforePool = await getBalances(pool.address, tokenIds);
-    const beforeState = await pool.fetchState();
-    const liquidity = beforeState.fields.liquidity - poolState.fields.liquidity;
+    const tokenIds = [fixture.tokenId0, fixture.tokenId1]
+    const lpAddr = (await lp.getSelectedAccount()).address
+    const beforeLp = await getBalances(lpAddr, tokenIds)
+    const beforePool = await getBalances(pool.address, tokenIds)
+    const beforeState = await pool.fetchState()
+    const liquidity = beforeState.fields.liquidity - poolState.fields.liquidity
 
-    const posId = fixture.powfi.clmm.getPositionId(pool.contractId, lpAddr, tickLower, tickUpper);
-    const beforeLp2 = await getBalances(lpAddr, [posId]);
-    expect(beforeLp2.tokens[posId]).toBe(1n);
-    await fixture.collectTokens(
-      lp,
-      configIndex,
-      tickLower,
-      tickUpper,
-      UNLIMITED_AMOUNT,
-      UNLIMITED_AMOUNT,
-      liquidity,
-    );
+    const posId = fixture.powfi.clmm.getPositionId(pool.contractId, lpAddr, tickLower, tickUpper)
+    const beforeLp2 = await getBalances(lpAddr, [posId])
+    expect(beforeLp2.tokens[posId]).toBe(1n)
+    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, liquidity)
 
-    const afterLp = await getBalances(lpAddr, [posId]);
-    expect(afterLp.tokens[posId]).toBe(0n);
+    const afterLp = await getBalances(lpAddr, [posId])
+    expect(afterLp.tokens[posId]).toBe(0n)
 
     await fixture.addRangePosition({
       lp,
@@ -161,21 +137,20 @@ describe('CLMM Managing Positions', () => {
       sqrtPriceCurrent: beforeState.fields.slot0.sqrtPriceX96,
       range: { tickLower, tickUpper },
       amount0Desired: 80n * ONE_ALPH,
-      amount1Desired: UNLIMITED_AMOUNT,
-    });
+      amount1Desired: UNLIMITED_AMOUNT
+    })
 
-    const afterLp2 = await getBalances(lpAddr, [posId]);
-    expect(afterLp2.tokens[posId]).toBe(1n);
-  });
-
+    const afterLp2 = await getBalances(lpAddr, [posId])
+    expect(afterLp2.tokens[posId]).toBe(1n)
+  })
 
   test('findBestRoute throws PoolNotFoundError for non-existent pool', async () => {
-    await expect(
-      fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
-    ).rejects.toThrow(PoolNotFoundError);
+    await expect(fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')).rejects.toThrow(
+      PoolNotFoundError
+    )
 
-    await expect(
-      fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')
-    ).rejects.toThrow('No concentrated liquidity pool found for token pair');
-  });
-});
+    await expect(fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')).rejects.toThrow(
+      'No concentrated liquidity pool found for token pair'
+    )
+  })
+})

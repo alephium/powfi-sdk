@@ -1,4 +1,4 @@
-import type { SignerProvider, SignExecuteScriptTxResult } from '@alephium/web3';
+import type { SignerProvider, SignExecuteScriptTxResult } from '@alephium/web3'
 import {
   ONE_ALPH,
   web3,
@@ -8,9 +8,9 @@ import {
   addressToBytes,
   codec,
   subContractId,
-  groupOfAddress,
-} from '@alephium/web3';
-import { getSigners } from '@alephium/web3-test';
+  groupOfAddress
+} from '@alephium/web3'
+import { getSigners } from '@alephium/web3-test'
 import {
   XAlphToken,
   XAlphStakeVault,
@@ -18,85 +18,85 @@ import {
   RewardSharingVault,
   type XAlphTokenInstance,
   type XAlphStakeVaultInstance,
-  type AlphUnstakeVaultInstance,
-} from 'staking/artifacts/ts';
-import { buildMerkleWhitelist, type MerkleWhitelist } from 'staking/src/merkle-whitelist';
-import { Powfi } from '../../../src/powfi';
-import type { StakingConfig } from '../../../src/staking/types';
+  type AlphUnstakeVaultInstance
+} from 'staking/artifacts/ts'
+import { buildMerkleWhitelist, type MerkleWhitelist } from 'staking/src/merkle-whitelist'
+import { Powfi } from '../../../src/powfi'
+import type { StakingConfig } from '../../../src/staking/types'
 
-export const UNSTAKE_DURATION = 10n * 1000n; // 10 seconds for testing
-export const MAX_ACTIVE_UNSTAKE_REQUESTS = 5n;
-export const MAX_CONNECTED_DAPPS = 2n;
-export const MAX_U256 = (1n << 256n) - 1n;
-export const WEIGHT_SCALING_FACTOR = 10n ** 18n;
+export const UNSTAKE_DURATION = 10n * 1000n // 10 seconds for testing
+export const MAX_ACTIVE_UNSTAKE_REQUESTS = 5n
+export const MAX_CONNECTED_DAPPS = 2n
+export const MAX_U256 = (1n << 256n) - 1n
+export const WEIGHT_SCALING_FACTOR = 10n ** 18n
 
 export interface Balances {
-  alph: bigint;
-  xalph: bigint;
+  alph: bigint
+  xalph: bigint
 }
 
 export interface StakingState {
-  totalDepositedAlph: bigint;
-  totalXAlphSupply: bigint;
-  lastUnstakeVaultIndex: bigint;
+  totalDepositedAlph: bigint
+  totalXAlphSupply: bigint
+  lastUnstakeVaultIndex: bigint
 }
 
 export interface StakeVaultState {
-  totalStakedAmount: bigint;
+  totalStakedAmount: bigint
 }
 
 export interface UnstakeVaultState {
-  totalUnstakeAmount: bigint;
-  withdrawnAmount: bigint;
-  unstakeStartTime: bigint;
-  unstakeDuration: bigint;
+  totalUnstakeAmount: bigint
+  withdrawnAmount: bigint
+  unstakeStartTime: bigint
+  unstakeDuration: bigint
 }
 
 export async function getBalances(address: string, xAlphTokenId: string): Promise<Balances> {
-  const balance = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address);
-  const xalphToken = balance.tokenBalances?.find((t) => t.id === xAlphTokenId);
+  const balance = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(address)
+  const xalphToken = balance.tokenBalances?.find((t) => t.id === xAlphTokenId)
   return {
     alph: BigInt(balance.balance),
-    xalph: xalphToken ? BigInt(xalphToken.amount) : 0n,
-  };
+    xalph: xalphToken ? BigInt(xalphToken.amount) : 0n
+  }
 }
 
 export function gasFee(txResult: SignExecuteScriptTxResult): bigint {
-  return BigInt(txResult.gasAmount) * BigInt(txResult.gasPrice);
+  return BigInt(txResult.gasAmount) * BigInt(txResult.gasPrice)
 }
 
 export function timeout(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export class Fixture {
-  readonly powfi: Powfi;
+  readonly powfi: Powfi
 
   constructor(
     readonly xAlphTokenContract: XAlphTokenInstance,
     readonly stakeVaultContract: XAlphStakeVaultInstance,
     readonly deployer: SignerProvider,
     readonly whitelist: MerkleWhitelist,
-    powfi: Powfi,
+    powfi: Powfi
   ) {
-    this.powfi = powfi;
+    this.powfi = powfi
   }
 
   get xAlphTokenId(): string {
-    return this.xAlphTokenContract.contractId;
+    return this.xAlphTokenContract.contractId
   }
 
   get stakeVaultId(): string {
-    return this.stakeVaultContract.contractId;
+    return this.stakeVaultContract.contractId
   }
 
   static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 10_000n * ONE_ALPH);
+    const [deployer] = await getSigners(1, 10_000n * ONE_ALPH)
 
-    const powfi = new Powfi({ networkId: 'devnet', signer: deployer });
-    powfi.setCurrentProviders();
+    const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
+    powfi.setCurrentProviders()
 
-    const unstakeVaultTemplate = (await AlphUnstakeVault.deployTemplate(deployer)).contractInstance;
+    const unstakeVaultTemplate = (await AlphUnstakeVault.deployTemplate(deployer)).contractInstance
 
     const xAlphTokenContract = (
       await XAlphToken.deploy(deployer, {
@@ -109,18 +109,17 @@ export class Fixture {
           unstakeDuration: UNSTAKE_DURATION,
           totalDepositedAlph: 0n,
           totalXAlphSupply: 0n,
-          lastUnstakeVaultIndex: 0n,
+          lastUnstakeVaultIndex: 0n
         },
-        issueTokenAmount: MAX_U256,
+        issueTokenAmount: MAX_U256
       })
-    ).contractInstance;
+    ).contractInstance
 
-    const rewardSharingTemplate = (await RewardSharingVault.deployTemplate(deployer))
-      .contractInstance;
-    const templateState = await rewardSharingTemplate.fetchState();
-    const codeHash = templateState.codeHash;
+    const rewardSharingTemplate = (await RewardSharingVault.deployTemplate(deployer)).contractInstance
+    const templateState = await rewardSharingTemplate.fetchState()
+    const codeHash = templateState.codeHash
 
-    const whitelist = await buildMerkleWhitelist([codeHash]);
+    const whitelist = await buildMerkleWhitelist([codeHash])
 
     const stakeVaultContract = (
       await XAlphStakeVault.deploy(deployer, {
@@ -129,10 +128,10 @@ export class Fixture {
           maxConnectedDapps: MAX_CONNECTED_DAPPS,
           merkleRoot: whitelist.root,
           totalStakedAmount: 0n,
-          owner: (await deployer.getSelectedAccount()).address,
-        },
+          owner: (await deployer.getSelectedAccount()).address
+        }
       })
-    ).contractInstance;
+    ).contractInstance
 
     // Configure Powfi SDK to use the deployed contracts
     const stakingConfig: StakingConfig = {
@@ -143,112 +142,112 @@ export class Fixture {
       xAlphStakeVaultId: stakeVaultContract.contractId,
       xAlphStakeVaultAddress: stakeVaultContract.address,
       rewardSharingTemplateId: rewardSharingTemplate.contractId,
-      governanceDemoTemplateId: '', // Not needed for tests
-    };
-    powfi.staking.setConfig(stakingConfig);
+      governanceDemoTemplateId: '' // Not needed for tests
+    }
+    powfi.staking.setConfig(stakingConfig)
 
-    return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, powfi);
+    return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, powfi)
   }
 
   async stakeAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.stakeAlph(amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.stakeAlph(amount)
   }
 
   async startUnstake(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.startUnstake(amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.startUnstake(amount)
   }
 
   async claimUnstaked(signer: SignerProvider, vaultIndex: bigint, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.claimUnstaked(vaultIndex, amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.claimUnstaked(vaultIndex, amount)
   }
 
   async cancelUnstake(signer: SignerProvider, vaultIndex: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.cancelUnstake(vaultIndex);
+    this.powfi.signer = signer
+    return this.powfi.staking.cancelUnstake(vaultIndex)
   }
 
   async stakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.stakeXAlph(amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.stakeXAlph(amount)
   }
 
   async unstakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.unstakeXAlph(amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.unstakeXAlph(amount)
   }
 
   async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer;
-    return this.powfi.staking.unlockAndStartUnstake(amount);
+    this.powfi.signer = signer
+    return this.powfi.staking.unlockAndStartUnstake(amount)
   }
 
   async getXAlphTokenState(): Promise<StakingState> {
-    const state = await this.powfi.staking.getXAlphTokenState();
+    const state = await this.powfi.staking.getXAlphTokenState()
     return {
       totalDepositedAlph: state.fields.totalDepositedAlph,
       totalXAlphSupply: state.fields.totalXAlphSupply,
-      lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex,
-    };
+      lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex
+    }
   }
 
   async getStakeVaultState(): Promise<StakeVaultState> {
-    const state = await this.powfi.staking.getStakeVaultState();
+    const state = await this.powfi.staking.getStakeVaultState()
     return {
-      totalStakedAmount: state.fields.totalStakedAmount,
-    };
+      totalStakedAmount: state.fields.totalStakedAmount
+    }
   }
 
   async getActiveUnstakeVaultIndexes(signer: SignerProvider): Promise<bigint[]> {
-    const account = await signer.getSelectedAccount();
-    return this.powfi.staking.getActiveUnstakeVaultIndexes(account.address);
+    const account = await signer.getSelectedAccount()
+    return this.powfi.staking.getActiveUnstakeVaultIndexes(account.address)
   }
 
   async getClaimableAmount(signer: SignerProvider, vaultIndex: bigint): Promise<bigint> {
-    const account = await signer.getSelectedAccount();
-    return this.powfi.staking.getClaimableAmount(account.address, vaultIndex);
+    const account = await signer.getSelectedAccount()
+    return this.powfi.staking.getClaimableAmount(account.address, vaultIndex)
   }
 
   async getUserStakingInfo(address: string): Promise<{ amount: bigint; connectedDapps: string[] }> {
-    return this.powfi.staking.getUserStakeVaultInfo(address);
+    return this.powfi.staking.getUserStakeVaultInfo(address)
   }
 
   async isUserStaking(address: string): Promise<boolean> {
-    return this.powfi.staking.isUserStaking(address);
+    return this.powfi.staking.isUserStaking(address)
   }
 
   async getUserWeight(address: string): Promise<bigint> {
-    return this.powfi.staking.getUserWeight(address);
+    return this.powfi.staking.getUserWeight(address)
   }
 
   getUnstakeVaultAddress(userAddress: string, vaultIndex: bigint): string {
-    const userHex = binToHex(addressToBytes(userAddress));
-    const indexHex = binToHex(codec.u256Codec.encode(vaultIndex));
+    const userHex = binToHex(addressToBytes(userAddress))
+    const indexHex = binToHex(codec.u256Codec.encode(vaultIndex))
     const contractId = subContractId(
       this.xAlphTokenContract.contractId,
       `${userHex}${indexHex}`,
-      groupOfAddress(this.xAlphTokenContract.address),
-    );
-    return addressFromContractId(contractId);
+      groupOfAddress(this.xAlphTokenContract.address)
+    )
+    return addressFromContractId(contractId)
   }
 
   getUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
-    return this.powfi.staking.getAlphUnstakeVault(userAddress, vaultIndex);
+    return this.powfi.staking.getAlphUnstakeVault(userAddress, vaultIndex)
   }
 
   async getUnstakeVaultState(userAddress: string, vaultIndex: bigint): Promise<UnstakeVaultState> {
-    const state = await this.powfi.staking.getAlphUnstakeVaultState(userAddress, vaultIndex);
+    const state = await this.powfi.staking.getAlphUnstakeVaultState(userAddress, vaultIndex)
     return {
       totalUnstakeAmount: state.fields.totalUnstakeAmount,
       withdrawnAmount: state.fields.withdrawnAmount,
       unstakeStartTime: state.fields.unstakeStartTime,
-      unstakeDuration: state.fields.unstakeDuration,
-    };
+      unstakeDuration: state.fields.unstakeDuration
+    }
   }
 
   async getBalances(address: string): Promise<Balances> {
-    return getBalances(address, this.xAlphTokenId);
+    return getBalances(address, this.xAlphTokenId)
   }
 }

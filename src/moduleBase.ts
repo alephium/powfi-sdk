@@ -1,64 +1,64 @@
-import type { Logger } from './common/logger';
-import { createLogger } from './common/logger';
-import type { Powfi } from './powfi';
+import type { Logger } from './common/logger'
+import { createLogger } from './common/logger'
+import type { Powfi } from './powfi'
 
 export interface ModuleBaseProps {
-  scope: Powfi;
-  moduleName: string;
+  scope: Powfi
+  moduleName: string
 }
 
 const joinMsg = (...args: unknown[]): string =>
   args
     .map((arg) => {
       if (arg instanceof Error) {
-        const base = arg.message ?? arg.name;
-        return arg.stack ? `${base}\n${arg.stack}` : base;
+        const base = arg.message ?? arg.name
+        return arg.stack ? `${base}\n${arg.stack}` : base
       }
 
       if (typeof arg === 'object' && arg !== null) {
         try {
-          return JSON.stringify(arg);
+          return JSON.stringify(arg)
         } catch {
-          return String(arg);
+          return String(arg)
         }
       }
 
-      return String(arg);
+      return String(arg)
     })
-    .join(', ');
+    .join(', ')
 
 export default class ModuleBase {
-  public scope: Powfi;
-  private disabled = false;
-  protected logger: Logger;
+  public scope: Powfi
+  private disabled = false
+  protected logger: Logger
 
   constructor({ scope, moduleName }: ModuleBaseProps) {
-    this.scope = scope;
-    this.logger = createLogger(moduleName);
+    this.scope = scope
+    this.logger = createLogger(moduleName)
   }
 
   public logDebug(...args: unknown[]): void {
-    this.logger.debug(joinMsg(...args));
+    this.logger.debug(joinMsg(...args))
   }
 
   public logInfo(...args: unknown[]): void {
-    this.logger.info(joinMsg(...args));
+    this.logger.info(joinMsg(...args))
   }
 
   public logWarning(...args: unknown[]): void {
-    this.logger.warning(joinMsg(...args));
+    this.logger.warning(joinMsg(...args))
   }
 
   public logError(...args: unknown[]): void {
-    this.logger.error(joinMsg(...args));
+    this.logger.error(joinMsg(...args))
   }
 
   public logAndThrowError(...args: unknown[]): never {
-    const message = joinMsg(...args);
-    throw new Error(message);
+    const message = joinMsg(...args)
+    throw new Error(message)
   }
 
   public checkDisabled(): void {
-    if (this.disabled || !this.scope) this.logAndThrowError('module not working');
+    if (this.disabled || !this.scope) this.logAndThrowError('module not working')
   }
 }
