@@ -6,3 +6,5 @@
 .deployments.devnet.json
 .ralph-lsp
 
+.env
+.env.*
