@@ -60,8 +60,8 @@ export class TokenModule extends ModuleBase {
   }
 
   async getTokenInfoBy(fn: (token: TokenInfo) => boolean): Promise<TokenInfo | undefined> {
-    const tokenInfoz = await this.getTokens()
-    return tokenInfoz.find(fn)
+    const tokenInfos = await this.getTokens()
+    return tokenInfos.find(fn)
   }
 
   async fetchTokens(): Promise<TokenInfo[]> {
