@@ -598,7 +598,6 @@ export class CpmmModule extends ModuleBase {
     return numerator / denominator
   }
 
-  // TODO: This might not be needed
   private getExtraAlphAmount(tokenAId: string, tokenBId: string): bigint {
     if (tokenAId === ALPH_TOKEN_ID || tokenBId === ALPH_TOKEN_ID) {
       return DUST_AMOUNT * 2n
