@@ -1,7 +1,8 @@
 export type Rounding = 'floor' | 'ceil'
 
+/** Bigint math utilities for AMM calculations. */
 export class MathUtil {
-  // Copied from https://github.com/Aisse-258/bigint-isqrt/blob/master/main.js
+  /** Computes integer square root using Newton's method. */
   static sqrt = function (value: bigint): bigint {
     if (value < 2n) {
       return value
@@ -32,26 +33,31 @@ export class MathUtil {
     return x0
   }
 
+  /** Floor division that rounds towards negative infinity (Alephium convention). */
   static alphDiv(a: bigint, b: bigint): bigint {
     const result = a / b
     if (a * b < 0n) return result - BigInt(a % b != 0n)
     return result
   }
 
+  /** Ceiling division that rounds away from zero. */
   static alphCeil(a: bigint, b: bigint): bigint {
     const result = a / b
     const rem = a % b
     return result + BigInt(rem != 0n) * BigInt(rem < 0n ? -1n : 1n)
   }
 
+  /** Floor division for non-negative denominators. */
   static divFloor(a: bigint, b: bigint): bigint {
     return this.divWithRounding(a, b, 'floor')
   }
 
+  /** Ceiling division for non-negative denominators. */
   static divCeil(a: bigint, b: bigint): bigint {
     return this.divWithRounding(a, b, 'ceil')
   }
 
+  /** Multiplies then divides with floor rounding; throws on division by zero. */
   static mulDivFloor(a: bigint, b: bigint, d: bigint): bigint {
     if (d === 0n) {
       throw new Error(`Division by zero in mulDivFloor: ${a} * ${b} / ${d}`)
@@ -60,6 +66,7 @@ export class MathUtil {
     return this.divFloor(product, d)
   }
 
+  /** Multiplies then divides with ceiling rounding; throws on division by zero. */
   static mulDivCeil(a: bigint, b: bigint, d: bigint): bigint {
     if (d === 0n) {
       throw new Error(`Division by zero in mulDivCeil: ${a} * ${b} / ${d}`)

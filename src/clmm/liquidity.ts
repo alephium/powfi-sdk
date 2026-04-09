@@ -4,7 +4,9 @@ import { MathUtil } from '../common/math'
 import { Q96 } from 'clmm/artifacts/ts/constants'
 import type { GetPositionAmountsFromPriceProps, GetPositionAmountsFromPriceReturn } from './types'
 
+/** Liquidity math utilities for concentrated liquidity positions. */
 export class ClmmLiquidityUtils {
+  /** Computes actual token amounts for a position given a target price, tick range, and desired amounts. */
   static getPositionAmountsFromPrice(p: GetPositionAmountsFromPriceProps): GetPositionAmountsFromPriceReturn {
     if (p.amountBase === 0n || p.amountQuote === 0n) {
       return { newAmountBase: 0n, newAmountQuote: 0n, liquidity: 0n }
@@ -31,6 +33,7 @@ export class ClmmLiquidityUtils {
       : { newAmountBase: amount0, newAmountQuote: amount1, liquidity }
   }
 
+  /** Computes token amounts and liquidity from a human-readable price and tick range. */
   static getAmountsAndLiquidityAtPrice(
     currentPrice: number,
     token0: TokenInfo,
@@ -46,6 +49,7 @@ export class ClmmLiquidityUtils {
     return this.getAmountsAndLiquidityAtSqrtPrice(sqrtRatioX96, sqrtRatioAX96, sqrtRatioBX96, amount0, amount1)
   }
 
+  /** Computes token amounts and liquidity from a raw sqrtRatioX96 and tick range. */
   static getAmountsAndLiquidityAtSqrtPrice(
     sqrtRatioX96: bigint,
     sqrtRatioAX96: bigint,
@@ -58,6 +62,7 @@ export class ClmmLiquidityUtils {
     return [-a0, -a1, liquidity]
   }
 
+  /** Computes token0/token1 amounts for a given liquidity delta at a price within a tick range. */
   static getAmountsForLiquidity(
     sqrtRatioX96: bigint,
     sqrtRatioAX96: bigint,
@@ -77,6 +82,7 @@ export class ClmmLiquidityUtils {
     }
   }
 
+  /** Computes the maximum liquidity mintable from given token amounts at a price within a tick range. */
   static getLiquidityFromAmounts(
     sqrtRatioX96: bigint,
     sqrtRatioAX96: bigint,
@@ -95,15 +101,18 @@ export class ClmmLiquidityUtils {
     }
   }
 
+  /** Computes liquidity from a single-token deposit of token0. */
   static getLiquidityFromToken0(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, amount0: bigint): bigint {
     const intermediate = MathUtil.alphDiv(sqrtRatioAX96 * sqrtRatioBX96, Q96)
     return MathUtil.alphDiv(amount0 * intermediate, sqrtRatioBX96 - sqrtRatioAX96)
   }
 
+  /** Computes liquidity from a single-token deposit of token1. */
   static getLiquidityFromToken1(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, amount1: bigint): bigint {
     return MathUtil.alphDiv(amount1 * Q96, sqrtRatioBX96 - sqrtRatioAX96)
   }
 
+  /** Computes the token amount delta between two sqrt prices for a given liquidity. */
   static getAmountDelta(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, liquidity: bigint, zeroForOne: boolean): bigint {
     if (zeroForOne) {
       return this.getToken0Delta(sqrtRatioAX96, sqrtRatioBX96, liquidity)
@@ -112,12 +121,14 @@ export class ClmmLiquidityUtils {
     }
   }
 
+  /** Computes the token0 amount delta between two sqrt prices for a given liquidity. */
   static getToken0Delta(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, liquidity: bigint): bigint {
     const numerator1 = liquidity * Q96
     const numerator2 = sqrtRatioBX96 - sqrtRatioAX96
     return MathUtil.alphDiv(numerator1 * numerator2, sqrtRatioBX96 * sqrtRatioAX96)
   }
 
+  /** Computes the token1 amount delta between two sqrt prices for a given liquidity. */
   static getToken1Delta(sqrtRatioAX96: bigint, sqrtRatioBX96: bigint, liquidity: bigint): bigint {
     return MathUtil.alphDiv(liquidity * (sqrtRatioBX96 - sqrtRatioAX96), Q96)
   }

@@ -12,6 +12,7 @@ type TokenListResponse = {
   tokens: TokenInfo[]
 }
 
+/** Fetches and caches token metadata from the Alephium token list. */
 export class TokenModule extends ModuleBase {
   private cache?: TokenCache
   private readonly cacheTimeMs: number
@@ -26,6 +27,7 @@ export class TokenModule extends ModuleBase {
     this.cacheTimeMs = cacheTimeDays * 24 * 60 * 60 * 1000
   }
 
+  /** Returns all tokens, using cache if valid, falling back to stale cache on fetch failure. */
   async getTokens(): Promise<TokenInfo[]> {
     if (this.isCacheValid()) {
       return this.cache!.tokens
@@ -43,6 +45,7 @@ export class TokenModule extends ModuleBase {
     }
   }
 
+  /** Looks up a token by its on-chain ID; throws if not found. */
   async getTokenById(id: string): Promise<TokenInfo> {
     const tokenInfo = await this.getTokenInfoBy((token) => token.id === id)
     if (!tokenInfo) {
@@ -51,6 +54,7 @@ export class TokenModule extends ModuleBase {
     return tokenInfo
   }
 
+  /** Looks up a token by its ticker symbol; throws if not found. */
   async getTokenBySymbol(symbol: string): Promise<TokenInfo> {
     const tokenInfo = await this.getTokenInfoBy((token) => token.symbol === symbol)
     if (!tokenInfo) {
@@ -59,6 +63,7 @@ export class TokenModule extends ModuleBase {
     return tokenInfo
   }
 
+  /** Looks up a token by a custom predicate. */
   async getTokenInfoBy(fn: (token: TokenInfo) => boolean): Promise<TokenInfo | undefined> {
     const tokenInfos = await this.getTokens()
     return tokenInfos.find(fn)

@@ -5,7 +5,9 @@ import { MathUtil } from '../common/math'
 import { BPS } from '../common/constants'
 import type { TokenInfo } from '@alephium/token-list'
 
+/** Uniswap V3-style tick math utilities for concentrated liquidity pools. */
 export class TickUtils {
+  /** Converts a tick index to its sqrt price in Q96 fixed-point format. */
   static getSqrtRatioAtTick(tick: bigint): bigint {
     const absTick = tick < 0n ? -tick : tick
     if (absTick > MAX_TICK) {
@@ -41,6 +43,7 @@ export class TickUtils {
     return ratio >> 32n
   }
 
+  /** Converts a Q96 sqrt price to the corresponding tick index. */
   static getTickAtSqrtRatio(sqrtPriceX96: bigint): bigint {
     if (sqrtPriceX96 < MIN_SQRT_RATIO || sqrtPriceX96 >= MAX_SQRT_RATIO) {
       throw new Error('SqrtPriceX96OutOfBounds')
@@ -113,6 +116,7 @@ export class TickUtils {
     }
   }
 
+  /** Converts a human-readable price to a Q96 sqrt price, adjusting for token decimals. */
   static priceToSqrtPriceX96(price: Decimal.Value, token0Decimal: number, token1Decimal: number): bigint {
     const priceDecimal = new Decimal(price)
     if (!priceDecimal.isFinite() || priceDecimal.lte(0)) {
@@ -129,6 +133,7 @@ export class TickUtils {
     return this.priceSqrt(token1Amount, token0Unit)
   }
 
+  /** Converts a Q96 sqrt price back to a human-readable price, adjusting for token decimals. */
   static sqrtPriceX96ToPrice(sqrtPriceX96: bigint, token0Decimal: number, token1Decimal: number): number {
     if (sqrtPriceX96 < 0n) {
       throw new Error('Invalid sqrtPriceX96')
@@ -151,6 +156,7 @@ export class TickUtils {
     return priceDecimal.toNumber()
   }
 
+  /** Snaps a price to the nearest valid tick boundary for a given tick spacing. */
   static getAlignedTick(price: number, token0Decimal: number, token1Decimal: number, tickSpacing: bigint): bigint {
     const sqrtPriceX96 = this.priceToSqrtPriceX96(price, token0Decimal, token1Decimal)
     const tick0 = this.getTickAtSqrtRatio(sqrtPriceX96)
@@ -158,6 +164,7 @@ export class TickUtils {
     return MathUtil.alphCeil(tick0, tickSpacing) * tickSpacing
   }
 
+  /** Returns the next valid tick in a given direction, useful for price adjustment UI. */
   static getNextTick(
     tick: bigint,
     tickSpacing: bigint,
@@ -171,6 +178,7 @@ export class TickUtils {
     return tick + delta
   }
 
+  /** Snaps a human-readable price to the nearest tick-aligned price. */
   static getAlignedPrice(
     priceIn: number,
     tokenBase: TokenInfo,
@@ -186,6 +194,7 @@ export class TickUtils {
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn)
   }
 
+  /** Converts a tick back to a human-readable price for a base/quote pair. */
   static getPriceFromTick(
     tick: bigint,
     tokenBase: TokenInfo,
@@ -201,6 +210,7 @@ export class TickUtils {
     return { tick, price }
   }
 
+  /** Returns the minimum representable price for a given tick spacing. */
   static getMinPriceFromTick(
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
@@ -213,6 +223,7 @@ export class TickUtils {
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn)
   }
 
+  /** Returns the maximum representable price for a given tick spacing. */
   static getMaxPriceFromTick(
     tokenBase: TokenInfo,
     tokenQuote: TokenInfo,
@@ -225,6 +236,7 @@ export class TickUtils {
     return this.getPriceFromTick(tick, tokenBase, tokenQuote, baseIn)
   }
 
+  /** Computes the resulting sqrt price after swapping a given amount of token0. */
   static getNextSqrtPriceFromAmount0(sqrtPriceX96: bigint, liquidity: bigint, amount: bigint): bigint {
     const numerator1 = liquidity * Q96
     const product = amount * sqrtPriceX96
@@ -235,11 +247,13 @@ export class TickUtils {
     return -MathUtil.alphDiv(-numerator1 * sqrtPriceX96, denominator)
   }
 
+  /** Computes the resulting sqrt price after swapping a given amount of token1. */
   static getNextSqrtPriceFromAmount1(sqrtPriceX96: bigint, liquidity: bigint, amount: bigint): bigint {
     const quotient = MathUtil.alphDiv(amount * Q96, liquidity)
     return sqrtPriceX96 + quotient
   }
 
+  /** Dispatches to {@link getNextSqrtPriceFromAmount0} or {@link getNextSqrtPriceFromAmount1} based on swap direction. */
   static getNextSqrtPrice(sqrtPX96: bigint, liquidity: bigint, amount: bigint, zeroForOne: boolean): bigint {
     if (zeroForOne) {
       return this.getNextSqrtPriceFromAmount0(sqrtPX96, liquidity, amount)
@@ -248,6 +262,7 @@ export class TickUtils {
     }
   }
 
+  /** Computes the sqrt price limit for a swap given a slippage tolerance in basis points. */
   static getSqrtPriceLimitX96(sqrtPriceX96: bigint, slippage: bigint, zeroForOne: boolean): bigint {
     if (slippage < 0n || slippage >= BPS) {
       throw new Error('slippageBps must be in [0, 10000)')
@@ -266,12 +281,10 @@ export class TickUtils {
     return limit
   }
 
-  // Compute slippage bounds for a given sqrt price
-  // The slippage is in bps.
-  // Returns [minSqrtPriceX96, maxSqrtPriceX96], where:
-  //   min = floor(sqrtPriceX96 * sqrt(1 - slippage))
-  //   max = ceil(sqrtPriceX96 * sqrt(1 + slippage))
-  // `slippage` is bps: e.g., 100 for 1%, 30 for 0.3%
+  /**
+   * Computes min/max sqrt price bounds for a given slippage in basis points.
+   * Returns `[floor(sqrtPrice * sqrt(1 - slippage)), ceil(sqrtPrice * sqrt(1 + slippage))]`.
+   */
   static getSqrtPriceX96Bounds(sqrtPriceX96: bigint, slippage: bigint): [bigint, bigint] {
     if (slippage < 0n || slippage >= BPS) {
       throw new Error('Invalid slippageBps; must be in [0, 10000)')

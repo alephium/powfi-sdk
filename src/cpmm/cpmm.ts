@@ -44,6 +44,10 @@ import { MINIMUM_LIQUIDITY } from './constants'
 import { BPS } from '../common/constants'
 import { InsufficientLiquidityError } from '../common/error'
 
+/**
+ * Provides constant-product AMM (x*y=k) operations for the Alephium Powfi DEX.
+ * Handles pool queries, swaps, liquidity management, and quote computations.
+ */
 export class CpmmModule extends ModuleBase {
   private config: CpmmConfig
 
@@ -54,16 +58,22 @@ export class CpmmModule extends ModuleBase {
     this.scope = scope
   }
 
+  /** Derives the on-chain contract ID for a token pair, independent of token order. */
   getPoolId(tokenA: string, tokenB: string): string {
     const [token0Id, token1Id] = sortTokens(tokenA, tokenB)
     const path = token0Id + token1Id
     return subContractId(this.config.factoryId, path, this.config.groupIndex)
   }
 
+  /** Converts a token pair's pool ID to its on-chain contract address. */
   getPoolAddress(tokenA: string, tokenB: string): string {
     return addressFromContractId(this.getPoolId(tokenA, tokenB))
   }
 
+  /**
+   * Fetches live on-chain pool reserves and metadata for a token pair.
+   * @throws {PoolNotFoundError} If the pool contract does not exist on-chain.
+   */
   async getPoolState(tokenA: string, tokenB: string): Promise<CpmmPoolContractState> {
     const [token0Id, token1Id] = sortTokens(tokenA, tokenB)
     const token0Info = await this.scope.token.getTokenById(token0Id)
@@ -92,6 +102,7 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /** Checks whether a pool contract exists on-chain for the given token pair. */
   async poolExists(tokenA: string, tokenB: string): Promise<boolean> {
     const address = this.getPoolAddress(tokenA, tokenB)
 
@@ -106,6 +117,12 @@ export class CpmmModule extends ModuleBase {
       })
   }
 
+  /**
+   * Executes a token swap transaction on-chain.
+   * @param balances - Optional wallet balances used for pre-flight insufficient-balance checks.
+   * @throws {PriceImpactTooHighError} If the computed price impact exceeds the maximum threshold.
+   * @throws {InsufficientBalanceError} If the wallet balance is too low for the swap input.
+   */
   async swap(params: CpmmSwapRequest, balances?: Map<string, bigint>): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for swap operation')
@@ -193,6 +210,11 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Adds liquidity to an existing pool on-chain.
+   * @param balances - Optional wallet balances used for pre-flight insufficient-balance checks.
+   * @throws {InsufficientBalanceError} If the wallet balance is too low for either token.
+   */
   async addLiquidity(params: CpmmAddLiquidityRequest, balances?: Map<string, bigint>): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for addLiquidity operation')
@@ -269,6 +291,7 @@ export class CpmmModule extends ModuleBase {
     return result
   }
 
+  /** Removes liquidity from a pool and returns the underlying tokens to the sender. */
   async removeLiquidity(params: CpmmRemoveLiquidityRequest): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for removeLiquidity operation')
@@ -298,6 +321,7 @@ export class CpmmModule extends ModuleBase {
     return result
   }
 
+  /** Fetches pool state then computes the token amounts claimable for a given liquidity position. */
   async computeClaimableAmounts(
     tokenAId: string,
     tokenBId: string,
@@ -313,6 +337,7 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /** Creates a new CPMM pool on-chain, optionally seeded with initial liquidity. */
   async createPool(params: CpmmCreatePoolRequest): Promise<ExecuteScriptResult & { poolId: string }> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for createPool operation')
@@ -366,6 +391,7 @@ export class CpmmModule extends ModuleBase {
     return { ...result, poolId }
   }
 
+  /** Loads the CPMM deployment addresses (factory, router) for the current network. */
   getCpmmConfig(): CpmmConfig {
     const networkId = this.scope.network.id
     try {
@@ -380,6 +406,10 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Computes swap output amount, price impact, and slippage bounds for a given input or output.
+   * Supports both exact-in and exact-out swap modes.
+   */
   static computeSwapAmount(params: CpmmSwapQuoteParams): CpmmSwapQuote {
     const { state, tokenInId, tokenOutId, amountIn, amountOut, slippageBps } = params
     const tokenInInfo = this.getTokenInfoFromPoolState(state, tokenInId, 'tokenInId')
@@ -423,6 +453,10 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Computes add-liquidity amounts and pool share for both initial and existing pools.
+   * For initial pools, both amounts are required; for existing pools, the other amount is derived from reserves.
+   */
   static computeLiquidityAmounts(params: CpmmAddLiquidityQuoteParams): CpmmAddLiquidityQuote {
     const { poolState, tokenAId, tokenBId, amountA, amountB, inputType = 'TokenA' } = params
 
@@ -445,6 +479,7 @@ export class CpmmModule extends ModuleBase {
     return this.getLiquidityDetails(poolState, inputTokenId, inputAmount, inputType)
   }
 
+  /** Computes the token amounts returned when removing a given amount of liquidity from a pool. */
   static computeRemoveLiquidityAmounts(
     state: CpmmPoolContractState,
     totalLiquidity: bigint,
@@ -473,15 +508,24 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /** Computes the full position value (both token amounts) for a given liquidity balance. */
   static computeClaimableAmounts(state: CpmmPoolContractState, liquidityBalance: bigint): CpmmRemoveLiquidityQuote {
     return this.computeRemoveLiquidityAmounts(state, liquidityBalance, liquidityBalance)
   }
 
+  /**
+   * Applies negative slippage to compute the minimum acceptable amount.
+   * @param slippage - Slippage tolerance in basis points (1 bps = 0.01%).
+   */
   static minimalAmount(amount: bigint, slippage: bigint): bigint {
     this.assertSlippageInRange(slippage)
     return (amount * BPS) / (BPS + slippage)
   }
 
+  /**
+   * Applies positive slippage to compute the maximum required amount.
+   * @param slippage - Slippage tolerance in basis points (1 bps = 0.01%).
+   */
   static maximalAmount(amount: bigint, slippage: bigint): bigint {
     this.assertSlippageInRange(slippage)
     return (amount * (BPS + slippage) + (BPS - 1n)) / BPS
@@ -493,6 +537,7 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /** Calculates the price impact percentage of a swap relative to the current pool reserves. */
   static calcPriceImpact(
     reserve0: bigint,
     reserve1: bigint,
@@ -508,6 +553,7 @@ export class CpmmModule extends ModuleBase {
     return parseFloat(impact)
   }
 
+  /** Computes the add-liquidity quote for an existing pool, deriving the paired amount from reserves. */
   static getLiquidityDetails(
     state: CpmmPoolContractState,
     inputTokenId: string,
@@ -533,6 +579,10 @@ export class CpmmModule extends ModuleBase {
     return { state, tokenAId, tokenBId, amountA, amountB, shareAmount: liquidity, sharePercentage }
   }
 
+  /**
+   * Computes the input amount needed for a desired output using the x*y=k formula with a 0.3% fee.
+   * @throws {InsufficientLiquidityError} If the desired output exceeds pool reserves.
+   */
   static getAmountIn(state: CpmmPoolContractState, tokenOutId: string, amountOut: bigint): bigint {
     const [tokenOutInfo, reserveIn, reserveOut] =
       tokenOutId === state.token0Info.id
@@ -549,6 +599,7 @@ export class CpmmModule extends ModuleBase {
     return numerator / denominator + 1n
   }
 
+  /** Computes the output amount for a given input using the x*y=k formula with a 0.3% fee. */
   static getAmountOut(state: CpmmPoolContractState, tokenInId: string, amountIn: bigint): bigint {
     if (tokenInId === state.token0Info.id) {
       return this._getAmountOut(amountIn, state.reserve0, state.reserve1)
@@ -557,6 +608,10 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Computes the initial liquidity pool share for a new pool.
+   * @throws {InsufficientLiquidityError} If the geometric mean of the amounts is below the minimum liquidity threshold.
+   */
   static getInitLiquidityDetails(
     tokenAId: string,
     tokenBId: string,

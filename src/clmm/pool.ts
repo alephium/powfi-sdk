@@ -6,7 +6,9 @@ import { ClmmLiquidityUtils } from './liquidity'
 import { MathUtil } from '../common/math'
 import { normalizeAddress } from '../common'
 
+/** Pool-level utility functions for CLMM pools. */
 export class PoolUtils {
+  /** Derives the on-chain position contract ID from pool address, owner, and tick range. */
   static getPositionId(poolAddress: string, owner: string, tickLower: bigint, tickUpper: bigint): string {
     const group = groupOfAddress(poolAddress)
     const poolId = binToHex(contractIdFromAddress(poolAddress))
@@ -20,6 +22,7 @@ export class PoolUtils {
     return subContractId(poolId, binToHex(path), group)
   }
 
+  /** Computes a single step of a swap through a tick range, returning the next price, amounts in/out, and fee. */
   static computeSwapStep(
     sqrtPriceX96: bigint,
     sqrtPriceTargetX96: bigint,
@@ -71,6 +74,7 @@ export class PoolUtils {
     return [sqrtPriceNextX96, amountIn, amountOut, feeAmount]
   }
 
+  /** Simulates a full multi-step swap locally using a pre-fetched liquidity distribution. */
   static offlineSwap(liqDist: ClmmSimulateSwapQuote, amountSpecified: bigint, sqrtPriceX96: bigint): bigint {
     const exactIn = amountSpecified > 0n
     let amountCalculated = 0n

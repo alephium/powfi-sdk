@@ -36,6 +36,10 @@ import { TickUtils } from './tick'
 import { ClmmLiquidityUtils } from './liquidity'
 import { normalizeAddress, PoolNotFoundError, sortTokens } from '../common'
 
+/**
+ * Provides operations for Alephium's concentrated liquidity AMM (Uniswap V3-style).
+ * Handles pool creation, liquidity management, swaps, position tracking, and farming rewards.
+ */
 export class ClmmModule extends ModuleBase {
   private config: ClmmConfig
   private configsByIndex = new Map<bigint, ClmmPoolConfig>()
@@ -46,14 +50,17 @@ export class ClmmModule extends ModuleBase {
     this.config = this._getClmmConfig()
   }
 
+  /** Overrides the CLMM deployment configuration (factory, position manager, etc.). */
   setConfig(config: ClmmConfig) {
     this.config = config
   }
 
+  /** Returns the current CLMM deployment configuration. */
   getClmmConfig(): ClmmConfig {
     return this.config
   }
 
+  /** Derives the on-chain contract ID of a pool fee tier configuration from its index. */
   getPoolConfigId(configIndex: bigint): string {
     const rawIndex = codec.u256Codec.encode(configIndex)
     const configPath = binToHex(rawIndex)
@@ -61,6 +68,7 @@ export class ClmmModule extends ModuleBase {
     return subContractId(this.config.factoryId, configPath, group)
   }
 
+  /** Fetches all fee tier configurations registered in the factory. Results are cached per index. */
   async getAllPoolConfigs(): Promise<ClmmPoolConfig[]> {
     const factoryAddress = addressFromContractId(this.config.factoryId)
     const factory = PoolFactory.at(factoryAddress)
@@ -80,6 +88,10 @@ export class ClmmModule extends ModuleBase {
     return configs
   }
 
+  /**
+   * Fetches a single fee tier configuration by index, returning from cache if available.
+   * @returns The pool config, or `undefined` if the index does not exist on-chain.
+   */
   async getPoolConfig(configIndex: bigint): Promise<ClmmPoolConfig | undefined> {
     const cached = this.configsByIndex.get(configIndex)
     if (cached) {
@@ -109,6 +121,10 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Fetches live pool state including current liquidity, tick, sqrtPriceX96, and token metadata.
+   * @throws {PoolNotFoundError} If no pool exists for the given ID.
+   */
   async getPoolState(poolId: string): Promise<ClmmPoolContractState> {
     try {
       const poolAddress = addressFromContractId(poolId)
@@ -137,6 +153,10 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Fetches the actual token balances held by the pool contract on-chain.
+   * @throws {PoolNotFoundError} If no pool exists for the given ID.
+   */
   async getPoolTokenBalances(poolId: string): Promise<{ token0Balance: bigint; token1Balance: bigint }> {
     try {
       const poolAddress = addressFromContractId(poolId)
@@ -161,6 +181,7 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  /** Derives the pool contract ID for a token pair and fee tier. Tokens are sorted internally. */
   getPoolId(tokenA: string, tokenB: string, configIndex: bigint): string {
     const [token0, token1] = sortTokens(tokenA, tokenB)
     const group = this.config.groupIndex
@@ -172,6 +193,7 @@ export class ClmmModule extends ModuleBase {
     return subContractId(factoryId, path, group)
   }
 
+  /** Derives a position's contract ID from the pool, owner address, and tick range. */
   getPositionId(poolId: string, owner: string, tickLower: bigint, tickUpper: bigint): string {
     const group = groupOfAddress(addressFromContractId(poolId))
     const path = encodePrimitiveValues([
@@ -183,16 +205,19 @@ export class ClmmModule extends ModuleBase {
     return subContractId(poolId, binToHex(path), group)
   }
 
+  /** Returns the contract address for a pool identified by token pair and fee tier. */
   getPoolAddress(tokenA: string, tokenB: string, configIndex: bigint): string {
     const poolId = this.getPoolId(tokenA, tokenB, configIndex)
     return addressFromContractId(poolId)
   }
 
+  /** Returns a Pool contract instance for the given token pair and fee tier. */
   getPool(tokenA: string, tokenB: string, configIndex: bigint): PoolInstance {
     const poolAddress = this.getPoolAddress(tokenA, tokenB, configIndex)
     return Pool.at(poolAddress)
   }
 
+  /** Checks whether a pool exists on-chain for the given token pair and fee tier. */
   async poolExists(tokenA: string, tokenB: string, configIndex: bigint): Promise<boolean> {
     const poolAddress = this.getPoolAddress(tokenA, tokenB, configIndex)
     const pool = Pool.at(poolAddress)
@@ -207,6 +232,10 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  /**
+   * Creates a new CLMM pool with initial liquidity within the specified tick range.
+   * Tokens and ticks are sorted internally to match on-chain ordering.
+   */
   async createPool(
     configIndex: bigint,
     token0: string,
@@ -265,11 +294,16 @@ export class ClmmModule extends ModuleBase {
     return { poolAddress, result }
   }
 
+  /** Adds liquidity to a tick range, minting a new position or updating an existing one. */
   async addLiquidity(p: ClmmAddLiquidityRequest): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const [positionId, positionManager, params] = await this.getAddLiquidityParams(p)
     return await this.addLiquidityFromParams(positionId, positionManager, params)
   }
 
+  /**
+   * Prepares add-liquidity transaction parameters without executing.
+   * Useful for previewing the transaction or splitting preparation from execution.
+   */
   async getAddLiquidityParams(
     p: ClmmAddLiquidityRequest
   ): Promise<[string, PositionManagerInstance, PositionManagerTypes.SignExecuteMethodParams<'addLiquidity'>]> {
@@ -360,6 +394,7 @@ export class ClmmModule extends ModuleBase {
     return [positionId, positionManager, params]
   }
 
+  /** Executes an add-liquidity transaction from pre-computed parameters. */
   async addLiquidityFromParams(
     positionId: string,
     positionManager: PositionManagerInstance,
@@ -369,6 +404,7 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result }
   }
 
+  /** Decreases liquidity from an existing position within the specified tick range. */
   async removeLiquidity(
     p: ClmmRemoveLiquidityRequest
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
@@ -410,11 +446,13 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result }
   }
 
+  /** Queries on-chain position state including accrued fees and current liquidity. */
   async positionInfo({ poolId, ...args }: ClmmPositionInfoRequest): Promise<ClmmPositionInfo> {
     const pool = Pool.at(addressFromContractId(poolId))
     const { returns } = await pool.view.positionInfo({ args })
     return returns
   }
+  /** Collects accrued fees from a position, optionally removing liquidity in the same transaction. */
   async collectTokens(p: ClmmCollectTokensRequest): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex)
     const positionId = PoolUtils.getPositionId(poolAddress, p.owner, p.tickLower, p.tickUpper)
@@ -451,6 +489,10 @@ export class ClmmModule extends ModuleBase {
     return { positionId, result }
   }
 
+  /**
+   * Finds the fee tier (config index) with the most liquidity for a token pair.
+   * @throws {PoolNotFoundError} If no pool exists for the token pair across any fee tier.
+   */
   async findBestRoute(token0: string, token1: string): Promise<bigint> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId)
     const poolFactory = PoolFactory.at(poolFactoryAddress)
@@ -477,6 +519,7 @@ export class ClmmModule extends ModuleBase {
     return index
   }
 
+  /** Simulates a swap off-chain and returns the resulting price, liquidity distribution, and fee. */
   async simulateSwap(p: ClmmSimulateSwapParams): Promise<ClmmSimulateSwapQuote> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex)
     const pool = Pool.at(poolAddress)
@@ -506,6 +549,7 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  /** Executes a swap transaction using the first entry in the route plan. */
   async swap(p: ClmmSwapRequest): Promise<SignExecuteScriptTxResult> {
     const configIndex = p.routePlan[0]
     const pool = this.getPool(p.token0, p.token1, configIndex)
@@ -533,6 +577,7 @@ export class ClmmModule extends ModuleBase {
     })
   }
 
+  /** Collects accumulated protocol fees from a pool. Admin only. */
   async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId)
     const poolFactory = PoolFactory.at(poolFactoryAddress)
@@ -548,6 +593,7 @@ export class ClmmModule extends ModuleBase {
     return result
   }
 
+  /** Configures farming reward parameters (token, amount, and time window) for a pool. Admin only. */
   async setRewardParams(p: ClmmSetRewardParamsRequest): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId)
     const poolFactory = PoolFactory.at(poolFactoryAddress)
@@ -571,6 +617,7 @@ export class ClmmModule extends ModuleBase {
     return result
   }
 
+  /** Extends an existing farming reward program by adding more tokens. Admin only. */
   async extendRewards(p: ClmmExtendRewardsRequest): Promise<SignExecuteScriptTxResult> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex)
     const pool = Pool.at(poolAddress)

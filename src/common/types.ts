@@ -1,5 +1,6 @@
 import type { SignerProvider, NetworkId } from '@alephium/web3'
 
+/** Network connection configuration (node URL, explorer URL, token list URL). */
 export interface Network {
   id: NetworkId
   name: string
@@ -10,6 +11,7 @@ export interface Network {
   tokenListUrl: string
 }
 
+/** Default devnet network configuration for local development. */
 export const DEVNET = {
   id: 'devnet' as NetworkId,
   nodeUrl: 'http://127.0.0.1:22973',
@@ -19,6 +21,7 @@ export const DEVNET = {
   name: 'Devnet'
 }
 
+/** Built-in network configurations for mainnet, testnet, and devnet. */
 export const defaultNetworks: Network[] = [
   {
     id: 'mainnet',
@@ -38,8 +41,10 @@ export const defaultNetworks: Network[] = [
   },
   DEVNET
 ]
+/** Partial network config for overriding defaults. */
 export type NetworkOverrides = Partial<Omit<Network, 'id'>>
 
+/** Parameters for initializing the Powfi SDK via `Powfi.load()`. */
 export interface PowfiLoadParams {
   networkId: NetworkId
   signer?: SignerProvider

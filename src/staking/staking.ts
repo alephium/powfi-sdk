@@ -36,6 +36,11 @@ import { decodeContractIdList, decodeU256List } from './utils'
 import type { StakingSettings } from './settings'
 import { getStakingSettings } from './settings'
 
+/**
+ * Provides xALPH liquid staking operations on Alephium. Users stake ALPH to receive
+ * xALPH, manage unstaking with cooldown periods, and interact with the StakeVault
+ * for governance and rewards.
+ */
 export class StakingModule extends ModuleBase {
   private config: StakingConfig
   private xAlphTokenContract: XAlphTokenInstance
@@ -49,40 +54,49 @@ export class StakingModule extends ModuleBase {
     this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(this.config.xAlphStakeVaultId))
   }
 
+  /** Overrides the deployment addresses used by this module. */
   setConfig(config: StakingConfig): void {
     this.config = config
     this.xAlphTokenContract = XAlphToken.at(addressFromContractId(config.xAlphTokenId))
     this.stakeVaultContract = XAlphStakeVault.at(addressFromContractId(config.xAlphStakeVaultId))
   }
 
+  /** Returns the current staking deployment configuration. */
   getConfig(): StakingConfig {
     return this.config
   }
 
+  /** Returns the xALPH token contract instance. */
   getXAlphToken(): XAlphTokenInstance {
     return this.xAlphTokenContract
   }
 
+  /** Returns the xALPH StakeVault contract instance. */
   getStakeVault(): XAlphStakeVaultInstance {
     return this.stakeVaultContract
   }
 
+  /** Returns a RewardSharingVault contract instance for the given contract ID. */
   getRewardSharingVault(contractId: string): RewardSharingVaultInstance {
     return RewardSharingVault.at(addressFromContractId(contractId))
   }
 
+  /** Returns a Governance contract instance for the given contract ID. */
   getGovernanceContract(contractId: string): GovernanceDemoInstance {
     return GovernanceDemo.at(addressFromContractId(contractId))
   }
 
+  /** Fetches the live on-chain state of the xALPH token contract. */
   async getXAlphTokenState(): Promise<XAlphTokenTypes.State> {
     return this.xAlphTokenContract.fetchState()
   }
 
+  /** Fetches the live on-chain state of the StakeVault contract. */
   async getStakeVaultState(): Promise<XAlphStakeVaultTypes.State> {
     return this.stakeVaultContract.fetchState()
   }
 
+  /** Stakes ALPH and mints xALPH to the caller. */
   async stakeAlph(amount: bigint): Promise<XAlphTokenTypes.SignExecuteMethodResult<'stake'>> {
     this.ensurePositiveAmount(amount, 'Stake amount')
     return this.xAlphTokenContract.transact.stake({
@@ -92,6 +106,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Burns xALPH and begins the unstaking cooldown period. */
   async startUnstake(amount: bigint): Promise<XAlphTokenTypes.SignExecuteMethodResult<'startUnstake'>> {
     this.ensurePositiveAmount(amount, 'Unstake amount')
     return this.xAlphTokenContract.transact.startUnstake({
@@ -101,6 +116,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Claims ALPH after the unstaking cooldown has elapsed. */
   async claimUnstaked(
     vaultIndex: bigint,
     amount: bigint
@@ -115,6 +131,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Cancels a pending unstake request and returns xALPH to the caller. */
   async cancelUnstake(vaultIndex: bigint): Promise<XAlphTokenTypes.SignExecuteMethodResult<'cancelUnstake'>> {
     return this.xAlphTokenContract.transact.cancelUnstake({
       signer: this.scope.signer,
@@ -123,6 +140,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Stakes xALPH into the StakeVault for governance participation and rewards. */
   async stakeXAlph(amount: bigint): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'stake'>> {
     this.ensurePositiveAmount(amount, 'Stake amount')
     return this.stakeVaultContract.transact.stake({
@@ -133,6 +151,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Unstakes xALPH from the StakeVault. */
   async unstakeXAlph(amount: bigint): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'unstake'>> {
     this.ensurePositiveAmount(amount, 'Unstake amount')
     return this.stakeVaultContract.transact.unstake({
@@ -142,6 +161,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Unstakes xALPH from the StakeVault and starts the ALPH unstaking cooldown in one transaction. */
   async unlockAndStartUnstake(amount: bigint): Promise<ExecuteScriptResult> {
     return XAlphUnlockAndStartUnstake.execute({
       signer: this.scope.signer,
@@ -154,6 +174,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Returns the unstake vault contract instance for a user at the given index. */
   getAlphUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
     const userHex = binToHex(addressToBytes(userAddress))
     const indexHex = binToHex(codec.u256Codec.encode(vaultIndex))
@@ -165,11 +186,13 @@ export class StakingModule extends ModuleBase {
     return AlphUnstakeVault.at(addressFromContractId(contractId))
   }
 
+  /** Fetches the live on-chain state of a user's unstake vault at the given index. */
   async getAlphUnstakeVaultState(userAddress: string, vaultIndex: bigint): Promise<AlphUnstakeVaultTypes.State> {
     const stakerAddress = this.getStakerAddress(userAddress)
     return this.getAlphUnstakeVault(stakerAddress, vaultIndex).fetchState()
   }
 
+  /** Connects staked xALPH to a dapp contract, enabling it to use the caller's stake weight. */
   async connectToDapp(
     contractId: string,
     merkleProof: HexString
@@ -181,6 +204,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Disconnects staked xALPH from a dapp contract. */
   async disconnectFromDapp(
     contractId: string
   ): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'disconnectFromDapp'>> {
@@ -191,6 +215,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Returns the user's staked xALPH amount and list of connected dapps. */
   async getUserStakeVaultInfo(address: string): Promise<StakeVaultUserInfo> {
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.getUserStakingInfo({
@@ -202,18 +227,21 @@ export class StakingModule extends ModuleBase {
     }
   }
 
+  /** Checks whether the user has an active stake in the StakeVault. */
   async isUserStaking(address: string): Promise<boolean> {
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.isStaking({ args: { user: stakerAddress } })
     return result.returns
   }
 
+  /** Returns the user's governance weight based on their staked xALPH. */
   async getUserWeight(address: string): Promise<bigint> {
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.stakeVaultContract.view.getWeight({ args: { user: stakerAddress } })
     return result.returns
   }
 
+  /** Returns the indexes of the user's active (pending or claimable) unstake requests. */
   async getActiveUnstakeVaultIndexes(address: string): Promise<bigint[]> {
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.xAlphTokenContract.view.getActiveUnstakeVaultIndexes({
@@ -222,6 +250,7 @@ export class StakingModule extends ModuleBase {
     return decodeU256List(result.returns)
   }
 
+  /** Returns the amount of ALPH that can be claimed from a specific unstake vault. */
   async getClaimableAmount(address: string, vaultIndex: bigint): Promise<bigint> {
     const stakerAddress = this.getStakerAddress(address)
     const result = await this.xAlphTokenContract.view.getClaimableAmount({
@@ -230,6 +259,7 @@ export class StakingModule extends ModuleBase {
     return result.returns
   }
 
+  /** Returns network-specific staking parameters such as cooldown duration and limits. */
   getSettings(): StakingSettings {
     return getStakingSettings(this.scope.network.id)
   }

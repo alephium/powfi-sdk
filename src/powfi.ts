@@ -7,10 +7,26 @@ import { ClmmModule } from './clmm/clmm'
 import { TokenModule } from './token/token'
 import { StakingModule } from './staking/staking'
 
+/**
+ * Main entry point for the Powfi SDK.
+ *
+ * Provides access to all protocol modules: CPMM (constant-product AMM),
+ * CLMM (concentrated liquidity AMM), token metadata, and xALPH staking.
+ *
+ * @example
+ * ```ts
+ * const powfi = Powfi.load({ networkId: 'mainnet', signer })
+ * const pool = await powfi.cpmm.getPoolState(tokenA, tokenB)
+ * ```
+ */
 export class Powfi {
+  /** Constant-product market maker module (swap, add/remove liquidity). */
   public cpmm: CpmmModule
+  /** Concentrated liquidity market maker module. */
   public clmm: ClmmModule
+  /** Token metadata lookups from the Alephium token list. */
   public token: TokenModule
+  /** xALPH staking module (stake, unstake, governance). */
   public staking: StakingModule
 
   private _nodeProvider: NodeProvider
@@ -42,6 +58,7 @@ export class Powfi {
     this.staking = new StakingModule(this)
   }
 
+  /** Create a new Powfi SDK instance with the given network and signer configuration. */
   static load(config: PowfiLoadParams): Powfi {
     return new Powfi(config)
   }
@@ -68,6 +85,7 @@ export class Powfi {
     return this._account
   }
 
+  /** Remove the current signer. Transaction methods will throw until a new signer is set. */
   public clearSigner() {
     this._signer = undefined
   }
@@ -92,6 +110,7 @@ export class Powfi {
     return this._tokenListUrl
   }
 
+  /** Set this instance's node and explorer providers as the global `web3` defaults. */
   public setCurrentProviders(): void {
     if (!this._nodeProvider) {
       throw new Error('Node provider not set')
