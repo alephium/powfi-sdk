@@ -3,7 +3,7 @@ import { UNLIMITED_AMOUNT } from '../../src/clmm/constants';
 import type { TokenInfo } from '@alephium/token-list';
 import { Powfi } from '../../src/powfi';
 import { ClmmLiquidityUtils } from '../../src/clmm/liquidity';
-import { GetPositionAmountsFromPriceReturn } from '../../src';
+import type { GetPositionAmountsFromPriceReturn } from '../../src';
 
 describe('LiquidityUtils', () => {
   const createToken = (id: string, decimals: number): TokenInfo => ({
@@ -148,7 +148,11 @@ describe('LiquidityUtils', () => {
       const amountWETH = 5n * 10n ** 17n; // 0.5 WETH
       const amountUSDC = 1000n * 10n ** 6n; // 1000 USDC
 
-      const { newAmountBase: usedWETH, newAmountQuote: usedUSDC, liquidity } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
+      const {
+        newAmountBase: usedWETH,
+        newAmountQuote: usedUSDC,
+        liquidity,
+      } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
         sqrtRatioX96: sqrtPriceX96,
         tokenBaseId: WETH.id,
         tokenQuoteId: USDC.id,
@@ -220,7 +224,11 @@ describe('LiquidityUtils', () => {
       });
 
       const { newAmountBase: usedUSDC, newAmountQuote: usedWETH, liquidity } = normalResult;
-      const { newAmountBase: usedWETHReversed, newAmountQuote: usedUSDCReversed, liquidity: liquidityReversed } = reversedResult;
+      const {
+        newAmountBase: usedWETHReversed,
+        newAmountQuote: usedUSDCReversed,
+        liquidity: liquidityReversed,
+      } = reversedResult;
 
       expect(liquidity).toBeGreaterThan(0n);
       expect(liquidityReversed).toBeGreaterThan(0n);
@@ -271,26 +279,28 @@ describe('LiquidityUtils', () => {
       const upperTick = priceResult.tick + 3000n;
 
       const limitedUSDC = 5000n * 10n ** 6n;
-      const { newAmountBase: usedUSDC1, liquidity: liquidity1 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-        sqrtRatioX96: sqrtPriceX96,
-        tokenBaseId: USDC.id,
-        tokenQuoteId: WETH.id,
-        lowerTick,
-        upperTick,
-        amountBase: limitedUSDC,
-        amountQuote: UNLIMITED_AMOUNT,
-      });
+      const { newAmountBase: usedUSDC1, liquidity: liquidity1 } =
+        ClmmLiquidityUtils.getPositionAmountsFromPrice({
+          sqrtRatioX96: sqrtPriceX96,
+          tokenBaseId: USDC.id,
+          tokenQuoteId: WETH.id,
+          lowerTick,
+          upperTick,
+          amountBase: limitedUSDC,
+          amountQuote: UNLIMITED_AMOUNT,
+        });
 
       const limitedWETH = 3n * 10n ** 18n;
-      const { newAmountQuote: usedWETH2, liquidity: liquidity2 } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-        sqrtRatioX96: sqrtPriceX96,
-        tokenBaseId: USDC.id,
-        tokenQuoteId: WETH.id,
-        lowerTick,
-        upperTick,
-        amountBase: UNLIMITED_AMOUNT,
-        amountQuote: limitedWETH,
-      });
+      const { newAmountQuote: usedWETH2, liquidity: liquidity2 } =
+        ClmmLiquidityUtils.getPositionAmountsFromPrice({
+          sqrtRatioX96: sqrtPriceX96,
+          tokenBaseId: USDC.id,
+          tokenQuoteId: WETH.id,
+          lowerTick,
+          upperTick,
+          amountBase: UNLIMITED_AMOUNT,
+          amountQuote: limitedWETH,
+        });
 
       expect(usedUSDC1).toBeLessThanOrEqual(limitedUSDC);
       expect(usedWETH2).toBeLessThanOrEqual(limitedWETH);
@@ -478,25 +488,27 @@ describe('LiquidityUtils', () => {
       ];
 
       for (const testCase of testCases) {
-        const { newAmountBase: usedUSDC, liquidity: liquidityUSDC } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-          sqrtRatioX96: sqrtPriceX96,
-          tokenBaseId: USDC.id,
-          tokenQuoteId: WETH.id,
-          lowerTick,
-          upperTick,
-          amountBase: testCase.amount,
-          amountQuote: UNLIMITED_AMOUNT,
-        });
+        const { newAmountBase: usedUSDC, liquidity: liquidityUSDC } =
+          ClmmLiquidityUtils.getPositionAmountsFromPrice({
+            sqrtRatioX96: sqrtPriceX96,
+            tokenBaseId: USDC.id,
+            tokenQuoteId: WETH.id,
+            lowerTick,
+            upperTick,
+            amountBase: testCase.amount,
+            amountQuote: UNLIMITED_AMOUNT,
+          });
 
-        const { newAmountQuote: usedWETH2, liquidity: liquidityWETH } = ClmmLiquidityUtils.getPositionAmountsFromPrice({
-          sqrtRatioX96: sqrtPriceX96,
-          tokenBaseId: USDC.id,
-          tokenQuoteId: WETH.id,
-          lowerTick,
-          upperTick,
-          amountBase: UNLIMITED_AMOUNT,
-          amountQuote: testCase.amount,
-        });
+        const { newAmountQuote: usedWETH2, liquidity: liquidityWETH } =
+          ClmmLiquidityUtils.getPositionAmountsFromPrice({
+            sqrtRatioX96: sqrtPriceX96,
+            tokenBaseId: USDC.id,
+            tokenQuoteId: WETH.id,
+            lowerTick,
+            upperTick,
+            amountBase: UNLIMITED_AMOUNT,
+            amountQuote: testCase.amount,
+          });
 
         expect(usedUSDC).toBeGreaterThanOrEqual(0n);
         expect(usedWETH2).toBeGreaterThanOrEqual(0n);
@@ -507,6 +519,107 @@ describe('LiquidityUtils', () => {
         expect(liquidityUSDC).toBeGreaterThanOrEqual(0n);
         expect(liquidityWETH).toBeGreaterThanOrEqual(0n);
       }
+    });
+  });
+
+  describe('TickUtils.getNextTick', () => {
+    test('moves tick by +/-tickSpacing depending on token order, baseIn and isAdd', () => {
+      const tokenA = createToken('a', 6);
+      const tokenB = createToken('b', 18);
+      const tick = 100n;
+      const tickSpacing = 10n;
+
+      const cases: Array<{
+        name: string;
+        tokenBase: TokenInfo;
+        tokenQuote: TokenInfo;
+        baseIn: boolean;
+        isAdd: boolean;
+        expected: bigint;
+      }> = [
+        // tokenBase.id < tokenQuote.id
+        {
+          name: 'base<quote, baseIn=true, isAdd=true',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: true,
+          isAdd: true,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=true, isAdd=false',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: true,
+          isAdd: false,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=false, isAdd=true',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: false,
+          isAdd: true,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base<quote, baseIn=false, isAdd=false',
+          tokenBase: tokenA,
+          tokenQuote: tokenB,
+          baseIn: false,
+          isAdd: false,
+          expected: tick + tickSpacing,
+        },
+
+        // tokenBase.id > tokenQuote.id
+        {
+          name: 'base>quote, baseIn=true, isAdd=true',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: true,
+          isAdd: true,
+          expected: tick - tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=true, isAdd=false',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: true,
+          isAdd: false,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=false, isAdd=true',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: false,
+          isAdd: true,
+          expected: tick + tickSpacing,
+        },
+        {
+          name: 'base>quote, baseIn=false, isAdd=false',
+          tokenBase: tokenB,
+          tokenQuote: tokenA,
+          baseIn: false,
+          isAdd: false,
+          expected: tick - tickSpacing,
+        },
+      ];
+
+      for (const c of cases) {
+        expect(
+          TickUtils.getNextTick(tick, tickSpacing, c.tokenBase, c.tokenQuote, c.baseIn, c.isAdd),
+        ).toBe(c.expected);
+      }
+    });
+
+    test('returns the same tick when tickSpacing is 0', () => {
+      const tokenA = createToken('a', 6);
+      const tokenB = createToken('b', 18);
+      const tick = -123n;
+
+      expect(TickUtils.getNextTick(tick, 0n, tokenA, tokenB, true, true)).toBe(tick);
+      expect(TickUtils.getNextTick(tick, 0n, tokenB, tokenA, false, false)).toBe(tick);
     });
   });
 

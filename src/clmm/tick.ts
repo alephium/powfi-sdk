@@ -189,7 +189,7 @@ export class TickUtils {
     isAdd: boolean,
   ): bigint {
     const reverse = tokenBase.id > tokenQuote.id == baseIn;
-    const delta = isAdd == reverse ? tickSpacing : -tickSpacing;
+    const delta = isAdd == reverse ? -tickSpacing : tickSpacing;
     return tick + delta;
   }
 
@@ -312,8 +312,8 @@ export class TickUtils {
       throw new Error('Invalid slippageBps; must be in [0, 10000)');
     }
     const price = sqrtPriceX96 * sqrtPriceX96;
-    const minSqrtPriceX96 = MathUtil.sqrt(price * (BPS - slippage) / BPS);
-    const maxSqrtPriceX96 = MathUtil.sqrt(price * (BPS + slippage) / BPS);
+    const minSqrtPriceX96 = MathUtil.sqrt((price * (BPS - slippage)) / BPS);
+    const maxSqrtPriceX96 = MathUtil.sqrt((price * (BPS + slippage)) / BPS);
     return [minSqrtPriceX96, maxSqrtPriceX96];
   }
 
