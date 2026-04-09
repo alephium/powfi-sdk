@@ -95,7 +95,7 @@ describe('CLMM Remove Liquidity', () => {
     const beforeState = await pool.fetchState()
 
     await fixture.removeLiquidity(lp, configIndex, liquidity, tickLower, tickUpper, amt0Out, amt1Out)
-    expect(fixture.collectTokens(lp, configIndex, tickLower, tickUpper, amt0Out, amt1Out)).rejects.toThrow(
+    await expect(fixture.collectTokens(lp, configIndex, tickLower, tickUpper, amt0Out, amt1Out)).rejects.toThrow(
       'expected: 1, got: 0'
     )
 

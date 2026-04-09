@@ -3,7 +3,7 @@ import { MathUtil } from '../../src/common/math'
 describe('Math Functions', () => {
   describe('sqrt', () => {
     // Copied from https://github.com/Aisse-258/bigint-isqrt/blob/master/test/sqrt-test.js
-    it('Should return square root of big numbers', function (done) {
+    it('Should return square root of big numbers', { timeout: 30_000 }, () => {
       expect(MathUtil.sqrt(BigInt('0'))).toEqual(BigInt('0'))
       expect(MathUtil.sqrt(BigInt('4'))).toEqual(BigInt('2'))
       expect(MathUtil.sqrt(BigInt('9'))).toEqual(BigInt('3'))
@@ -44,10 +44,9 @@ describe('Math Functions', () => {
         }
       }
 
-      done()
     })
 
-    it('Should return negative numbers same', function (done) {
+    it('Should return negative numbers same', () => {
       expect(MathUtil.sqrt(BigInt('-25'))).toEqual(BigInt('-25'))
       expect(MathUtil.sqrt(BigInt('-2359295'))).toEqual(BigInt('-2359295'))
       expect(MathUtil.sqrt(BigInt('-54866395443885995655625'))).toEqual(BigInt('-54866395443885995655625'))
@@ -62,7 +61,6 @@ describe('Math Functions', () => {
           '-82120471531550314555681345949499512621827274120673745141541602816614526075010755373654280259022317599142038423759320355177481886719814621305828811322920076213800348341464996337890625'
         )
       )
-      done()
     })
   })
 

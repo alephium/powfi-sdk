@@ -7,7 +7,7 @@
     "outDir": "./lib",
     "rootDir": "./",
     "noImplicitAny": true,
-    "types": ["jest", "node"]
+    "types": ["vitest/globals", "node"]
   },
   "include": ["src/**/*", "cpmm/**/*", "staking/**/*", "tests/**/*"],
   "exclude": ["node_modules", "lib", "dist"]

@@ -47,7 +47,7 @@ describe('CpmmModule functions', () => {
   const percent = (value: bigint, total: bigint): number => Number((value * 10000n) / total) / 100
 
   afterEach(() => {
-    jest.restoreAllMocks()
+    vi.restoreAllMocks()
   })
 
   describe('getAmountOut', () => {
@@ -265,7 +265,7 @@ describe('CpmmModule functions', () => {
 
       const mockScope = {
         network: { id: 'testnet' },
-        token: { getTokenById: jest.fn((id: string) => (id === token0.id ? token0 : token1)) }
+        token: { getTokenById: vi.fn((id: string) => (id === token0.id ? token0 : token1)) }
       } as unknown as Powfi
 
       const mockState: CpmmPoolContractState = {
