@@ -43,7 +43,6 @@ describe('Math Functions', () => {
           }
         }
       }
-
     })
 
     it('Should return negative numbers same', () => {
