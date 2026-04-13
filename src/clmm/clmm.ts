@@ -560,6 +560,8 @@ export class ClmmModule extends ModuleBase {
 
     const tokens = sortTokens(p.token0, p.token1)
     const [tokenIn, tokenOut] = zeroForOne ? tokens : tokens.reverse()
+    const attoAlphAmount = DUST_AMOUNT * 2n
+    const amount = p.amountIn + (tokenIn == ALPH_TOKEN_ID ? attoAlphAmount : 0n)
     return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -572,8 +574,8 @@ export class ClmmModule extends ModuleBase {
         sqrtPriceLimitX96,
         data: ''
       },
-      tokens: [{ id: tokenIn, amount: p.amountIn }],
-      attoAlphAmount: DUST_AMOUNT * 2n
+      tokens: [{ id: tokenIn, amount }],
+      attoAlphAmount
     })
   }
 
