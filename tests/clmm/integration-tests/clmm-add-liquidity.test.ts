@@ -293,7 +293,7 @@ describe('CLMM Add Liquidity', () => {
     const tickLower = -300148n
     const tickUpper = -299148n
     const configIndex = 1n
-    const amount1 = 19_000_000n
+    // const amount1 = 19_000_000n
 
     const token0 = ALPH_TOKEN_ID
     const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203'
@@ -474,8 +474,8 @@ describe('CLMM Add Liquidity', () => {
       const positionAddress = addressFromContractId(positionId)
       const positionState = await Position.at(positionAddress).fetchState()
       expect(positionState.fields.liquidity).toBe(0n)
-    } catch (error: any) {
-      expect(error.message).toMatch(/Error Code: 107/)
+    } catch (error: unknown) {
+      expect((error as Error).message).toMatch(/Error Code: 107/)
     }
   })
 

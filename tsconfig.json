@@ -9,6 +9,6 @@
     "noImplicitAny": true,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src/**/*", "cpmm/**/*", "staking/**/*", "tests/**/*"],
+  "include": ["src/**/*", "cpmm/**/*", "staking/**/*", "tests/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "lib", "dist"]
 }

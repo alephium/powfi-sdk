@@ -115,10 +115,10 @@ describe('CLMM Managing Positions', () => {
     // Generate fees: trader swaps token0 -> token1
     await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300)
 
-    const tokenIds = [fixture.tokenId0, fixture.tokenId1]
+    // const tokenIds = [fixture.tokenId0, fixture.tokenId1]
     const lpAddr = (await lp.getSelectedAccount()).address
-    const beforeLp = await getBalances(lpAddr, tokenIds)
-    const beforePool = await getBalances(pool.address, tokenIds)
+    // const beforeLp = await getBalances(lpAddr, tokenIds)
+    // const beforePool = await getBalances(pool.address, tokenIds)
     const beforeState = await pool.fetchState()
     const liquidity = beforeState.fields.liquidity - poolState.fields.liquidity
 

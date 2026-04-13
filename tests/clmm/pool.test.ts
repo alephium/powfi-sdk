@@ -29,7 +29,7 @@ describe('PoolUtils', () => {
   it('computeSwapStep exact-in zeroForOne with partial fill stops early', () => {
     const sqrtStart = TickUtils.getSqrtRatioAtTick(0n)
     const sqrtTarget = TickUtils.getSqrtRatioAtTick(-100n)
-    const zeroForOne = sqrtStart >= sqrtTarget
+    // const zeroForOne = sqrtStart >= sqrtTarget
     const liquidity = 1_000_000n
     const limitedAmount = 1000n
 
@@ -56,7 +56,7 @@ describe('PoolUtils', () => {
     const liquidity = 1_000_000n
     const amountRequired = -ClmmLiquidityUtils.getAmountDelta(sqrtTarget, sqrtStart, -liquidity, zeroForOne)
 
-    const [nextPrice, amountIn, amountOut, feeAmount] = PoolUtils.computeSwapStep(
+    const [nextPrice, amountIn, amountOut] = PoolUtils.computeSwapStep(
       sqrtStart,
       sqrtTarget,
       liquidity,
