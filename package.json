@@ -1,6 +1,6 @@
 {
   "name": "@alephium/powfi-sdk",
-  "version": "0.0.1-rc.24",
+  "version": "0.0.1-rc.25",
   "description": "Typescript SDK for Alephium Powfi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
