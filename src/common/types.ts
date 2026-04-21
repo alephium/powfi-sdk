@@ -36,7 +36,7 @@ export const defaultNetworks: Network[] = [
     nodeUrl: 'https://node.testnet.alephium.org',
     explorerApiUrl: 'https://backend.testnet.alephium.org',
     explorerUrl: 'https://testnet.alephium.org',
-    tokenListUrl: 'https://raw.githubusercontent.com/h0ngcha0/token-list/main/testnet.json',
+    tokenListUrl: 'https://raw.githubusercontent.com/alephium/token-list/master/tokens/testnet.json',
     name: 'Testnet'
   },
   DEVNET
