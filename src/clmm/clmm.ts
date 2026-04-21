@@ -389,8 +389,9 @@ export class ClmmModule extends ModuleBase {
     )
 
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper)
+    const attoAlphAmount = DUST_AMOUNT * 2n
     const tokens: Token[] = [
-      { id: p.token0, amount: p.amount0 },
+      { id: p.token0, amount: p.amount0 + (p.token0 === ALPH_TOKEN_ID ? attoAlphAmount : 0n) },
       { id: p.token1, amount: p.amount1 }
     ]
 
@@ -416,7 +417,7 @@ export class ClmmModule extends ModuleBase {
         }
       },
       tokens,
-      attoAlphAmount: this.getAddLiquidityAttoAlphAmount(p.token0, p.token1),
+      attoAlphAmount,
       dustAmount: deposit,
       positionId
     }

@@ -8,7 +8,7 @@ import {
   NodeProvider,
   addressFromContractId
 } from '@alephium/web3'
-import { getSigners } from '@alephium/web3-test'
+import { getSigner, getSigners } from '@alephium/web3-test'
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
 import { TickUtils } from '../../../src/clmm/tick'
 import { UNLIMITED_AMOUNT } from '../../../src'
@@ -438,6 +438,23 @@ describe('CLMM Add Liquidity', () => {
     await fixture.addLiquidity(lp, configIndex, amount0, amount1, slippage, tickLower, tickUpper)
   })
 
+  test('add liquidity for small amount of ALPHs', async () => {
+    const { configIndex, pool } = await fixture.setupPool()
+    const poolStateBefore = await pool.fetchState()
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1)
+
+    const [amount0, amount1] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      sqrtPriceCurrent,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      10_000n
+    )
+    const slippage = 0n
+
+    await fixture.addLiquidity(lp, configIndex, amount0, amount1, slippage, tickLower, tickUpper)
+  })
+
   test('mint no liquidity, because of slippage', async () => {
     const { configIndex, pool } = await fixture.setupPool()
     const poolStateBefore = await pool.fetchState()
@@ -504,5 +521,34 @@ describe('CLMM Add Liquidity', () => {
     // Verify the exact difference matches what was added
     expect(balancesAfter.token0Balance - balancesBefore.token0Balance).toBe(amount0)
     expect(balancesAfter.token1Balance - balancesBefore.token1Balance).toBe(amount1)
+  })
+})
+
+describe('CLMM Add Liquidity with ALPH', () => {
+  let fixture: Fixture
+  let lp: SignerProvider
+  let lp2: SignerProvider
+
+  beforeAll(async () => {
+    fixture = await Fixture.create(true)
+
+    const signers = await getSigners(2, 3_000n * ONE_ALPH)
+    lp = signers[0]
+    lp2 = signers[1]
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp)
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp2)
+  })
+
+  test('add liquidity for small amount of ALPHs', async () => {
+    const { configIndex, pool } = await fixture.setupWidePool(-307267n, 20n * ONE_ALPH, ONE_ALPH)
+    const poolStateBefore = await pool.fetchState()
+    const sqrtPriceCurrent = poolStateBefore.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.5, 1.5)
+
+    const slippage = 0n
+
+    const amount0 = ONE_ALPH
+    const amount1 = ONE_ALPH / 20n
+    await fixture.addLiquidity(lp, configIndex, amount0, amount1, slippage, tickLower, tickUpper)
   })
 })

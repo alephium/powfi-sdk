@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Powfi } from './powfi'
-import { ALPH_TOKEN_ID, addressFromContractId } from '@alephium/web3'
+import { ALPH_TOKEN_ID, addressFromContractId, KeyType } from '@alephium/web3'
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { testPrivateKeyWallet } from '@alephium/web3-test'
 import { TickUtils } from './clmm/tick'
@@ -12,6 +12,7 @@ import { PoolUtils } from './clmm/pool'
 import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
 import type { TokenInfo } from '@alephium/token-list'
+import { TokenPair } from 'cpmm'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -30,10 +31,11 @@ async function main() {
 
   const networkId = (process.env.NETWORK as string) || 'devnet'
   const privateKey = process.env.PRIVATE_KEY
+  const keyType: KeyType = process.env.GROUP ? 'default' : 'gl-secp256k1'
 
   let signer: PrivateKeyWallet
   if (privateKey) {
-    signer = new PrivateKeyWallet({ privateKey })
+    signer = new PrivateKeyWallet({ privateKey, keyType })
   } else if (networkId === 'devnet') {
     signer = testPrivateKeyWallet
     console.log('Using default test signer for devnet')
@@ -48,6 +50,33 @@ async function main() {
   })
 
   powfi.setCurrentProviders()
+
+  const formatAmount = (amount: bigint, decimals: number) => {
+    return new Decimal(amount.toString()).div(new Decimal(10).pow(decimals)).toString()
+  }
+
+  const fetchOnChainMetadata = async (tokenId: string) => {
+    try {
+      const address = addressFromContractId(tokenId)
+      const tokenPair = TokenPair.at(address)
+
+      const [symbolResult, nameResult, decimalsResult] = await Promise.all([
+        tokenPair.view.getSymbol().catch(() => undefined),
+        tokenPair.view.getName().catch(() => undefined),
+        tokenPair.view.getDecimals().catch(() => undefined)
+      ])
+
+      if (symbolResult && decimalsResult) {
+        const symbol = Buffer.from(symbolResult.returns, 'hex').toString()
+        const name = nameResult ? Buffer.from(nameResult.returns, 'hex').toString() : symbol
+        const decimals = Number(decimalsResult.returns)
+        return { symbol, name, decimals }
+      }
+    } catch {
+      return undefined
+    }
+    return undefined
+  }
 
   const getTokenInfo = async (symbol: string) => {
     if (symbol === 'ALPH')
@@ -64,6 +93,10 @@ async function main() {
         try {
           return await powfi.token.getTokenById(symbol)
         } catch {
+          const onChain = await fetchOnChainMetadata(symbol)
+          if (onChain) {
+            return { id: symbol, ...onChain, description: '', logoURI: '' }
+          }
           throw new Error(`Unknown token: ${symbol}`)
         }
       }
@@ -78,19 +111,15 @@ async function main() {
     return d.isNegative() ? -abs : abs
   }
 
-  const formatAmount = (amount: bigint, decimals: number) => {
-    return new Decimal(amount.toString()).div(new Decimal(10).pow(decimals)).toString()
-  }
-
   const waitForTx = async (txId: string) => {
     let status
     while (true) {
+      await new Promise((r) => setTimeout(r, 2000))
       status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId })
       if (status.type === 'Confirmed') return status
       if (status.type === 'Conflicted' || status.type === 'TxNotFound') {
         throw new Error(`Transaction failed with status: ${status.type}`)
       }
-      await new Promise((r) => setTimeout(r, 2000))
     }
   }
 
@@ -169,8 +198,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-            .div(new Decimal(actualIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(actualIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -215,8 +244,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-            .div(new Decimal(amountIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(amountIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
@@ -1601,7 +1630,7 @@ async function main() {
 
       // Display ALPH first
       const alphBalance = formatAmount(BigInt(balanceInfo.balance), 18)
-      console.log(`- ALPH:      ${alphBalance.padEnd(20)} [Alephium]`)
+      console.log(`- ALPH:      ${alphBalance.padEnd(20)} [Alephium] (${ALPH_TOKEN_ID})`)
 
       const registryTokens = tokensResult as any[]
       const walletTokens = balanceInfo.tokenBalances || []
@@ -1620,14 +1649,69 @@ async function main() {
             const decimals = registryInfo?.decimals || 18
             const formatted = formatAmount(balance, decimals)
 
-            console.log(`- ${symbol.padEnd(10)}: ${formatted.padEnd(20)} [${name}]`)
+            console.log(`- ${symbol.padEnd(10)}: ${formatted.padEnd(20)} [${name}] (${walletInfo.id})`)
           }
         }
       })
+    } else if (action === 'ext') {
+      const signerAccount = await powfi.signer.getSelectedAccount()
+
+      const [tokensResult, balanceInfo] = await Promise.all([
+        powfi.token.getTokens().catch(() => [] as any[]),
+        powfi.nodeProvider.addresses.getAddressesAddressBalance(signerAccount.address)
+      ])
+
+      console.log(`Extended Balances for ${signerAccount.address} (Balance > 1):`)
+
+      const alphBalance = BigInt(balanceInfo.balance)
+      if (alphBalance > 10n ** 18n) {
+        console.log(`- ALPH:      ${formatAmount(alphBalance, 18).padEnd(20)} [Alephium] (${ALPH_TOKEN_ID})`)
+      }
+
+      const registryTokens = tokensResult as any[]
+      const walletTokens = balanceInfo.tokenBalances || []
+      const xAlphId = powfi.staking.getConfig().xAlphTokenId
+
+      for (const walletInfo of walletTokens) {
+        const balance = BigInt(walletInfo.amount)
+        const registryInfo = registryTokens.find((t) => t.id === walletInfo.id)
+        const isXAlph = walletInfo.id === xAlphId
+
+        let decimals = 18
+        let symbol = ''
+        let name = ''
+
+        if (registryInfo) {
+          decimals = registryInfo.decimals
+          symbol = registryInfo.symbol
+          name = registryInfo.name
+        } else if (isXAlph) {
+          decimals = 18
+          symbol = 'xALPH'
+          name = 'Staked ALPH'
+        } else {
+          const onChain = await fetchOnChainMetadata(walletInfo.id)
+          if (onChain) {
+            decimals = onChain.decimals
+            symbol = onChain.symbol
+            name = onChain.name
+          } else {
+            decimals = 18
+            symbol = `TKN-${walletInfo.id.substring(0, 6)}`
+            name = `Token ${walletInfo.id.substring(0, 8)}...`
+          }
+        }
+
+        if (balance > 10n ** BigInt(decimals)) {
+          const formatted = formatAmount(balance, decimals)
+          console.log(`- ${symbol.padEnd(10)}: ${formatted.padEnd(20)} [${name}] (${walletInfo.id})`)
+        }
+      }
     } else {
       console.log(`Unknown action ${action} for module token`)
       console.log('Available Actions:')
       console.log('  list')
+      console.log('  ext')
     }
   } else if (command === 'collector') {
     const action = args[1]

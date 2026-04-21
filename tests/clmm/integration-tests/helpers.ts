@@ -9,7 +9,8 @@ import {
   contractIdFromAddress,
   groupOfAddress,
   DUST_AMOUNT,
-  encodePrimitiveValues
+  encodePrimitiveValues,
+  ALPH_TOKEN_ID
 } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
 import type { DexAccountInstance, PoolFactoryInstance, PoolInstance } from 'clmm/artifacts/ts'
@@ -25,7 +26,7 @@ import {
 } from 'clmm/artifacts/ts'
 import { TickUtils } from '../../../src/clmm/tick'
 import { Powfi } from '../../../src/powfi'
-import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src'
+import { ClmmLiquidityUtils, MAX_TICK, MIN_TICK, PoolUtils, sortTokens } from '../../../src'
 
 export interface Balances {
   alph: bigint
@@ -92,10 +93,10 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) {}
+  ) { }
 
-  static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 20n * ONE_ALPH)
+  static async create(isAlph: boolean = false): Promise<Fixture> {
+    const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
 
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
     powfi.setCurrentProviders()
@@ -139,9 +140,14 @@ export class Fixture {
     })
 
     const initialAmount = 1_000_000n * ONE_ALPH
+
     const { tokenId: tokenA } = await mintToken(deployer.address, initialAmount)
     const { tokenId: tokenB } = await mintToken(deployer.address, initialAmount)
-    const [tokenId0, tokenId1] = sortTokens(tokenA, tokenB)
+    const tokens = sortTokens(tokenA, tokenB)
+    if (isAlph) {
+      tokens[0] = ALPH_TOKEN_ID
+    }
+    const [tokenId0, tokenId1] = tokens
 
     powfi.clmm.setConfig({
       groupIndex: 0,
@@ -438,6 +444,30 @@ export class Fixture {
   ) {
     const configIndex = await this.createConfigIndex(tickSpacing, fee, feeProtocol)
     const pool = await this.createPoolWithInitialLiquidity(configIndex, amount0, amount1, tickSpacing)
+    return { configIndex, pool }
+  }
+
+  async setupWidePool(
+    currentTick: bigint,
+    amount0: bigint,
+    amount1: bigint,
+    tickSpacing: bigint = 1n,
+    fee: bigint = 3_000n,
+    feeProtocol: bigint = 0n
+  ) {
+    const configIndex = await this.createConfigIndex(tickSpacing, fee, feeProtocol)
+    await this.powfi.clmm.createPool(
+      configIndex,
+      this.tokenId0,
+      this.tokenId1,
+      '',
+      currentTick,
+      amount0,
+      amount1,
+      MIN_TICK,
+      MAX_TICK
+    )
+    const pool = await this.powfi.clmm.getPool(this.tokenId0, this.tokenId1, configIndex)
     return { configIndex, pool }
   }
 }
