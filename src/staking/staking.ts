@@ -363,13 +363,6 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async migrateXAlphToken(newBytecode: string): Promise<XAlphTokenTypes.SignExecuteMethodResult<'upgrade'>> {
-    return this.xAlphTokenContract.transact.upgrade({
-      signer: this.scope.signer,
-      args: { newBytecode }
-    })
-  }
-
   async migrateRewardFeeCollector(
     newBytecode: string
   ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {

@@ -1454,7 +1454,6 @@ async function main() {
       console.log('  deposit <amountALPH>       # Stake ALPH to get xALPH')
       console.log('  donate <amountALPH>        # Donate ALPH as reward to all xALPH holders')
       console.log('  info                       # Show xALPH price and my holdings')
-      console.log('  migrate-token <newBytecode>')
       console.log('  migrate-fee-collector <newBytecode>')
       return
     }
@@ -1570,20 +1569,6 @@ async function main() {
         console.log(`- ALPH value      : ${formatAmount(myAlphValue, 18)} ALPH`)
       } catch (error) {
         console.error('Failed to fetch staking info:', error)
-      }
-    } else if (action === 'migrate-token') {
-      const newBytecode = actionArgs[0]
-      if (newBytecode === undefined) {
-        console.log('Usage: stake migrate-token <newBytecode>')
-        return
-      }
-      try {
-        const result = await powfi.staking.migrateXAlphToken(newBytecode)
-        console.log(`Token migration submitted: ${result.txId}`)
-        await waitForTx(result.txId)
-        console.log('Token migration confirmed.')
-      } catch (error) {
-        console.error('Failed to migrate token:', error)
       }
     } else if (action === 'migrate-fee-collector') {
       const newBytecode = actionArgs[0]

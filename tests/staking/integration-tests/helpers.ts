@@ -103,7 +103,6 @@ export class Fixture {
     const xAlphTokenContract = (
       await XAlphToken.deploy(deployer, {
         initialFields: {
-          owner: deployer.address,
           symbol: stringToHex('XALPH'),
           name: stringToHex('Staked ALPH'),
           decimals: 18n,
