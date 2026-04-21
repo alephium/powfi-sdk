@@ -1,6 +1,6 @@
 {
   "name": "@alephium/powfi-sdk",
-  "version": "0.0.1-rc.95",
+  "version": "0.0.1-rc.27",
   "description": "Typescript SDK for Alephium Powfi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -58,13 +58,13 @@
   },
   "dependencies": {
     "@alephium/token-list": "0.0.20",
-    "@alephium/web3": "3.0.2",
+    "@alephium/web3": "3.0.3",
     "bignumber.js": "^10.0.2",
     "decimal.js": "^10.6.0"
   },
   "devDependencies": {
-    "@alephium/web3-test": "3.0.2",
-    "@alephium/web3-wallet": "3.0.2",
+    "@alephium/web3-test": "3.0.3",
+    "@alephium/web3-wallet": "3.0.3",
     "@types/node": "20",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
