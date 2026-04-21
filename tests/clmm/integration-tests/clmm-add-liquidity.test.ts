@@ -232,7 +232,7 @@ describe('CLMM Add Liquidity', () => {
       amount1,
       existingPosition: false
     })
-    expect(params.attoAlphAmount).toBe(DUST_AMOUNT)
+    expect(params.attoAlphAmount).toBe(DUST_AMOUNT * 2n)
 
     await fixture.powfi.clmm.addLiquidityFromParams(positionId, positionManager, params)
 

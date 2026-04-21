@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Powfi } from './powfi'
-import { ALPH_TOKEN_ID, addressFromContractId, KeyType } from '@alephium/web3'
+import { ALPH_TOKEN_ID, addressFromContractId, KeyType, hexToString } from '@alephium/web3'
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { testPrivateKeyWallet } from '@alephium/web3-test'
 import { TickUtils } from './clmm/tick'
@@ -67,8 +67,8 @@ async function main() {
       ])
 
       if (symbolResult && decimalsResult) {
-        const symbol = Buffer.from(symbolResult.returns, 'hex').toString()
-        const name = nameResult ? Buffer.from(nameResult.returns, 'hex').toString() : symbol
+        const symbol = hexToString(symbolResult.returns)
+        const name = nameResult ? hexToString(nameResult.returns) : symbol
         const decimals = Number(decimalsResult.returns)
         return { symbol, name, decimals }
       }
@@ -198,8 +198,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-            .div(new Decimal(actualIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(actualIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -244,8 +244,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-            .div(new Decimal(amountIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(amountIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
