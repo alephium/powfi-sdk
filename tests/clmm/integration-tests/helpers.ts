@@ -93,7 +93,7 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) { }
+  ) {}
 
   static async create(isAlph: boolean = false): Promise<Fixture> {
     const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
@@ -467,7 +467,7 @@ export class Fixture {
       MIN_TICK,
       MAX_TICK
     )
-    const pool = await this.powfi.clmm.getPool(this.tokenId0, this.tokenId1, configIndex)
+    const pool = this.powfi.clmm.getPool(this.tokenId0, this.tokenId1, configIndex)
     return { configIndex, pool }
   }
 }

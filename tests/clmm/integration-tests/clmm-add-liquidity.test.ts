@@ -8,7 +8,7 @@ import {
   NodeProvider,
   addressFromContractId
 } from '@alephium/web3'
-import { getSigner, getSigners } from '@alephium/web3-test'
+import { getSigners } from '@alephium/web3-test'
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
 import { TickUtils } from '../../../src/clmm/tick'
 import { UNLIMITED_AMOUNT } from '../../../src'
