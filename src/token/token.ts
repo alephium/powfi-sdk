@@ -1,5 +1,4 @@
 import type { TokenInfo } from '@alephium/token-list'
-import { ALPH_TOKEN_ID } from '@alephium/web3'
 import ModuleBase from '../moduleBase'
 import type { Powfi } from '../powfi'
 import { TokenListFetchError } from '../common/error'
@@ -48,12 +47,13 @@ export class TokenModule extends ModuleBase {
 
   /** Looks up a token by its on-chain ID; throws if not found. */
   async getTokenById(id: string): Promise<TokenInfo> {
-    if (id === ALPH_TOKEN_ID) {
-      return { id: ALPH_TOKEN_ID, decimals: 18, symbol: 'ALPH', name: 'Alephium', description: '', logoURI: '' }
-    }
     const xAlphId = this.scope.staking.getConfig().xAlphTokenId
     if (id === xAlphId) {
-      return { id: xAlphId, decimals: 18, symbol: 'xALPH', name: 'Staked ALPH', description: '', logoURI: '' }
+      const xAlphInfo = await this.getTokenInfoBy((token) => token.symbol === 'xALPH')
+      if (!xAlphInfo) {
+        throw new Error('Could not find xALPH in token list')
+      }
+      return { ...xAlphInfo, id: xAlphId }
     }
 
     const tokenInfo = await this.getTokenInfoBy((token) => token.id === id)
@@ -65,17 +65,13 @@ export class TokenModule extends ModuleBase {
 
   /** Looks up a token by its ticker symbol; throws if not found. */
   async getTokenBySymbol(symbol: string): Promise<TokenInfo> {
-    if (symbol === 'ALPH') {
-      return { id: ALPH_TOKEN_ID, decimals: 18, symbol: 'ALPH', name: 'Alephium', description: '', logoURI: '' }
-    }
-    if (symbol === 'xALPH') {
-      const xAlphId = this.scope.staking.getConfig().xAlphTokenId
-      return { id: xAlphId, decimals: 18, symbol: 'xALPH', name: 'Staked ALPH', description: '', logoURI: '' }
-    }
-
     const tokenInfo = await this.getTokenInfoBy((token) => token.symbol === symbol)
     if (!tokenInfo) {
       throw new Error(`Unknown token, symbol not found in token list: ${symbol}`)
+    }
+    if (symbol === 'xALPH') {
+      const xAlphId = this.scope.staking.getConfig().xAlphTokenId
+      return { ...tokenInfo, id: xAlphId }
     }
     return tokenInfo
   }
