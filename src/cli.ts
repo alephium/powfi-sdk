@@ -55,49 +55,23 @@ async function main() {
     return new Decimal(amount.toString()).div(new Decimal(10).pow(decimals)).toString()
   }
 
-  const fetchOnChainMetadata = async (tokenId: string) => {
-    try {
-      const address = addressFromContractId(tokenId)
-      const tokenPair = TokenPair.at(address)
-
-      const [symbolResult, nameResult, decimalsResult] = await Promise.all([
-        tokenPair.view.getSymbol().catch(() => undefined),
-        tokenPair.view.getName().catch(() => undefined),
-        tokenPair.view.getDecimals().catch(() => undefined)
-      ])
-
-      if (symbolResult && decimalsResult) {
-        const symbol = hexToString(symbolResult.returns)
-        const name = nameResult ? hexToString(nameResult.returns) : symbol
-        const decimals = Number(decimalsResult.returns)
-        return { symbol, name, decimals }
-      }
-    } catch {
-      return undefined
-    }
-    return undefined
-  }
-
   const getTokenInfo = async (symbol: string) => {
-    if (symbol === 'ALPH')
-      return { id: ALPH_TOKEN_ID, decimals: 18, symbol: 'ALPH', name: 'Alephium', description: '', logoURI: '' }
-    if (symbol === 'xALPH') {
-      const xAlphId = powfi.staking.getConfig().xAlphTokenId
-      return { id: xAlphId, decimals: 18, symbol: 'xALPH', name: 'Staked ALPH', description: '', logoURI: '' }
-    }
     try {
       return await powfi.token.getTokenBySymbol(symbol)
     } catch (error) {
       // Check if it's a valid token ID
       if (symbol.length === 64) {
+        const tokenId = symbol
         try {
-          return await powfi.token.getTokenById(symbol)
+          return await powfi.token.getTokenById(tokenId)
         } catch {
-          const onChain = await fetchOnChainMetadata(symbol)
+          const onChain = await powfi.nodeProvider.fetchFungibleTokenMetaData(tokenId)
+          onChain.symbol = hexToString(onChain.symbol)
+          onChain.name = hexToString(onChain.name)
           if (onChain) {
-            return { id: symbol, ...onChain, description: '', logoURI: '' }
+            return { id: tokenId, ...onChain, description: '', logoURI: '' }
           }
-          throw new Error(`Unknown token: ${symbol}`)
+          throw new Error(`Unknown token: ${tokenId}`)
         }
       }
       throw new Error(`Unknown token: ${symbol}`)
@@ -198,8 +172,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-            .div(new Decimal(actualIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(actualIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -244,8 +218,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-            .div(new Decimal(amountIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(amountIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
@@ -1664,45 +1638,26 @@ async function main() {
       console.log(`Extended Balances for ${signerAccount.address} (Balance > 1):`)
 
       const alphBalance = BigInt(balanceInfo.balance)
-      if (alphBalance > 10n ** 18n) {
-        console.log(`- ALPH:      ${formatAmount(alphBalance, 18).padEnd(20)} [Alephium] (${ALPH_TOKEN_ID})`)
-      }
+      console.log(`- ALPH:      ${formatAmount(alphBalance, 18).padEnd(20)} [Alephium] (${ALPH_TOKEN_ID})`)
 
-      const registryTokens = tokensResult as any[]
       const walletTokens = balanceInfo.tokenBalances || []
-      const xAlphId = powfi.staking.getConfig().xAlphTokenId
 
       for (const walletInfo of walletTokens) {
         const balance = BigInt(walletInfo.amount)
-        const registryInfo = registryTokens.find((t) => t.id === walletInfo.id)
-        const isXAlph = walletInfo.id === xAlphId
+        if (balance > 0n) {
+          let decimals = 18
+          let symbol = `TKN-${walletInfo.id.substring(0, 6)}`
+          let name = `Token ${walletInfo.id.substring(0, 8)}...`
 
-        let decimals = 18
-        let symbol = ''
-        let name = ''
-
-        if (registryInfo) {
-          decimals = registryInfo.decimals
-          symbol = registryInfo.symbol
-          name = registryInfo.name
-        } else if (isXAlph) {
-          decimals = 18
-          symbol = 'xALPH'
-          name = 'Staked ALPH'
-        } else {
-          const onChain = await fetchOnChainMetadata(walletInfo.id)
-          if (onChain) {
-            decimals = onChain.decimals
-            symbol = onChain.symbol
-            name = onChain.name
-          } else {
-            decimals = 18
-            symbol = `TKN-${walletInfo.id.substring(0, 6)}`
-            name = `Token ${walletInfo.id.substring(0, 8)}...`
+          try {
+            const tokenInfo = await getTokenInfo(walletInfo.id)
+            decimals = tokenInfo.decimals
+            symbol = tokenInfo.symbol
+            name = tokenInfo.name
+          } catch {
+            // Fallback to defaults already set
           }
-        }
 
-        if (balance > 10n ** BigInt(decimals)) {
           const formatted = formatAmount(balance, decimals)
           console.log(`- ${symbol.padEnd(10)}: ${formatted.padEnd(20)} [${name}] (${walletInfo.id})`)
         }

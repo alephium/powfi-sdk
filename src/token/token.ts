@@ -47,15 +47,6 @@ export class TokenModule extends ModuleBase {
 
   /** Looks up a token by its on-chain ID; throws if not found. */
   async getTokenById(id: string): Promise<TokenInfo> {
-    const xAlphId = this.scope.staking.getConfig().xAlphTokenId
-    if (id === xAlphId) {
-      const xAlphInfo = await this.getTokenInfoBy((token) => token.symbol === 'xALPH')
-      if (!xAlphInfo) {
-        throw new Error('Could not find xALPH in token list')
-      }
-      return { ...xAlphInfo, id: xAlphId }
-    }
-
     const tokenInfo = await this.getTokenInfoBy((token) => token.id === id)
     if (!tokenInfo) {
       throw new Error(`Unknown token, id not found in token list: ${id}`)
@@ -85,7 +76,6 @@ export class TokenModule extends ModuleBase {
   async fetchTokens(): Promise<TokenInfo[]> {
     try {
       const response = await fetch(this.scope.tokenListUrl)
-
       if (!response.ok) {
         throw new TokenListFetchError(this.scope.tokenListUrl, { status: response.status })
       }

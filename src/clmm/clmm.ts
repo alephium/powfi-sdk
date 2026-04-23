@@ -675,10 +675,6 @@ export class ClmmModule extends ModuleBase {
     return result
   }
 
-  private getAddLiquidityAttoAlphAmount(token0Id: string, token1Id: string): bigint {
-    const nonAlphTokenCount = [token0Id, token1Id].filter((tokenId) => tokenId !== ALPH_TOKEN_ID).length
-    return BigInt(nonAlphTokenCount) * DUST_AMOUNT
-  }
   getCollectProtocolFeesData(token0: string, token1: string, configIndex: bigint): string {
     const [t0, t1] = sortTokens(token0, token1)
     const poolPath = t0 + t1 + this.getPoolConfigId(configIndex)
