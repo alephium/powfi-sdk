@@ -1,4 +1,4 @@
-import type { SignExecuteScriptTxResult, Token } from '@alephium/web3'
+import type { ExecuteScriptResult, SignExecuteScriptTxResult, Token } from '@alephium/web3'
 import {
   ALPH_TOKEN_ID,
   addressFromContractId,
@@ -276,7 +276,7 @@ export class ClmmModule extends ModuleBase {
     tickLower: bigint,
     tickUpper: bigint,
     dustAmount?: bigint
-  ): Promise<{ poolAddress: string; result: SignExecuteScriptTxResult }> {
+  ): Promise<{ poolId: string; result: ExecuteScriptResult }> {
     const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(tick)
     const tokens = [token0, token1]
     const amounts = [amount0, amount1]
@@ -319,8 +319,8 @@ export class ClmmModule extends ModuleBase {
       ],
       dustAmount: dustAmount ?? MINIMAL_CONTRACT_DEPOSIT * 2n
     })
-    const poolAddress = this.getPoolAddress(tokens[0], tokens[1], configIndex)
-    return { poolAddress, result }
+    const poolId = this.getPoolId(tokens[0], tokens[1], configIndex)
+    return { poolId, result }
   }
 
   /** Adds liquidity to a tick range, minting a new position or updating an existing one. */

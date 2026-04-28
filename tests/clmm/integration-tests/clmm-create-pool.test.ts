@@ -34,7 +34,7 @@ describe('CLMM Create Pool', () => {
     const tickLower = TickUtils.getAlignedTick(price * 0.9, 18, 18, 1n)
     const tickUpper = TickUtils.getAlignedTick(price * 1.1, 18, 18, 1n)
 
-    const { poolAddress, result } = await fixture.powfi.clmm.createPool(
+    const { poolId, result } = await fixture.powfi.clmm.createPool(
       configIndex,
       fixture.tokenId0,
       fixture.tokenId1,
@@ -46,7 +46,7 @@ describe('CLMM Create Pool', () => {
       tickUpper
     )
 
-    expect(poolAddress).toBeDefined()
+    expect(poolId).toBeDefined()
     expect(result.txId).toBeDefined()
 
     const pool = fixture.powfi.clmm.getPool(fixture.tokenId0, fixture.tokenId1, configIndex)

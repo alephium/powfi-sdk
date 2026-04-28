@@ -418,7 +418,7 @@ export class CpmmModule extends ModuleBase {
   }
 
   /** Creates a new CPMM pool on-chain, optionally seeded with initial liquidity. */
-  async createPool(params: CpmmCreatePoolRequest): Promise<ExecuteScriptResult & { poolId: string }> {
+  async createPool(params: CpmmCreatePoolRequest): Promise<{ poolId: string; result: ExecuteScriptResult }> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for createPool operation')
     }
@@ -450,7 +450,7 @@ export class CpmmModule extends ModuleBase {
           { id: token1Id, amount: amount1 }
         ]
       })
-      return { ...result, poolId }
+      return { result, poolId }
     }
 
     const result = await CreatePair.execute({
@@ -468,7 +468,7 @@ export class CpmmModule extends ModuleBase {
         { id: tokenBId, amount: 1n }
       ]
     })
-    return { ...result, poolId }
+    return { result, poolId }
   }
 
   getCollectProtocolFeesData(tokenAId: string, tokenBId: string): string {

@@ -334,7 +334,7 @@ async function main() {
       const tickUpper = (887272n / config.tickSpacing) * config.tickSpacing
 
       try {
-        const { poolAddress, result } = await powfi.clmm.createPool(
+        const { poolId, result } = await powfi.clmm.createPool(
           configIndex,
           t0Info.id,
           t1Info.id,
@@ -347,7 +347,7 @@ async function main() {
         )
 
         console.log(`Pool creation submitted: ${result.txId}`)
-        console.log(`Pool address will be: ${poolAddress}`)
+        console.log(`Pool ID will be: ${poolId}`)
         await waitForTx(result.txId)
         console.log('Pool creation confirmed.')
       } catch (error: unknown) {
@@ -1078,7 +1078,7 @@ async function main() {
         return
       }
       try {
-        const result = await powfi.cpmm.createPool({
+        const { result, poolId } = await powfi.cpmm.createPool({
           tokenAId: tokenA.id,
           tokenBId: tokenB.id,
           sender: signerAccount.address,
@@ -1087,7 +1087,7 @@ async function main() {
             tokenBAmount: amountB
           }
         })
-        console.log(`CPMM pool created: ${result.poolId}`)
+        console.log(`CPMM pool created: ${poolId}`)
         console.log(`Transaction ID: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('CPMM pool creation confirmed.')
