@@ -33,7 +33,8 @@ import {
   XAlphToken,
   XAlphUnlockAndStartUnstake,
   DistributorVault,
-  CollectProtocolCLMMToken
+  CollectProtocolCLMMToken,
+  SwapProtocolFeesCLMM
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -392,25 +393,23 @@ export class StakingModule extends ModuleBase {
     token1: string,
     configIndex: bigint
   ): Promise<ExecuteScriptResult> {
-    const alphVaultId = subContractId(
-      this.config.feeCollectorId,
-      ALPH_TOKEN_ID,
-      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
-    )
-    const alphVault = DistributorVault.at(addressFromContractId(alphVaultId))
-    return await alphVault.transact.swapFeesOnCLMM({
+    return await SwapProtocolFeesCLMM.execute({
       signer: this.scope.signer,
-      args: { factory: factoryId, token0, token1, configIndex },
-      attoAlphAmount: DUST_AMOUNT * 2n
+      initialFields: {
+        collector: this.config.feeCollectorId,
+        factory: factoryId,
+        token0,
+        token1,
+        configIndex
+      },
+      attoAlphAmount: DUST_AMOUNT * 3n
     })
   }
 
-  async migrateRewardFeeCollector(
-    newBytecode: string
-  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
+  async migrateRewardFeeCollector(): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
       signer: this.scope.signer,
-      args: { newBytecode }
+      args: { newBytecode: RewardFeeCollector.contract.bytecode }
     })
   }
 

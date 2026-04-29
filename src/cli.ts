@@ -1500,7 +1500,6 @@ async function main() {
       console.log('  deposit <amountALPH>       # Stake ALPH to get xALPH')
       console.log('  donate <amountALPH>        # Donate ALPH as reward to all xALPH holders')
       console.log('  info                       # Show xALPH price and my holdings')
-      console.log('  migrate-fee-collector <newBytecode>')
       return
     }
 
@@ -1616,20 +1615,6 @@ async function main() {
       } catch (error) {
         console.error('Failed to fetch staking info:', error)
       }
-    } else if (action === 'migrate-fee-collector') {
-      const newBytecode = actionArgs[0]
-      if (newBytecode === undefined) {
-        console.log('Usage: stake migrate-fee-collector <newBytecode>')
-        return
-      }
-      try {
-        const result = await powfi.staking.migrateRewardFeeCollector(newBytecode)
-        console.log(`Fee collector migration submitted: ${result.txId}`)
-        await waitForTx(result.txId)
-        console.log('Fee collector migration confirmed.')
-      } catch (error) {
-        console.error('Failed to migrate fee collector:', error)
-      }
     } else {
       console.log(`Unknown action ${action} for module stake`)
     }
@@ -1723,6 +1708,7 @@ async function main() {
       console.log('  distribute # Manually trigger reward distribution')
       console.log('  enable <symbol> # Enable token for collection')
       console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
+      console.log('  upgrade    # Upgrade collector contract')
       return
     }
 
@@ -1863,6 +1849,16 @@ async function main() {
         console.log('Vault upgrade confirmed.')
       } catch (error) {
         console.error(`Failed to upgrade vault for ${symbol}:`, error)
+      }
+    } else if (action === 'upgrade') {
+      console.log('Upgrading RewardFeeCollector...')
+      try {
+        const result = await powfi.staking.migrateRewardFeeCollector()
+        console.log(`Collector upgrade submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Collector upgrade confirmed.')
+      } catch (error) {
+        console.error('Failed to upgrade collector:', error)
       }
     } else {
       console.log(`Unknown action ${action} for module collector`)
