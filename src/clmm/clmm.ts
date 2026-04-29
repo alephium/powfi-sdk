@@ -164,6 +164,15 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
+  async getPoolProtocolFees(poolId: string): Promise<{ token0: bigint; token1: bigint }> {
+    const pool = Pool.at(addressFromContractId(poolId))
+    const state = await pool.fetchState()
+    return {
+      token0: state.fields.protocolFees.token0,
+      token1: state.fields.protocolFees.token1
+    }
+  }
+
   async getPoolRewardState(poolId: string): Promise<ClmmPoolRewardState> {
     try {
       const poolAddress = addressFromContractId(poolId)
@@ -675,16 +684,20 @@ export class ClmmModule extends ModuleBase {
     return result
   }
 
-  getCollectProtocolFeesData(token0: string, token1: string, configIndex: bigint): string {
+  getCollectProtocolFeesData(token0: string, token1: string, configIndex: bigint, tokenId: string): string {
     const [t0, t1] = sortTokens(token0, token1)
     const poolPath = t0 + t1 + this.getPoolConfigId(configIndex)
-    return t0 + poolPath
+    return tokenId + poolPath
   }
 
   async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
-    const [t0] = sortTokens(p.token0, p.token1)
-    const data = this.getCollectProtocolFeesData(p.token0, p.token1, p.configIndex)
-    return await this.scope.staking.collectProtocolFees(this.config.factoryId, t0, data)
+    return await this.scope.staking.collectProtocolFeesCLMM(
+      this.config.factoryId,
+      p.token0,
+      p.token1,
+      p.configIndex,
+      p.tokenId
+    )
   }
 
   async setFeeCollector(): Promise<SignExecuteScriptTxResult> {

@@ -103,6 +103,7 @@ export interface ClmmCollectProtocolFeesRequest {
   token0: string
   token1: string
   configIndex: bigint
+  tokenId: string
 }
 
 export interface ClmmSetRewardParamsRequest {

@@ -8,7 +8,8 @@ import {
   codec,
   groupOfAddress,
   isGrouplessAddressWithoutGroupIndex,
-  subContractId
+  subContractId,
+  ALPH_TOKEN_ID
 } from '@alephium/web3'
 import type {
   AlphUnstakeVaultInstance,
@@ -20,7 +21,8 @@ import type {
   XAlphStakeVaultInstance,
   XAlphStakeVaultTypes,
   XAlphTokenInstance,
-  XAlphTokenTypes
+  XAlphTokenTypes,
+  DistributorVaultTypes
 } from 'staking/artifacts/ts'
 import {
   AlphUnstakeVault,
@@ -30,7 +32,8 @@ import {
   XAlphStakeVault,
   XAlphToken,
   XAlphUnlockAndStartUnstake,
-  DistributorVault
+  DistributorVault,
+  CollectProtocolCLMMToken
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -363,12 +366,67 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  async collectProtocolFeesCLMM(
+    factoryId: string,
+    token0: string,
+    token1: string,
+    configIndex: bigint,
+    tokenId: string
+  ): Promise<ExecuteScriptResult> {
+    return await CollectProtocolCLMMToken.execute({
+      signer: this.scope.signer,
+      initialFields: {
+        collector: this.config.feeCollectorId,
+        factory: factoryId,
+        token0,
+        token1,
+        configIndex,
+        tokenId,
+      },
+      attoAlphAmount: DUST_AMOUNT * 2n
+    })
+  }
+  async swapProtocolFeesCLMM(
+    factoryId: string,
+    token0: string,
+    token1: string,
+    configIndex: bigint
+  ): Promise<ExecuteScriptResult> {
+    const alphVaultId = subContractId(
+      this.config.feeCollectorId,
+      ALPH_TOKEN_ID,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    const alphVault = DistributorVault.at(addressFromContractId(alphVaultId))
+    return await alphVault.transact.swapFeesOnCLMM({
+      signer: this.scope.signer,
+      args: { factory: factoryId, token0, token1, configIndex },
+      attoAlphAmount: DUST_AMOUNT * 2n
+    })
+  }
+
   async migrateRewardFeeCollector(
     newBytecode: string
   ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
       signer: this.scope.signer,
       args: { newBytecode }
+    })
+  }
+
+  async migrateDistributorVault(
+    token: string
+  ): Promise<DistributorVaultTypes.SignExecuteMethodResult<'upgrade'>> {
+    const vaultId = subContractId(
+      this.config.feeCollectorId,
+      token,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    const vaultAddress = addressFromContractId(vaultId)
+    const vault = DistributorVault.at(vaultAddress)
+    return await vault.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newCode: DistributorVault.contract.bytecode }
     })
   }
 

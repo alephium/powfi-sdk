@@ -13,6 +13,7 @@ import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
 import type { TokenInfo } from '@alephium/token-list'
 import { TokenPair } from 'cpmm'
+import { DistributorVault } from 'staking'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -88,12 +89,12 @@ async function main() {
   const waitForTx = async (txId: string) => {
     let status
     while (true) {
-      await new Promise((r) => setTimeout(r, 2000))
       status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId })
       if (status.type === 'Confirmed') return status
-      if (status.type === 'Conflicted' || status.type === 'TxNotFound') {
+      if (status.type === 'Conflicted') {
         throw new Error(`Transaction failed with status: ${status.type}`)
       }
+      await new Promise((r) => setTimeout(r, 2000))
     }
   }
 
@@ -172,8 +173,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-            .div(new Decimal(actualIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(actualIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -218,8 +219,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-            .div(new Decimal(amountIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(amountIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
@@ -271,7 +272,8 @@ async function main() {
       console.log(
         '  swap-to <targetPrice>                       # swap until pool reaches target price (direction auto-inferred)'
       )
-      console.log('  collect-protocol')
+      console.log('  collect-protocol <tokenSymbol>')
+      console.log('  protocol-swap')
       console.log('  rewards set <rewardSymbol> <amount> <durationDays>')
       console.log('  rewards extend <rewardSymbol> <amount>')
       console.log('  migrate-factory <newBytecode>')
@@ -338,7 +340,7 @@ async function main() {
           configIndex,
           t0Info.id,
           t1Info.id,
-          ALPH_TOKEN_ID, // Use ALPH as reward token by default
+          powfi.staking.getConfig().xAlphTokenId, // Use xALPH as reward token by default
           tick,
           amount0,
           amount1,
@@ -502,6 +504,15 @@ async function main() {
           console.log(`- Pool Tick:      ${poolState.tick}`)
           const poolLiqDecimals = Math.floor((t0Info.decimals + t1Info.decimals) / 2)
           console.log(`- Total Liq:      ${formatAmount(poolState.liquidity, poolLiqDecimals)}`)
+          console.log(`- Trading Fee:    ${(Number(poolState.tradingFee) / 10000).toFixed(2)}%`)
+          console.log(`- Protocol Fee:   ${poolState.protocolFee}%`)
+
+          const protocolFees = await powfi.clmm.getPoolProtocolFees(poolId)
+          if (protocolFees.token0 > 0n || protocolFees.token1 > 0n) {
+            console.log(`\nUncollected Protocol Fees:`)
+            console.log(`  - ${t0Info.symbol.padEnd(8)}: ${formatAmount(protocolFees.token0, t0Info.decimals)}`)
+            console.log(`  - ${t1Info.symbol.padEnd(8)}: ${formatAmount(protocolFees.token1, t1Info.decimals)}`)
+          }
 
           const rewardState = await powfi.clmm.getPoolRewardState(poolId)
           if (rewardState.rewardInfos.some((r) => r.amount > 0n)) {
@@ -511,10 +522,10 @@ async function main() {
               const r = rewardState.rewardInfos[i]
               if (r.amount > 0n) {
                 const token = poolTokens[i]
-                const now = BigInt(Math.floor(Date.now() / 1000))
+                const now = BigInt(Date.now())
                 const remaining = r.endTime > now ? r.endTime - now : 0n
                 console.log(
-                  `  - [Slot ${i}] ${token.symbol.padEnd(8)}: ${formatAmount(r.amount, token.decimals).padStart(12)} (Ends: ${new Date(Number(r.endTime) * 1000).toLocaleString()}, ${remaining / 3600n}h left)`
+                  `  - [Slot ${i}] ${token.symbol.padEnd(8)}: ${formatAmount(r.amount, token.decimals).padStart(12)} (Ends: ${new Date(Number(r.endTime)).toLocaleString()}, ${remaining / 3600000n}h left)`
                 )
               }
             }
@@ -581,8 +592,8 @@ async function main() {
 
         const rewardToken = await getTokenInfo(rewardSymbol)
         const amount = getAmount(amountStr, rewardToken.decimals)
-        const durationSec = BigInt(durationDays) * 24n * 3600n
-        const now = BigInt(Math.floor(Date.now() / 1000))
+        const durationSec = BigInt(Number(durationDays) * 24 * 3600 * 1000)
+        const now = BigInt(Math.floor(Date.now()))
 
         console.log(`Setting rewards: ${amountStr} ${rewardSymbol} for ${durationDays} days...`)
 
@@ -615,7 +626,17 @@ async function main() {
         const rewardToken = await getTokenInfo(rewardSymbol)
         const amount = getAmount(amountStr, rewardToken.decimals)
 
-        console.log(`Extending rewards: ${amountStr} ${rewardSymbol}...`)
+        const rewardState = await powfi.clmm.getPoolRewardState(poolId)
+        const index = rewardToken.id === t0Info.id ? 0 : rewardToken.id === t1Info.id ? 1 : 2
+        const rewardInfo = rewardState.rewardInfos[index]
+        const now = BigInt(Date.now())
+
+        const timeDelta = rewardInfo.endTime - now
+        const additionalTimeMs = (timeDelta * amount) / rewardInfo.amount
+        const additionalDays = Number(additionalTimeMs) / (24 * 3600 * 1000)
+        console.log(
+          `Extending rewards: ${amountStr} ${rewardSymbol}. This will add ~${additionalDays.toFixed(2)} days at the current rate.`
+        )
 
         try {
           const result = await powfi.clmm.extendRewards({
@@ -929,18 +950,22 @@ async function main() {
         console.error('Failed to remove liquidity: Position might not exist or percent is invalid.', error)
       }
     } else if (action === 'collect-protocol') {
-      const targetTokenSymbol = actionArgs[0] || 'ALPH'
-      const swapConfigIndexStr = actionArgs[1] || configIndexStr
-      const swapConfigIndex = BigInt(swapConfigIndexStr)
+      const collectTokenSymbol = actionArgs[0]
+      if (!collectTokenSymbol) {
+        console.log(`Usage: clmm <T1> <T2> <INDEX> collect-protocol <tokenSymbol>`)
+        return
+      }
 
+      const collectToken = await getTokenInfo(collectTokenSymbol)
       console.log(
-        `Collecting protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) into ${targetTokenSymbol} (Swap Config ${swapConfigIndex})...`
+        `Collecting protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) - Token: ${collectToken.symbol}...`
       )
       try {
         const result = await powfi.clmm.collectProtocolFees({
           token0: t0Info.id,
           token1: t1Info.id,
-          configIndex: config.configIndex
+          configIndex: config.configIndex,
+          tokenId: collectToken.id
         })
 
         console.log(`Collect protocol fees submitted: ${result.txId}`)
@@ -970,13 +995,15 @@ async function main() {
 
           if (collectEvent) {
             const fields = collectEvent.fields as { type: string; value: string }[]
-            const recipient = fields[0].value
-            const amount0 = BigInt(fields[1].value)
-            const amount1 = BigInt(fields[2].value)
+            const sender = fields[0].value
+            const recipient = fields[1].value
+            const amount0 = BigInt(fields[2].value)
+            const amount1 = BigInt(fields[3].value)
 
+            console.log(`- Sender:         ${sender}`)
             console.log(`- Recipient:      ${recipient}`)
-            console.log(`- Collected ${t0Info.symbol.padEnd(7)}: ${formatAmount(amount0, t0Info.decimals)}`)
-            console.log(`- Collected ${t1Info.symbol.padEnd(7)}: ${formatAmount(amount1, t1Info.decimals)}`)
+            console.log(`- ${t0Info.symbol.padEnd(12)}: ${formatAmount(amount0, t0Info.decimals)}`)
+            console.log(`- ${t1Info.symbol.padEnd(12)}: ${formatAmount(amount1, t1Info.decimals)}`)
           } else {
             console.log('Fees collected but info could not be parsed from events.')
           }
@@ -985,6 +1012,22 @@ async function main() {
         }
       } catch (error) {
         console.error('Failed to collect protocol fees:', error)
+      }
+    } else if (action === 'protocol-swap') {
+      console.log(`Swapping collected protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) to ALPH...`)
+      try {
+        const result = await powfi.staking.swapProtocolFeesCLMM(
+          powfi.clmm.getClmmConfig().factoryId,
+          t0Info.id,
+          t1Info.id,
+          config.configIndex
+        )
+
+        console.log(`Protocol swap submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Protocol swap confirmed.')
+      } catch (error) {
+        console.error('Failed to swap protocol fees:', error)
       }
     } else if (action === 'migrate-account') {
       const newBytecode = actionArgs[0]
@@ -1671,7 +1714,19 @@ async function main() {
   } else if (command === 'collector') {
     const action = args[1]
 
-    if (!action || action === 'info') {
+    if (!action) {
+      console.log('Usage: npx ts-node src/cli.ts collector <action> [args...]')
+      console.log('Available actions:')
+      console.log('  info       # Show collector stats (reward rate, burn rate, balance)')
+      console.log('  rr <%>     # Set reward rate (percent per year)')
+      console.log('  br <%>     # Set burn rate (percent of rewards to burn)')
+      console.log('  distribute # Manually trigger reward distribution')
+      console.log('  enable <symbol> # Enable token for collection')
+      console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
+      return
+    }
+
+    if (action === 'info') {
       try {
         const feeCollectorId = powfi.staking.getConfig().feeCollectorId
         const feeCollectorAddress = addressFromContractId(feeCollectorId)
@@ -1793,14 +1848,24 @@ async function main() {
       } catch (error) {
         console.error(`Failed to enable token ${symbol}:`, error)
       }
+    } else if (action === 'vault-upgrade') {
+      const symbol = args[2]
+      if (!symbol) {
+        console.log('Usage: collector vault-upgrade <symbol>')
+        return
+      }
+      try {
+        const tokenInfo = await getTokenInfo(symbol)
+        console.log(`Upgrading DistributorVault for ${tokenInfo.symbol}...`)
+        const result = await powfi.staking.migrateDistributorVault(tokenInfo.id)
+        console.log(`Vault upgrade submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Vault upgrade confirmed.')
+      } catch (error) {
+        console.error(`Failed to upgrade vault for ${symbol}:`, error)
+      }
     } else {
       console.log(`Unknown action ${action} for module collector`)
-      console.log('Available actions:')
-      console.log('  info       # Show collector stats (reward rate, burn rate, balance)')
-      console.log('  rr <%>     # Set reward rate (percent per year)')
-      console.log('  br <%>     # Set burn rate (percent of rewards to burn)')
-      console.log('  distribute # Manually trigger reward distribution')
-      console.log('  enable <symbol> # Enable token for collection')
     }
   } else {
     console.log(`Unknown module ${command}`)
