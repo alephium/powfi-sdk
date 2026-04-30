@@ -87,12 +87,12 @@ async function main() {
   }
 
   const waitForTx = async (txId: string) => {
-    let status
     while (true) {
-      status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId })
-      if (status.type === 'Confirmed') return status
-      if (status.type === 'Conflicted') {
-        throw new Error(`Transaction failed with status: ${status.type}`)
+      try {
+        const status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId })
+        if (status.type === 'Confirmed') return
+      } catch (e) {
+        // ignore errors and keep waiting
       }
       await new Promise((r) => setTimeout(r, 2000))
     }
@@ -972,43 +972,32 @@ async function main() {
         console.log('Waiting for confirmation...')
 
         // Wait for confirmation
-        let status
-        while (true) {
-          status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId: result.txId })
-          if (status.type === 'Confirmed' || status.type === 'TxNotFound' || status.type === 'Conflicted') {
-            break
-          }
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-        }
+        await waitForTx(result.txId)
 
-        if (status.type === 'Confirmed') {
-          const eventsData = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
-          const poolAddress = powfi.clmm.getPoolAddress(t0Info.id, t1Info.id, config.configIndex)
+        const eventsData = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
+        const poolAddress = powfi.clmm.getPoolAddress(t0Info.id, t1Info.id, config.configIndex)
 
-          // Print debug events emitted from the pool before CollectProtocol
-          const poolEvents = eventsData.events.filter((e) => e.contractAddress === poolAddress)
+        // Print debug events emitted from the pool before CollectProtocol
+        const poolEvents = eventsData.events.filter((e) => e.contractAddress === poolAddress)
 
-          // CollectProtocol is the last pool event
-          const collectEvent = poolEvents.at(-1)
+        // CollectProtocol is the last pool event
+        const collectEvent = poolEvents.at(-1)
 
-          console.log('\nProtocol Fee Collection Results:')
+        console.log('\nProtocol Fee Collection Results:')
 
-          if (collectEvent) {
-            const fields = collectEvent.fields as { type: string; value: string }[]
-            const sender = fields[0].value
-            const recipient = fields[1].value
-            const amount0 = BigInt(fields[2].value)
-            const amount1 = BigInt(fields[3].value)
+        if (collectEvent) {
+          const fields = collectEvent.fields as { type: string; value: string }[]
+          const sender = fields[0].value
+          const recipient = fields[1].value
+          const amount0 = BigInt(fields[2].value)
+          const amount1 = BigInt(fields[3].value)
 
-            console.log(`- Sender:         ${sender}`)
-            console.log(`- Recipient:      ${recipient}`)
-            console.log(`- ${t0Info.symbol.padEnd(12)}: ${formatAmount(amount0, t0Info.decimals)}`)
-            console.log(`- ${t1Info.symbol.padEnd(12)}: ${formatAmount(amount1, t1Info.decimals)}`)
-          } else {
-            console.log('Fees collected but info could not be parsed from events.')
-          }
+          console.log(`- Sender:         ${sender}`)
+          console.log(`- Recipient:      ${recipient}`)
+          console.log(`- ${t0Info.symbol.padEnd(12)}: ${formatAmount(amount0, t0Info.decimals)}`)
+          console.log(`- ${t1Info.symbol.padEnd(12)}: ${formatAmount(amount1, t1Info.decimals)}`)
         } else {
-          console.log(`Transaction failed with status: ${status.type}`)
+          console.log('Fees collected but info could not be parsed from events.')
         }
       } catch (error) {
         console.error('Failed to collect protocol fees:', error)
@@ -1017,15 +1006,35 @@ async function main() {
       console.log(`Swapping collected protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) to ALPH...`)
       try {
         const result = await powfi.staking.swapProtocolFeesCLMM(
-          powfi.clmm.getClmmConfig().factoryId,
-          t0Info.id,
           t1Info.id,
           config.configIndex
         )
 
         console.log(`Protocol swap submitted: ${result.txId}`)
         await waitForTx(result.txId)
-        console.log('Protocol swap confirmed.')
+
+        const eventsData = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
+        const poolAddress = powfi.clmm.getPoolAddress(t0Info.id, t1Info.id, config.configIndex)
+
+        // Swap event has eventIndex === 3
+        const swapEvent = eventsData.events.find((e) => e.contractAddress === poolAddress && e.eventIndex === 3)
+
+        if (swapEvent) {
+          const fields = swapEvent.fields as { type: string; value: string }[]
+          let poolDelta0 = BigInt(fields[2].value)
+          if (poolDelta0 > 2n ** 255n) poolDelta0 -= 2n ** 256n
+          let poolDelta1 = BigInt(fields[3].value)
+          if (poolDelta1 > 2n ** 255n) poolDelta1 -= 2n ** 256n
+
+          const userDelta0 = -poolDelta0
+          const userDelta1 = -poolDelta1
+
+          console.log('\nProtocol Swap Results:')
+          console.log(`- ${t0Info.symbol.padEnd(12)}: ${userDelta0 > 0n ? '+' : ''}${formatAmount(userDelta0, t0Info.decimals)}`)
+          console.log(`- ${t1Info.symbol.padEnd(12)}: ${userDelta1 > 0n ? '+' : ''}${formatAmount(userDelta1, t1Info.decimals)}`)
+        } else {
+          console.log('Protocol swap confirmed.')
+        }
       } catch (error) {
         console.error('Failed to swap protocol fees:', error)
       }
@@ -1518,16 +1527,7 @@ async function main() {
         console.log(`Deposit submitted: ${result.txId}`)
         console.log('Waiting for confirmation...')
 
-        let status
-        while (true) {
-          status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId: result.txId })
-          if (status.type === 'Confirmed') break
-          if (status.type === 'Conflicted' || status.type === 'TxNotFound') {
-            console.error(`Transaction failed with status: ${status.type}`)
-            return
-          }
-          await new Promise((r) => setTimeout(r, 2000))
-        }
+        await waitForTx(result.txId)
 
         const events = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
         const xAlphAddress = addressFromContractId(xAlphId)
@@ -1560,16 +1560,7 @@ async function main() {
         console.log(`Donate submitted: ${result.txId}`)
         console.log('Waiting for confirmation...')
 
-        let status
-        while (true) {
-          status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId: result.txId })
-          if (status.type === 'Confirmed') break
-          if (status.type === 'Conflicted' || status.type === 'TxNotFound') {
-            console.error(`Transaction failed with status: ${status.type}`)
-            return
-          }
-          await new Promise((r) => setTimeout(r, 2000))
-        }
+        await waitForTx(result.txId)
 
         const events = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
         const xAlphAddress = addressFromContractId(xAlphId)
@@ -1709,6 +1700,7 @@ async function main() {
       console.log('  enable <symbol> # Enable token for collection')
       console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
       console.log('  upgrade    # Upgrade collector contract')
+      console.log('  set-clmm-factory # Set CLMM factory ID automatically')
       return
     }
 
@@ -1726,20 +1718,15 @@ async function main() {
 
         const { rewardRate, burnRate, lastUpdate } = collectorState.fields
 
-        // Rates are stored as fraction of u256Max (2^256 - 1).
-        // Convert to human-readable % using Decimal for precision.
-        const U256_MAX = new Decimal(2n ** 256n - 1n + '')
-        const rewardRatePct = new Decimal(rewardRate.toString()).div(U256_MAX).mul(100)
-        const burnRatePct = new Decimal(burnRate.toString()).div(U256_MAX).mul(100)
+        const rewardRatePct = new Decimal(rewardRate.toString()).div(100)
+        const burnRatePct = new Decimal(burnRate.toString()).div(100)
 
         const alphHeld = BigInt(balanceInfo.balance)
         const lastUpdateDate = new Date(Number(lastUpdate)).toISOString()
 
-        // Annualised yield estimate: rewardRate applied to total deposited ALPH per year
         const totalDeposited = xAlphState.fields.totalDepositedAlph
-        const msPerYear = 31_536_000_000n
-        const annualReward = (totalDeposited * rewardRate) / (2n ** 256n - 1n)
-        const netAnnualReward = (annualReward * (2n ** 256n - 1n - burnRate)) / (2n ** 256n - 1n)
+        const annualReward = (totalDeposited * rewardRate) / 10000n
+        const netAnnualReward = (annualReward * (10000n - burnRate)) / 10000n
 
         console.log('\nRewardFeeCollector Info:')
         console.log(`- Address       : ${feeCollectorAddress}`)
@@ -1763,14 +1750,14 @@ async function main() {
 
       try {
         const pct = new Decimal(pctStr)
-        const U256_MAX = new Decimal(2n ** 256n - 1n + '')
-        // BigInt(decimal.toNumber()) will lose precision for large values (like 2^256 scale).
-        // Use .toFixed(0) to get the integer string for BigInt.
-        const newRate = BigInt(pct.div(100).mul(U256_MAX).floor().toFixed(0))
+        const newRate = BigInt(pct.mul(100).floor().toFixed(0))
+
         const result =
           action === 'rr' ? await powfi.staking.setRewardRate(newRate) : await powfi.staking.setBurnRate(newRate)
 
         console.log(`${action === 'rr' ? 'Reward' : 'Burn'} rate set to ${pctStr}% (TX: ${result.txId})`)
+        await waitForTx(result.txId)
+        console.log('Update confirmed.')
       } catch (error) {
         console.error(`Failed to set ${action === 'rr' ? 'reward' : 'burn'} rate:`, error)
       }
@@ -1782,25 +1769,16 @@ async function main() {
         console.log(`Rewards distribution triggered: ${result.txId}`)
         console.log('Waiting for confirmation...')
 
-        let status
-        while (true) {
-          status = await powfi.nodeProvider.transactions.getTransactionsStatus({ txId: result.txId })
-          if (status.type === 'Confirmed') break
-          if (status.type === 'Conflicted' || status.type === 'TxNotFound') {
-            console.error(`Transaction failed with status: ${status.type}`)
-            return
-          }
-          await new Promise((r) => setTimeout(r, 2000))
-        }
+        await waitForTx(result.txId)
 
         const events = await powfi.nodeProvider.events.getEventsTxIdTxid(result.txId)
         const xAlphAddress = addressFromContractId(stakingConfig.xAlphTokenId)
         const collectorAddress = addressFromContractId(feeCollectorId)
 
         // XAlphToken emits RewardDeposited(from, amount) as event index 3
-        const rewardEvent = events.events.find((e) => e.contractAddress === xAlphAddress && e.eventIndex === 3)
+        const rewardEvent = events.events.find((e) => e.contractAddress === xAlphAddress)
         // RewardFeeCollector emits Burnt(amount) as event index 0
-        const burntEvent = events.events.find((e) => e.contractAddress === collectorAddress && e.eventIndex === 0)
+        const burntEvent = events.events.find((e) => e.contractAddress === collectorAddress)
 
         console.log('\nDistribution results:')
         if (rewardEvent) {
@@ -1859,6 +1837,16 @@ async function main() {
         console.log('Collector upgrade confirmed.')
       } catch (error) {
         console.error('Failed to upgrade collector:', error)
+      }
+    } else if (action === 'set-clmm-factory') {
+      try {
+        const factoryId = powfi.clmm.getClmmConfig().factoryId
+        const result = await powfi.staking.setClmmFactoryId(factoryId)
+        console.log(`CLMM factory ID updated to ${factoryId}. TX: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('CLMM factory ID update confirmed.')
+      } catch (error) {
+        console.error('Failed to update CLMM factory ID:', error)
       }
     } else {
       console.log(`Unknown action ${action} for module collector`)

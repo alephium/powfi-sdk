@@ -388,18 +388,14 @@ export class StakingModule extends ModuleBase {
     })
   }
   async swapProtocolFeesCLMM(
-    factoryId: string,
-    token0: string,
-    token1: string,
+    token: string,
     configIndex: bigint
   ): Promise<ExecuteScriptResult> {
     return await SwapProtocolFeesCLMM.execute({
       signer: this.scope.signer,
       initialFields: {
         collector: this.config.feeCollectorId,
-        factory: factoryId,
-        token0,
-        token1,
+        token,
         configIndex
       },
       attoAlphAmount: DUST_AMOUNT * 3n
@@ -410,6 +406,15 @@ export class StakingModule extends ModuleBase {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
       signer: this.scope.signer,
       args: { newBytecode: RewardFeeCollector.contract.bytecode }
+    })
+  }
+
+  async setClmmFactoryId(
+    factoryId: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setClmmFactoryId'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setClmmFactoryId({
+      signer: this.scope.signer,
+      args: { newId: factoryId }
     })
   }
 
