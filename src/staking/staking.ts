@@ -8,8 +8,7 @@ import {
   codec,
   groupOfAddress,
   isGrouplessAddressWithoutGroupIndex,
-  subContractId,
-  ALPH_TOKEN_ID
+  subContractId
 } from '@alephium/web3'
 import type {
   AlphUnstakeVaultInstance,
@@ -383,15 +382,12 @@ export class StakingModule extends ModuleBase {
         token0,
         token1,
         configIndex,
-        tokenId,
+        tokenId
       },
       attoAlphAmount: DUST_AMOUNT * 2n
     })
   }
-  async swapProtocolFeesCLMM(
-    token: string,
-    configIndex: bigint
-  ): Promise<ExecuteScriptResult> {
+  async swapProtocolFeesCLMM(token: string, configIndex: bigint): Promise<ExecuteScriptResult> {
     return await SwapProtocolFeesCLMM.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -403,10 +399,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async swapProtocolFeesCPMM(
-    lpToken: string,
-    token: string
-  ): Promise<ExecuteScriptResult> {
+  async swapProtocolFeesCPMM(lpToken: string, token: string): Promise<ExecuteScriptResult> {
     return await SwapProtocolFeesCPMM.execute({
       signer: this.scope.signer,
       initialFields: {
@@ -418,21 +411,10 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async burnProtocolFeesCPMM(
-    token0: string,
-    token1: string
-  ): Promise<ExecuteScriptResult> {
+  async burnProtocolFeesCPMM(token0: string, token1: string): Promise<ExecuteScriptResult> {
     const cpmmConfig = this.scope.cpmm.getCpmmConfig()
-    const lpTokenId = subContractId(
-      cpmmConfig.factoryId,
-      token0 + token1,
-      this.config.groupIndex
-    )
-    const vaultId = subContractId(
-      this.config.feeCollectorId,
-      lpTokenId,
-      this.config.groupIndex
-    )
+    const lpTokenId = subContractId(cpmmConfig.factoryId, token0 + token1, this.config.groupIndex)
+    const vaultId = subContractId(this.config.feeCollectorId, lpTokenId, this.config.groupIndex)
     const vault = DistributorVault.at(addressFromContractId(vaultId))
     return await vault.transact.burnFeesOnCPMM({
       signer: this.scope.signer,
@@ -466,9 +448,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async migrateDistributorVault(
-    token: string
-  ): Promise<DistributorVaultTypes.SignExecuteMethodResult<'upgrade'>> {
+  async migrateDistributorVault(token: string): Promise<DistributorVaultTypes.SignExecuteMethodResult<'upgrade'>> {
     const vaultId = subContractId(
       this.config.feeCollectorId,
       token,
@@ -482,10 +462,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async transferProtocolFees(
-    fromToken: string,
-    toToken: string
-  ): Promise<ExecuteScriptResult> {
+  async transferProtocolFees(fromToken: string, toToken: string): Promise<ExecuteScriptResult> {
     const fromVaultId = subContractId(
       this.config.feeCollectorId,
       fromToken,
@@ -499,9 +476,7 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async transferProtocolFeesALPH(
-    fromToken: string
-  ): Promise<ExecuteScriptResult> {
+  async transferProtocolFeesALPH(fromToken: string): Promise<ExecuteScriptResult> {
     const fromVaultId = subContractId(
       this.config.feeCollectorId,
       fromToken,

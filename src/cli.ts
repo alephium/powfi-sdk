@@ -173,8 +173,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-          .div(new Decimal(actualIn.toString()))
-          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+            .div(new Decimal(actualIn.toString()))
+            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -219,8 +219,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-          .div(new Decimal(amountIn.toString()))
-          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+            .div(new Decimal(amountIn.toString()))
+            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
@@ -1005,10 +1005,7 @@ async function main() {
     } else if (action === 'protocol-swap') {
       console.log(`Swapping collected protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) to ALPH...`)
       try {
-        const result = await powfi.staking.swapProtocolFeesCLMM(
-          t1Info.id,
-          config.configIndex
-        )
+        const result = await powfi.staking.swapProtocolFeesCLMM(t1Info.id, config.configIndex)
 
         console.log(`Protocol swap submitted: ${result.txId}`)
         await waitForTx(result.txId)
@@ -1030,8 +1027,12 @@ async function main() {
           const userDelta1 = -poolDelta1
 
           console.log('\nProtocol Swap Results:')
-          console.log(`- ${t0Info.symbol.padEnd(12)}: ${userDelta0 > 0n ? '+' : ''}${formatAmount(userDelta0, t0Info.decimals)}`)
-          console.log(`- ${t1Info.symbol.padEnd(12)}: ${userDelta1 > 0n ? '+' : ''}${formatAmount(userDelta1, t1Info.decimals)}`)
+          console.log(
+            `- ${t0Info.symbol.padEnd(12)}: ${userDelta0 > 0n ? '+' : ''}${formatAmount(userDelta0, t0Info.decimals)}`
+          )
+          console.log(
+            `- ${t1Info.symbol.padEnd(12)}: ${userDelta1 > 0n ? '+' : ''}${formatAmount(userDelta1, t1Info.decimals)}`
+          )
         } else {
           console.log('Protocol swap confirmed.')
         }
