@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Powfi } from './powfi'
-import { ALPH_TOKEN_ID, addressFromContractId, KeyType, hexToString } from '@alephium/web3'
+import { ALPH_TOKEN_ID, addressFromContractId, KeyType, hexToString, subContractId } from '@alephium/web3'
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { testPrivateKeyWallet } from '@alephium/web3-test'
 import { TickUtils } from './clmm/tick'
@@ -1102,6 +1102,9 @@ async function main() {
       console.log('  sim-swap <symbolIn> <amountIn> # Simulation of swap')
       console.log('  info                        # Show reserves and price')
       console.log('  collect-protocol            # Collect protocol fees')
+      console.log('  protocol-swap <symbol>      # Swap collected fees for ALPH')
+      console.log('  protocol-burn               # Burn LP fees for underlying tokens')
+      console.log('  protocol-transfer <symbol>  # Transfer fees from LP vault to destination vault/collector')
       console.log('  migrate-factory <newBytecode>')
       console.log('  migrate-pool <newBytecode>')
       console.log('  migrate-account <newBytecode>')
@@ -1454,6 +1457,58 @@ async function main() {
       } catch (error) {
         console.error('Failed to collect protocol fees from CPMM pool:', error)
       }
+    } else if (action === 'protocol-swap') {
+      const symbolIn = actionArgs[0]
+      if (!symbolIn) {
+        console.log('Usage: cpmm <T1> <T2> protocol-swap <symbol>')
+        return
+      }
+      try {
+        const [id0, id1] = sortTokens(tokenA.id, tokenB.id)
+        const cpmmConfig = powfi.cpmm.getCpmmConfig()
+        const lpTokenId = subContractId(cpmmConfig.factoryId, id0 + id1, cpmmConfig.groupIndex)
+
+        const tokenIn = await getTokenInfo(symbolIn)
+        const result = await powfi.staking.swapProtocolFeesCPMM(lpTokenId, tokenIn.id)
+        console.log(`Protocol fee swap submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Protocol fee swap confirmed.')
+      } catch (error) {
+        console.error('Failed to swap protocol fees:', error)
+      }
+    } else if (action === 'protocol-burn') {
+      try {
+        const [id0, id1] = sortTokens(tokenA.id, tokenB.id)
+        const result = await powfi.staking.burnProtocolFeesCPMM(id0, id1)
+        console.log(`Protocol fee burn submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Protocol fee burn confirmed.')
+      } catch (error) {
+        console.error('Failed to burn protocol fees:', error)
+      }
+    } else if (action === 'protocol-transfer') {
+      const symbolTransfer = actionArgs[0]
+      if (!symbolTransfer) {
+        console.log('Usage: cpmm <T1> <T2> protocol-transfer <symbol>')
+        return
+      }
+      try {
+        const [id0, id1] = sortTokens(tokenA.id, tokenB.id)
+        const cpmmConfig = powfi.cpmm.getCpmmConfig()
+        const lpTokenId = subContractId(cpmmConfig.factoryId, id0 + id1, cpmmConfig.groupIndex)
+
+        const tokenTransfer = await getTokenInfo(symbolTransfer)
+        const result =
+          symbolTransfer === 'ALPH'
+            ? await powfi.staking.transferProtocolFeesALPH(lpTokenId)
+            : await powfi.staking.transferProtocolFees(lpTokenId, tokenTransfer.id)
+
+        console.log(`Protocol fee transfer submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Protocol fee transfer confirmed.')
+      } catch (error) {
+        console.error('Failed to transfer protocol fees:', error)
+      }
     } else if (action === 'migrate-factory') {
       const newBytecode = actionArgs[0]
       if (newBytecode === undefined) {
@@ -1699,8 +1754,9 @@ async function main() {
       console.log('  distribute # Manually trigger reward distribution')
       console.log('  enable <symbol> # Enable token for collection')
       console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
-      console.log('  upgrade    # Upgrade collector contract')
+      console.log('  upgrade          # Upgrade collector contract')
       console.log('  set-clmm-factory # Set CLMM factory ID automatically')
+      console.log('  set-cpmm-factory # Set CPMM factory ID automatically')
       return
     }
 
@@ -1716,7 +1772,7 @@ async function main() {
           powfi.staking.getXAlphTokenState()
         ])
 
-        const { rewardRate, burnRate, lastUpdate } = collectorState.fields
+        const { rewardRate, burnRate, lastUpdate, clmmFactoryId, cpmmFactoryId } = collectorState.fields
 
         const rewardRatePct = new Decimal(rewardRate.toString()).div(100)
         const burnRatePct = new Decimal(burnRate.toString()).div(100)
@@ -1734,6 +1790,8 @@ async function main() {
         console.log(`- Reward rate   : ${rewardRatePct.toFixed(4)}% / year (of total staked ALPH)`)
         console.log(`- Burn rate     : ${burnRatePct.toFixed(4)}% of rewards`)
         console.log(`- Last update   : ${lastUpdateDate}`)
+        console.log(`- CLMM Factory  : ${clmmFactoryId || 'None'}`)
+        console.log(`- CPMM Factory  : ${cpmmFactoryId || 'None'}`)
         console.log(`\nProjected annual output (on ${formatAmount(totalDeposited, 18)} ALPH staked):`)
         console.log(`- Gross reward  : ${formatAmount(annualReward, 18)} ALPH/year`)
         console.log(`- Net to stakers: ${formatAmount(netAnnualReward, 18)} ALPH/year`)
@@ -1847,6 +1905,16 @@ async function main() {
         console.log('CLMM factory ID update confirmed.')
       } catch (error) {
         console.error('Failed to update CLMM factory ID:', error)
+      }
+    } else if (action === 'set-cpmm-factory') {
+      try {
+        const factoryId = powfi.cpmm.getCpmmConfig().factoryId
+        const result = await powfi.staking.setCpmmFactoryId(factoryId)
+        console.log(`CPMM factory ID updated to ${factoryId}. TX: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('CPMM factory ID update confirmed.')
+      } catch (error) {
+        console.error('Failed to update CPMM factory ID:', error)
       }
     } else {
       console.log(`Unknown action ${action} for module collector`)

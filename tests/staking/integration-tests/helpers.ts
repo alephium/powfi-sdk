@@ -18,6 +18,7 @@ import {
   RewardSharingVault,
   RewardFeeCollector,
   DistributorVault,
+  ALPHLock,
   type XAlphTokenInstance,
   type XAlphStakeVaultInstance,
   type AlphUnstakeVaultInstance
@@ -136,6 +137,7 @@ export class Fixture {
     ).contractInstance
 
     const distributorVaultTemplate = (await DistributorVault.deployTemplate(deployer)).contractInstance
+    const alphLock = (await ALPHLock.deploy(deployer, { initialFields: {} })).contractInstance
 
     const feeCollectorContract = (
       await RewardFeeCollector.deploy(deployer, {
@@ -143,9 +145,12 @@ export class Fixture {
           owner: (await deployer.getSelectedAccount()).address,
           xAlph: xAlphTokenContract.contractId,
           distributorVaultTemplateId: distributorVaultTemplate.contractId,
+          locker: alphLock.contractId,
           lastUpdate: 0n,
           rewardRate: 0n,
-          burnRate: 0n
+          burnRate: 0n,
+          clmmFactoryId: '',
+          cpmmFactoryId: ''
         }
       })
     ).contractInstance

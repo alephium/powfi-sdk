@@ -189,7 +189,10 @@ describe('CLMM Managing Positions', () => {
         distributorVaultTemplateId: distributorVaultTemplate.contractId,
         lastUpdate: 0n,
         rewardRate: (1n << 256n) - 1n,
-        burnRate: 0n
+        burnRate: 0n,
+        clmmFactoryId: '',
+        cpmmFactoryId: '',
+        locker: ''
       },
       initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH
     })
@@ -204,7 +207,8 @@ describe('CLMM Managing Positions', () => {
     await fixture.powfi.clmm.collectProtocolFees({
       token0: fixture.tokenId0,
       token1: fixture.tokenId1,
-      configIndex
+      configIndex,
+      tokenId: fixture.tokenId0
     })
 
     const poolStateAfterCollect = await pool.fetchState()

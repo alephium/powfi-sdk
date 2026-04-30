@@ -34,7 +34,8 @@ import {
   XAlphUnlockAndStartUnstake,
   DistributorVault,
   CollectProtocolCLMMToken,
-  SwapProtocolFeesCLMM
+  SwapProtocolFeesCLMM,
+  SwapProtocolFeesCPMM
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -402,6 +403,44 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  async swapProtocolFeesCPMM(
+    lpToken: string,
+    token: string
+  ): Promise<ExecuteScriptResult> {
+    return await SwapProtocolFeesCPMM.execute({
+      signer: this.scope.signer,
+      initialFields: {
+        collector: this.config.feeCollectorId,
+        lpToken,
+        token
+      },
+      attoAlphAmount: DUST_AMOUNT * 3n
+    })
+  }
+
+  async burnProtocolFeesCPMM(
+    token0: string,
+    token1: string
+  ): Promise<ExecuteScriptResult> {
+    const cpmmConfig = this.scope.cpmm.getCpmmConfig()
+    const lpTokenId = subContractId(
+      cpmmConfig.factoryId,
+      token0 + token1,
+      this.config.groupIndex
+    )
+    const vaultId = subContractId(
+      this.config.feeCollectorId,
+      lpTokenId,
+      this.config.groupIndex
+    )
+    const vault = DistributorVault.at(addressFromContractId(vaultId))
+    return await vault.transact.burnFeesOnCPMM({
+      signer: this.scope.signer,
+      args: { token0, token1 },
+      attoAlphAmount: DUST_AMOUNT * 2n
+    })
+  }
+
   async migrateRewardFeeCollector(): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
       signer: this.scope.signer,
@@ -413,6 +452,15 @@ export class StakingModule extends ModuleBase {
     factoryId: string
   ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setClmmFactoryId'>> {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setClmmFactoryId({
+      signer: this.scope.signer,
+      args: { newId: factoryId }
+    })
+  }
+
+  async setCpmmFactoryId(
+    factoryId: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setCpmmFactoryId'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setCpmmFactoryId({
       signer: this.scope.signer,
       args: { newId: factoryId }
     })
@@ -431,6 +479,38 @@ export class StakingModule extends ModuleBase {
     return await vault.transact.upgrade({
       signer: this.scope.signer,
       args: { newCode: DistributorVault.contract.bytecode }
+    })
+  }
+
+  async transferProtocolFees(
+    fromToken: string,
+    toToken: string
+  ): Promise<ExecuteScriptResult> {
+    const fromVaultId = subContractId(
+      this.config.feeCollectorId,
+      fromToken,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    const vault = DistributorVault.at(addressFromContractId(fromVaultId))
+    return await vault.transact.transfer({
+      signer: this.scope.signer,
+      args: { tokenId: toToken },
+      attoAlphAmount: DUST_AMOUNT * 2n
+    })
+  }
+
+  async transferProtocolFeesALPH(
+    fromToken: string
+  ): Promise<ExecuteScriptResult> {
+    const fromVaultId = subContractId(
+      this.config.feeCollectorId,
+      fromToken,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+    const vault = DistributorVault.at(addressFromContractId(fromVaultId))
+    return await vault.transact.transferALPH({
+      signer: this.scope.signer,
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
   }
 
