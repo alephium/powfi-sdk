@@ -101,6 +101,14 @@ export class StakingModule extends ModuleBase {
     return GovernanceDemo.at(addressFromContractId(contractId))
   }
 
+  getDistributorVaultId(token: string): string {
+    return subContractId(
+      this.config.feeCollectorId,
+      token,
+      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
+    )
+  }
+
   async getXAlphTokenState(): Promise<XAlphTokenTypes.State> {
     return this.xAlphTokenContract.fetchState()
   }
@@ -152,7 +160,8 @@ export class StakingModule extends ModuleBase {
       args: {
         vaultIndex,
         amount
-      }
+      },
+      attoAlphAmount: DUST_AMOUNT
     })
   }
 
@@ -317,21 +326,11 @@ export class StakingModule extends ModuleBase {
   }
 
   async enableToken(token: string): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'enableToken'>> {
-    const vaultId = subContractId(
-      this.config.feeCollectorId,
-      token,
-      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
-    )
-    try {
-      await this.scope.nodeProvider.contracts.getContractsAddressState(addressFromContractId(vaultId))
-      return {} as RewardFeeCollectorTypes.SignExecuteMethodResult<'enableToken'>
-    } catch {
-      return this.getRewardFeeCollector(this.config.feeCollectorId).transact.enableToken({
-        signer: this.scope.signer,
-        args: { token },
-        attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + DUST_AMOUNT
-      })
-    }
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.enableToken({
+      signer: this.scope.signer,
+      args: { token },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + DUST_AMOUNT
+    })
   }
 
   async setRewardRate(newRate: bigint): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setRewardRate'>> {
@@ -348,22 +347,24 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  getVault(token: string): DistributorVaultInstance {
+    const vaultId = this.getDistributorVaultId(token)
+    return DistributorVault.at(addressFromContractId(vaultId))
+  }
+
   async collectProtocolFees(
-    protocolFeeCollector: string,
-    token: string,
-    data: HexString
-  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'collectProtocolFees'>> {
-    const vaultId = subContractId(
-      this.config.feeCollectorId,
-      token,
-      groupOfAddress(addressFromContractId(this.config.feeCollectorId))
-    )
-    const vaultAddress = addressFromContractId(vaultId)
-    const vault = DistributorVault.at(vaultAddress)
+    factoryId: string,
+    lpToken: string,
+    data: string
+  ): Promise<ExecuteScriptResult> {
+    const vault = this.getVault(lpToken)
     return await vault.transact.collectProtocolFees({
       signer: this.scope.signer,
-      args: { protocolFeeCollector, data },
-      attoAlphAmount: DUST_AMOUNT
+      args: {
+        protocolFeeCollector: factoryId,
+        data
+      },
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
   }
 
@@ -400,25 +401,28 @@ export class StakingModule extends ModuleBase {
   }
 
   async swapProtocolFeesCPMM(lpToken: string, token: string): Promise<ExecuteScriptResult> {
-    return await SwapProtocolFeesCPMM.execute({
+    const vault = this.getVault(lpToken)
+    return await vault.transact.swapFeesOnCPMM({
       signer: this.scope.signer,
-      initialFields: {
-        collector: this.config.feeCollectorId,
-        lpToken,
-        token
-      },
-      attoAlphAmount: DUST_AMOUNT * 3n
+      args: { tokenId: token },
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
   }
 
   async burnProtocolFeesCPMM(token0: string, token1: string): Promise<ExecuteScriptResult> {
-    const cpmmConfig = this.scope.cpmm.getCpmmConfig()
-    const lpTokenId = subContractId(cpmmConfig.factoryId, token0 + token1, this.config.groupIndex)
-    const vaultId = subContractId(this.config.feeCollectorId, lpTokenId, this.config.groupIndex)
-    const vault = DistributorVault.at(addressFromContractId(vaultId))
+    const lpTokenId = this.scope.cpmm.getPoolId(token0, token1)
+    const vault = this.getVault(lpTokenId)
     return await vault.transact.burnFeesOnCPMM({
       signer: this.scope.signer,
       args: { token0, token1 },
+      attoAlphAmount: DUST_AMOUNT * 2n
+    })
+  }
+
+  async transferALPH(lpToken: string): Promise<ExecuteScriptResult> {
+    const vault = this.getVault(lpToken)
+    return await vault.transact.transferALPH({
+      signer: this.scope.signer,
       attoAlphAmount: DUST_AMOUNT * 2n
     })
   }

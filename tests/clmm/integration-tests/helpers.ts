@@ -24,6 +24,7 @@ import {
   Tick,
   PositionManager
 } from 'clmm/artifacts/ts'
+import { RewardFeeCollector, ALPHLock, DistributorVault } from 'staking/artifacts/ts'
 import { TickUtils } from '../../../src/clmm/tick'
 import { Powfi } from '../../../src/powfi'
 import { ClmmLiquidityUtils, MAX_TICK, MIN_TICK, PoolUtils, sortTokens } from '../../../src'
@@ -93,12 +94,18 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) {}
+  ) { }
 
   static async create(isAlph: boolean = false): Promise<Fixture> {
     const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
-
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
+    return this.load(powfi, isAlph)
+  }
+
+  static async load(powfi: Powfi, isAlph: boolean = false): Promise<Fixture> {
+    const deployer = powfi.signer
+    const address = (await deployer.getSelectedAccount()).address
+
     powfi.setCurrentProviders()
 
     const poolTemplate = (await Pool.deployTemplate(deployer)).contractInstance
@@ -110,8 +117,8 @@ export class Fixture {
       await DexAccount.deploy(deployer, {
         initialFields: {
           counter: 0n,
-          owner: deployer.address,
-          refferer: deployer.address,
+          owner: address,
+          refferer: address,
           parents: ['', '']
         }
       })
@@ -120,7 +127,7 @@ export class Fixture {
     const factory = (
       await PoolFactory.deploy(deployer, {
         initialFields: {
-          owner: deployer.address,
+          owner: address,
           poolTemplate: poolTemplate.contractId,
           positionTemplate: positionTemplate.contractId,
           tickTemplate: tickTemplate.contractId,
@@ -128,7 +135,7 @@ export class Fixture {
           poolConfigTemplate: poolConfigTemplate.contractId,
           dexAccountRoot: dexAccountTemplate.contractId,
           nextConfigIndex: 0n,
-          feeCollector: deployer.address
+          feeCollector: address
         }
       })
     ).contractInstance
@@ -141,8 +148,8 @@ export class Fixture {
 
     const initialAmount = 1_000_000n * ONE_ALPH
 
-    const { tokenId: tokenA } = await mintToken(deployer.address, initialAmount)
-    const { tokenId: tokenB } = await mintToken(deployer.address, initialAmount)
+    const { tokenId: tokenA } = await mintToken(address, initialAmount)
+    const { tokenId: tokenB } = await mintToken(address, initialAmount)
     const tokens = sortTokens(tokenA, tokenB)
     if (isAlph) {
       tokens[0] = ALPH_TOKEN_ID

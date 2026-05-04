@@ -62,6 +62,16 @@ export class CpmmModule extends ModuleBase {
     this.scope = scope
   }
 
+  /** Overrides the CPMM deployment configuration. */
+  setConfig(config: CpmmConfig) {
+    this.config = config
+  }
+
+  /** Returns the current CPMM deployment configuration. */
+  getConfig(): CpmmConfig {
+    return this.config
+  }
+
   /** Derives the on-chain contract ID for a token pair, independent of token order. */
   getPoolId(tokenA: string, tokenB: string): string {
     const [token0Id, token1Id] = sortTokens(tokenA, tokenB)
@@ -162,7 +172,7 @@ export class CpmmModule extends ModuleBase {
         throw new InsufficientBalanceError(
           swapDetails.tokenInInfo.symbol,
           prettifyTokenAmount(swapDetails.tokenInAmount, swapDetails.tokenInInfo.decimals) ??
-            `${swapDetails.tokenInAmount}`,
+          `${swapDetails.tokenInAmount}`,
           prettifyTokenAmount(available, swapDetails.tokenInInfo.decimals) ?? `${available}`
         )
       }
@@ -478,7 +488,8 @@ export class CpmmModule extends ModuleBase {
 
   async collectProtocolFees(params: CpmmCollectProtocolFeesRequest): Promise<ExecuteScriptResult> {
     const data = this.getCollectProtocolFeesData(params.tokenAId, params.tokenBId)
-    return await this.scope.staking.collectProtocolFees(this.config.factoryId, data, data)
+    const lpTokenId = this.getPoolId(params.tokenAId, params.tokenBId)
+    return await this.scope.staking.collectProtocolFees(this.config.factoryId, lpTokenId, data)
   }
 
   async setFeeCollector(): Promise<ExecuteScriptResult> {
