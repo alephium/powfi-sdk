@@ -171,7 +171,6 @@ export class Fixture {
     }
     powfi.staking.setConfig(stakingConfig)
 
-
     return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, powfi)
   }
 

@@ -32,7 +32,7 @@ import type {
   ClmmPositionInfo,
   ClmmPoolRewardState
 } from './types'
-import type { PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts'
+import type { DexAccountInstance, PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts'
 import {
   CreateLiquidPool,
   Pool,
@@ -58,7 +58,7 @@ export class ClmmModule extends ModuleBase {
   constructor(scope: Powfi) {
     super({ scope, moduleName: 'ClmmModule' })
 
-    this.config = this._getClmmConfig()
+    this.config = this.getConfig()
   }
 
   /** Overrides the CLMM deployment configuration (factory, position manager, etc.). */
@@ -718,27 +718,70 @@ export class ClmmModule extends ModuleBase {
   }
 
   async migrateDexAccount(newBytecode: string): Promise<SignExecuteScriptTxResult> {
-    const signerAccount = await this.scope.signer.getSelectedAccount()
-    const accountId = this.getDexAccountId(signerAccount.address)
-    const account = DexAccount.at(addressFromContractId(accountId))
-    const path = binToHex(addressToBytes(signerAccount.address))
-    return await account.transact.upgrade({
+    const dexRoot = DexAccount.at(addressFromContractId(this.config.accountRoot))
+    return await dexRoot.transact.upgrade({
       signer: this.scope.signer,
-      args: { newCode: newBytecode, path }
+      args: { newCode: newBytecode, tokenId: this.config.accountRoot, path: '' },
+      tokens: [{ id: this.config.accountRoot, amount: 1n }]
     })
   }
 
-  getDexAccountId(owner: string): string {
+  async upgradeUserDexAccount(owner: string, newBytecode: string): Promise<SignExecuteScriptTxResult> {
+    const accountId = await this.getDexAccountId(owner)
+    const account = DexAccount.at(addressFromContractId(accountId))
+    const path = binToHex(addressToBytes(owner))
+    return await account.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newCode: newBytecode, tokenId: this.config.accountRoot, path },
+      tokens: [{ id: this.config.accountRoot, amount: 1n }]
+    })
+  }
+
+  getDexAccountRoot(): DexAccountInstance {
+    return DexAccount.at(addressFromContractId(this.config.accountRoot))
+  }
+
+  async getDexAccountId(owner: string): Promise<string> {
     const group = this.config.groupIndex
     const path = binToHex(addressToBytes(owner))
-    return subContractId(this.config.accountRoot, path, group)
+    const accountRoot = this.config.accountRoot
+    return subContractId(accountRoot, path, group)
+  }
+
+  async getDexAccountState(owner: string) {
+    const accountId = await this.getDexAccountId(owner)
+    const account = DexAccount.at(addressFromContractId(accountId))
+    return {
+      address: account.address,
+      id: account.contractId,
+      state: await account.fetchState()
+    }
+  }
+
+  async createDexAccount(referrer: string): Promise<ExecuteScriptResult> {
+    const template = DexAccount.at(addressFromContractId(this.config.accountRoot))
+    return await template.transact.createAccount({
+      signer: this.scope.signer,
+      args: { ref: referrer },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
+    })
+  }
+
+  async setParents(parents: [string, string]): Promise<ExecuteScriptResult> {
+    const accountRoot = this.config.accountRoot
+    const account = DexAccount.at(addressFromContractId(accountRoot))
+    return await account.transact.setParents({
+      signer: this.scope.signer,
+      args: { newParents: parents },
+      tokens: [{ id: accountRoot, amount: 1n }]
+    })
   }
 
   buildSwapPath(tokenId: string, configIndex: bigint): string {
     return tokenId + configIndex.toString(16).padStart(4, '0')
   }
 
-  private _getClmmConfig(): ClmmConfig {
+  getConfig(): ClmmConfig {
     const networkId = this.scope.network.id
     try {
       const deployments = loadDeployments(networkId)

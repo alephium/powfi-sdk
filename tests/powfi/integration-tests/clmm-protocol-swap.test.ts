@@ -4,8 +4,7 @@ import {
   web3,
   ALPH_TOKEN_ID,
   DUST_AMOUNT,
-  addressFromContractId,
-  sleep,
+  addressFromContractId
 } from '@alephium/web3'
 import { Fixture as ClmmFixture } from '../../clmm/integration-tests/helpers'
 import { Fixture as StakingFixture } from '../../staking/integration-tests/helpers'
@@ -136,7 +135,7 @@ describe('CLMM Protocol Swap Integration Test', () => {
         amount0Out: amountOut,
         amount1Out: 0n
       },
-      tokens: [{ id: cpmmFixture.tokenId1, amount: amountIn }],
+      tokens: [{ id: cpmmFixture.tokenId1, amount: amountIn }]
     })
 
     // Trigger LP Fee Minting via Burn
@@ -146,7 +145,7 @@ describe('CLMM Protocol Swap Integration Test', () => {
         sender: deployerAddress,
         liquidity: ONE_ALPH
       },
-      tokens: [{ id: cpmmPoolId, amount: ONE_ALPH }],
+      tokens: [{ id: cpmmPoolId, amount: ONE_ALPH }]
     })
 
     const nodeProvider = web3.getCurrentNodeProvider()
@@ -170,23 +169,25 @@ describe('CLMM Protocol Swap Integration Test', () => {
     const lpVaultAddressFinal = addressFromContractId(lpVaultIdFinal)
 
     const lpBalanceBefore = await nodeProvider.addresses.getAddressesAddressBalance(lpVaultAddressFinal)
-    const lpAmountBefore = lpBalanceBefore.tokenBalances?.find(t => t.id === cpmmPoolId)?.amount ?? '0'
+    const lpAmountBefore = lpBalanceBefore.tokenBalances?.find((t) => t.id === cpmmPoolId)?.amount ?? '0'
     expect(BigInt(lpAmountBefore)).toBeGreaterThan(0n)
 
     await powfi.staking.burnProtocolFeesCPMM(cpmmFixture.tokenId0, cpmmFixture.tokenId1)
 
     const lpBalanceAfterBurn = await nodeProvider.addresses.getAddressesAddressBalance(lpVaultAddressFinal)
-    const lpAmountAfter = lpBalanceAfterBurn.tokenBalances?.find(t => t.id === cpmmPoolId)?.amount ?? '0'
+    const lpAmountAfter = lpBalanceAfterBurn.tokenBalances?.find((t) => t.id === cpmmPoolId)?.amount ?? '0'
     expect(BigInt(lpAmountAfter)).toBe(0n)
 
     // Check released tokens (token1) in LP vault
-    const token1AmountAfterBurn = lpBalanceAfterBurn.tokenBalances?.find(t => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
+    const token1AmountAfterBurn =
+      lpBalanceAfterBurn.tokenBalances?.find((t) => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
     expect(BigInt(token1AmountAfterBurn)).toBeGreaterThan(0n)
 
     await powfi.staking.swapProtocolFeesCPMM(cpmmPoolId, cpmmFixture.tokenId1)
 
     const lpBalanceAfterSwap = await nodeProvider.addresses.getAddressesAddressBalance(lpVaultAddressFinal)
-    const token1AmountAfterSwap = lpBalanceAfterSwap.tokenBalances?.find(t => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
+    const token1AmountAfterSwap =
+      lpBalanceAfterSwap.tokenBalances?.find((t) => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
     expect(BigInt(token1AmountAfterSwap)).toBe(0n)
 
     // Transfer ALPH to collector

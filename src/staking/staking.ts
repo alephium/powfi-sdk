@@ -21,7 +21,8 @@ import type {
   XAlphStakeVaultTypes,
   XAlphTokenInstance,
   XAlphTokenTypes,
-  DistributorVaultTypes
+  DistributorVaultTypes,
+  DistributorVaultInstance
 } from 'staking/artifacts/ts'
 import {
   AlphUnstakeVault,
@@ -32,9 +33,7 @@ import {
   XAlphToken,
   XAlphUnlockAndStartUnstake,
   DistributorVault,
-  CollectProtocolCLMMToken,
-  SwapProtocolFeesCLMM,
-  SwapProtocolFeesCPMM
+  CollectProtocolCLMMToken
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -352,11 +351,19 @@ export class StakingModule extends ModuleBase {
     return DistributorVault.at(addressFromContractId(vaultId))
   }
 
-  async collectProtocolFees(
-    factoryId: string,
-    lpToken: string,
-    data: string
-  ): Promise<ExecuteScriptResult> {
+  async getVaultState(token: string) {
+    const vault = this.getVault(token)
+    const state = await vault.fetchState()
+    const balances = await this.scope.nodeProvider.addresses.getAddressesAddressBalance(vault.address)
+    return {
+      address: vault.address,
+      id: vault.contractId,
+      state,
+      balances
+    }
+  }
+
+  async collectProtocolFees(factoryId: string, lpToken: string, data: string): Promise<ExecuteScriptResult> {
     const vault = this.getVault(lpToken)
     return await vault.transact.collectProtocolFees({
       signer: this.scope.signer,
@@ -389,14 +396,11 @@ export class StakingModule extends ModuleBase {
     })
   }
   async swapProtocolFeesCLMM(token: string, configIndex: bigint): Promise<ExecuteScriptResult> {
-    return await SwapProtocolFeesCLMM.execute({
+    const vault = this.getVault(token)
+    return await vault.transact.swapFeesOnCLMM({
       signer: this.scope.signer,
-      initialFields: {
-        collector: this.config.feeCollectorId,
-        token,
-        configIndex
-      },
-      attoAlphAmount: DUST_AMOUNT * 3n
+      args: { tokenId: token, configIndex },
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
   }
 

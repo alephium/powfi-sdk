@@ -522,32 +522,6 @@ export class CpmmModule extends ModuleBase {
     })
   }
 
-  async migrateDexAccount(newBytecode: string): Promise<ExecuteScriptResult> {
-    const signerAccount = await this.scope.signer.getSelectedAccount()
-    const accountId = await this.getDexAccountId(signerAccount.address)
-    const account = DexAccount.at(addressFromContractId(accountId))
-    return await account.transact.upgrade({
-      signer: this.scope.signer,
-      args: { newCode: newBytecode, path: '' }
-    })
-  }
-
-  async getAccountRoot(): Promise<string> {
-    if (this.config.accountRoot) {
-      return this.config.accountRoot
-    }
-    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
-    const state = await factory.fetchState()
-    return state.fields.dexAccount0
-  }
-
-  async getDexAccountId(owner: string): Promise<string> {
-    const group = this.config.groupIndex
-    const path = binToHex(addressToBytes(owner))
-    const accountRoot = await this.getAccountRoot()
-    return subContractId(accountRoot, path, group)
-  }
-
   getCpmmConfig(): CpmmConfig {
     const networkId = this.scope.network.id
     try {

@@ -1,24 +1,8 @@
-import {
-  MINIMAL_CONTRACT_DEPOSIT,
-  ONE_ALPH,
-  addressFromContractId,
-  binToHex,
-  subContractId,
-  web3,
-  DUST_AMOUNT,
-  ALPH_TOKEN_ID,
-  groupOfAddress,
-  SignerProvider
-} from '@alephium/web3'
+import type { SignerProvider } from '@alephium/web3'
+import { ONE_ALPH, web3, DUST_AMOUNT, ALPH_TOKEN_ID, groupOfAddress } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import {
-  TokenPair,
-  TokenPairFactory,
-  DexAccount,
-  TokenPairFactoryInstance,
-  DexAccountInstance,
-  CreatePairAndAddLiquidity
-} from '../../../cpmm/artifacts/ts'
+import type { TokenPairFactoryInstance, DexAccountInstance } from '../../../cpmm/artifacts/ts'
+import { TokenPair, TokenPairFactory, DexAccount, CreatePairAndAddLiquidity } from '../../../cpmm/artifacts/ts'
 import { Powfi } from '../../../src/powfi'
 import { sortTokens } from '../../../src/common/utils'
 
@@ -45,7 +29,7 @@ export class Fixture {
     readonly tokenId1: string,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) { }
+  ) {}
 
   static async create(isAlph: boolean = false): Promise<Fixture> {
     const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
@@ -105,11 +89,12 @@ export class Fixture {
   async createPool(amount0: bigint, amount1: bigint) {
     const [t0, t1] = [this.tokenId0, this.tokenId1]
     const [a0, a1] = [amount0, amount1]
+    const deployer = await this.deployer.getSelectedAccount()
 
     return await CreatePairAndAddLiquidity.execute({
       signer: this.deployer,
       initialFields: {
-        payer: this.deployer.address,
+        payer: deployer.address,
         factory: this.factory.contractId,
         alphAmount: ONE_ALPH,
         token0Id: t0,

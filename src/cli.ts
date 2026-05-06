@@ -7,7 +7,7 @@ import { TickUtils } from './clmm/tick'
 import { ClmmLiquidityUtils } from './clmm/liquidity'
 import { sortTokens } from './common/utils'
 import Decimal from 'decimal.js'
-import { Position } from 'clmm'
+import { Position, DexAccount } from 'clmm'
 import { PoolUtils } from './clmm/pool'
 import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
@@ -27,6 +27,7 @@ async function main() {
     console.log('  stake')
     console.log('  token')
     console.log('  collector')
+    console.log('  ref create [referrer] | info [address] | set-parents | upgrade [address] | migrate')
     return
   }
 
@@ -173,8 +174,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-            .div(new Decimal(actualIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(actualIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -219,8 +220,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-            .div(new Decimal(amountIn.toString()))
-            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+          .div(new Decimal(amountIn.toString()))
+          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
@@ -1005,8 +1006,8 @@ async function main() {
     } else if (action === 'protocol-swap') {
       console.log(`Swapping collected protocol fees for ${symbolA}/${symbolB} (Config ${configIndex}) to ALPH...`)
       try {
+        console.log(`Swapping ${t1Info.symbol} for ALPH...`)
         const result = await powfi.staking.swapProtocolFeesCLMM(t1Info.id, config.configIndex)
-
         console.log(`Protocol swap submitted: ${result.txId}`)
         await waitForTx(result.txId)
 
@@ -1103,7 +1104,7 @@ async function main() {
       console.log('  sim-swap <symbolIn> <amountIn> # Simulation of swap')
       console.log('  info                        # Show reserves and price')
       console.log('  collect-protocol            # Collect protocol fees')
-      console.log('  protocol-swap <symbol>      # Swap collected fees for ALPH')
+      console.log('  protocol-swap               # Swap collected fees for ALPH')
       console.log('  protocol-burn               # Burn LP fees for underlying tokens')
       console.log('  protocol-transfer <symbol>  # Transfer fees from LP vault to destination vault/collector')
       console.log('  migrate-factory <newBytecode>')
@@ -1459,18 +1460,14 @@ async function main() {
         console.error('Failed to collect protocol fees from CPMM pool:', error)
       }
     } else if (action === 'protocol-swap') {
-      const symbolIn = actionArgs[0]
-      if (!symbolIn) {
-        console.log('Usage: cpmm <T1> <T2> protocol-swap <symbol>')
-        return
-      }
       try {
         const [id0, id1] = sortTokens(tokenA.id, tokenB.id)
         const cpmmConfig = powfi.cpmm.getCpmmConfig()
         const lpTokenId = subContractId(cpmmConfig.factoryId, id0 + id1, cpmmConfig.groupIndex)
 
-        const tokenIn = await getTokenInfo(symbolIn)
-        const result = await powfi.staking.swapProtocolFeesCPMM(lpTokenId, tokenIn.id)
+        const t1 = id1 === tokenA.id ? tokenA : tokenB
+        console.log(`Swapping ${t1.symbol} for ALPH...`)
+        const result = await powfi.staking.swapProtocolFeesCPMM(lpTokenId, t1.id)
         console.log(`Protocol fee swap submitted: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('Protocol fee swap confirmed.')
@@ -1500,7 +1497,7 @@ async function main() {
 
         const tokenTransfer = await getTokenInfo(symbolTransfer)
         const result =
-          symbolTransfer === 'ALPH'
+          tokenTransfer.id === ALPH_TOKEN_ID
             ? await powfi.staking.transferProtocolFeesALPH(lpTokenId)
             : await powfi.staking.transferProtocolFees(lpTokenId, tokenTransfer.id)
 
@@ -1537,20 +1534,6 @@ async function main() {
         console.log('Pool migration confirmed.')
       } catch (error) {
         console.error('Failed to migrate pool:', error)
-      }
-    } else if (action === 'migrate-account') {
-      const newBytecode = actionArgs[0]
-      if (newBytecode === undefined) {
-        console.log('Usage: cpmm migrate-account <newBytecode>')
-        return
-      }
-      try {
-        const result = await powfi.cpmm.migrateDexAccount(newBytecode)
-        console.log(`Account migration submitted: ${result.txId}`)
-        await waitForTx(result.txId)
-        console.log('Account migration confirmed.')
-      } catch (error) {
-        console.error('Failed to migrate account:', error)
       }
     } else {
       console.log(`Unknown action ${action} for module cpmm`)
@@ -1749,19 +1732,39 @@ async function main() {
     if (!action) {
       console.log('Usage: npx ts-node src/cli.ts collector <action> [args...]')
       console.log('Available actions:')
-      console.log('  info       # Show collector stats (reward rate, burn rate, balance)')
+      console.log('  info [symbol] # Show collector stats or specific vault info')
       console.log('  rr <%>     # Set reward rate (percent per year)')
       console.log('  br <%>     # Set burn rate (percent of rewards to burn)')
       console.log('  distribute # Manually trigger reward distribution')
       console.log('  enable <symbol> # Enable token for collection')
       console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
-      console.log('  upgrade          # Upgrade collector contract')
       console.log('  set-clmm-factory # Set CLMM factory ID automatically')
       console.log('  set-cpmm-factory # Set CPMM factory ID automatically')
       return
     }
 
     if (action === 'info') {
+      const symbol = args[2]
+      if (symbol) {
+        try {
+          const token = await getTokenInfo(symbol)
+          const info = await powfi.staking.getVaultState(token.id)
+          console.log(`\nVault Info for ${token.symbol}:`)
+          console.log(`- Address: ${info.address}`)
+          console.log(`- ID:      ${info.id}`)
+          console.log(`- Owner:   ${info.state.fields.owner}`)
+
+          console.log('\nBalances:')
+          for (const balance of info.balances.tokenBalances ?? []) {
+            const bToken = await getTokenInfo(balance.id)
+            console.log(`- ${bToken.symbol.padEnd(12)}: ${formatAmount(BigInt(balance.amount), bToken.decimals)}`)
+          }
+          console.log(`- ALPH:         ${formatAmount(BigInt(info.balances.balance), 18)}`)
+        } catch (error) {
+          console.error('Failed to get vault info:', error)
+        }
+        return
+      }
       try {
         const feeCollectorId = powfi.staking.getConfig().feeCollectorId
         const feeCollectorAddress = addressFromContractId(feeCollectorId)
@@ -1919,6 +1922,84 @@ async function main() {
       }
     } else {
       console.log(`Unknown action ${action} for module collector`)
+    }
+  } else if (command === 'ref') {
+    const action = args[1]
+    if (!action) {
+      console.log('Usage: npx ts-node src/cli.ts ref <action> [args]')
+      console.log('Actions:')
+      console.log('  create [referrer] # Create a new referral account')
+      console.log('  info [address]    # Show referral account info/stats')
+      console.log('  set-parents       # Set protocol factories as account parents')
+      console.log('  upgrade [address] # Upgrade referral account bytecode')
+      console.log('  migrate           # Migrate root account template bytecode')
+      return
+    }
+
+    if (action === 'create') {
+      const referrer = args[2] || (await powfi.signer.getSelectedAccount()).address
+      console.log(`Creating referral account with referrer ${referrer}...`)
+      try {
+        const res = await powfi.clmm.createDexAccount(referrer)
+        console.log(`- Submitted: ${res.txId}`)
+        await waitForTx(res.txId)
+        console.log('Referral account created.')
+      } catch (error) {
+        console.error('Failed to create referral account:', error)
+      }
+    } else if (action === 'info') {
+      const address = args[2] || (await powfi.signer.getSelectedAccount()).address
+      try {
+        const info = await powfi.clmm.getDexAccountState(address)
+        console.log(`\nReferral Account Info for ${address}:`)
+        console.log(`- Address:   ${info.address}`)
+        console.log(`- ID:        ${info.id}`)
+        console.log(`- Owner:     ${info.state.fields.owner}`)
+        console.log(`- Referrer:  ${info.state.fields.refferer}`)
+        console.log(`- Counter:   ${info.state.fields.counter}`)
+      } catch (error) {
+        console.error(`Failed to get referral account info for ${address}:`, error)
+      }
+    } else if (action === 'set-parents') {
+      console.log('Setting up referral account parents...')
+      try {
+        const clmmFactory = powfi.clmm.getConfig().factoryId
+        const cpmmFactory = powfi.cpmm.getCpmmConfig().factoryId
+        console.log(`- CLMM Factory: ${clmmFactory}`)
+        console.log(`- CPMM Factory: ${cpmmFactory}`)
+
+        const res = await powfi.clmm.setParents([clmmFactory, cpmmFactory])
+        console.log(`- Submitted: ${res.txId}`)
+        await waitForTx(res.txId)
+        console.log('Referral account parents setup completed.')
+      } catch (error) {
+        console.error('Failed to setup referral account parents:', error)
+      }
+    } else if (action === 'migrate') {
+      const newCode = DexAccount.contract.bytecode
+      console.log(`Migrating referral account root template...`)
+      try {
+        const res = await powfi.clmm.migrateDexAccount(newCode)
+        console.log(`- Submitted: ${res.txId}`)
+        await waitForTx(res.txId)
+        console.log('Root template migrated.')
+      } catch (error) {
+        console.error('Failed to migrate root template:', error)
+      }
+    } else if (action === 'upgrade') {
+      const address = args[2] || (await powfi.signer.getSelectedAccount()).address
+      const newCode = DexAccount.contract.bytecode
+      console.log(`Upgrading referral account for ${address}...`)
+      try {
+        const res = await powfi.clmm.upgradeUserDexAccount(address, newCode)
+        console.log(`- Submitted: ${res.txId}`)
+        await waitForTx(res.txId)
+        console.log('Referral account upgraded.')
+      } catch (error) {
+        console.error('Failed to upgrade referral account:', error)
+      }
+    } else {
+      console.log(`Unknown action ${action} for module ref`)
     }
   } else {
     console.log(`Unknown module ${command}`)

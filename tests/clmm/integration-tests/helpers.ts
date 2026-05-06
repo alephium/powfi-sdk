@@ -24,7 +24,6 @@ import {
   Tick,
   PositionManager
 } from 'clmm/artifacts/ts'
-import { RewardFeeCollector, ALPHLock, DistributorVault } from 'staking/artifacts/ts'
 import { TickUtils } from '../../../src/clmm/tick'
 import { Powfi } from '../../../src/powfi'
 import { ClmmLiquidityUtils, MAX_TICK, MIN_TICK, PoolUtils, sortTokens } from '../../../src'
@@ -120,7 +119,9 @@ export class Fixture {
           owner: address,
           refferer: address,
           parents: ['', '']
-        }
+        },
+        issueTokenTo: address,
+        issueTokenAmount: 1n,
       })
     ).contractInstance
 
