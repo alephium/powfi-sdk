@@ -5,9 +5,7 @@ import {
   subContractId,
   ALPH_TOKEN_ID,
   ONE_ALPH,
-  prettifyTokenAmount,
-  binToHex,
-  addressToBytes
+  prettifyTokenAmount
 } from '@alephium/web3'
 import {
   TokenPair as TokenPairContract,
@@ -17,8 +15,7 @@ import {
   RemoveLiquidity,
   CreatePair,
   CreatePairAndAddLiquidity,
-  TokenPairFactory,
-  DexAccount
+  TokenPairFactory
 } from 'cpmm/artifacts/ts'
 import { loadDeployments } from 'cpmm/artifacts/ts/deployments'
 import type { TokenInfo } from '@alephium/token-list'
@@ -172,7 +169,7 @@ export class CpmmModule extends ModuleBase {
         throw new InsufficientBalanceError(
           swapDetails.tokenInInfo.symbol,
           prettifyTokenAmount(swapDetails.tokenInAmount, swapDetails.tokenInInfo.decimals) ??
-          `${swapDetails.tokenInAmount}`,
+            `${swapDetails.tokenInAmount}`,
           prettifyTokenAmount(available, swapDetails.tokenInInfo.decimals) ?? `${available}`
         )
       }

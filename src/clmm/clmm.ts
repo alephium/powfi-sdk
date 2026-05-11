@@ -32,7 +32,13 @@ import type {
   ClmmPositionInfo,
   ClmmPoolRewardState
 } from './types'
-import type { DexAccountInstance, PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts'
+import type {
+  DexAccountInstance,
+  PoolInstance,
+  PoolTypes,
+  PositionManagerInstance,
+  PositionManagerTypes
+} from 'clmm/artifacts/ts'
 import {
   CreateLiquidPool,
   Pool,
@@ -727,7 +733,7 @@ export class ClmmModule extends ModuleBase {
   }
 
   async upgradeUserDexAccount(owner: string, newBytecode: string): Promise<SignExecuteScriptTxResult> {
-    const accountId = await this.getDexAccountId(owner)
+    const accountId = this.getDexAccountId(owner)
     const account = DexAccount.at(addressFromContractId(accountId))
     const path = binToHex(addressToBytes(owner))
     return await account.transact.upgrade({
@@ -741,7 +747,7 @@ export class ClmmModule extends ModuleBase {
     return DexAccount.at(addressFromContractId(this.config.accountRoot))
   }
 
-  async getDexAccountId(owner: string): Promise<string> {
+  getDexAccountId(owner: string): string {
     const group = this.config.groupIndex
     const path = binToHex(addressToBytes(owner))
     const accountRoot = this.config.accountRoot
@@ -749,7 +755,7 @@ export class ClmmModule extends ModuleBase {
   }
 
   async getDexAccountState(owner: string) {
-    const accountId = await this.getDexAccountId(owner)
+    const accountId = this.getDexAccountId(owner)
     const account = DexAccount.at(addressFromContractId(accountId))
     return {
       address: account.address,

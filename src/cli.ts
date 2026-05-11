@@ -174,8 +174,8 @@ async function main() {
       actualIn === 0n
         ? new Decimal(0)
         : new Decimal(actualOut.toString())
-          .div(new Decimal(actualIn.toString()))
-          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+            .div(new Decimal(actualIn.toString()))
+            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     const isT0 = tokenIn.id === t0.id
     const baseP = isT0 ? prePrice : prePrice.isZero() ? new Decimal(0) : new Decimal(1).div(prePrice)
@@ -220,8 +220,8 @@ async function main() {
       amountIn === 0n
         ? new Decimal(0)
         : new Decimal(amountOut.toString())
-          .div(new Decimal(amountIn.toString()))
-          .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
+            .div(new Decimal(amountIn.toString()))
+            .mul(new Decimal(10).pow(tokenIn.decimals - tokenOut.decimals))
 
     console.log(`- Execution Price: ${execPrice.toFixed(10)} ${tokenOut.symbol}/${tokenIn.symbol}`)
     console.log(`- Price Impact:    ${new Decimal(priceImpact.toString()).toFixed(4)}%`)
