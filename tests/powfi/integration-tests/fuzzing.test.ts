@@ -1,6 +1,16 @@
-import { web3, stringToHex, ONE_ALPH, subContractId, addressFromContractId, DUST_AMOUNT, MINIMAL_CONTRACT_DEPOSIT, ALPH_TOKEN_ID, codec, binToHex } from '@alephium/web3'
+/* eslint-disable */
+import {
+    web3,
+    ONE_ALPH,
+    subContractId,
+    addressFromContractId,
+    DUST_AMOUNT,
+    ALPH_TOKEN_ID,
+    codec,
+    binToHex
+} from '@alephium/web3'
 import { getSigners } from '@alephium/web3-test'
-import { FuzzCreateFactories, FuzzingTestFactory, PoolFactory, Pool, FuzzClmmAddLiquidity, FuzzSwapAllPools, PositionManager } from 'clmm'
+import { FuzzCreateFactories, FuzzingTestFactory, PoolFactory, Pool, PositionManager } from 'clmm'
 import { TokenPairFactory, TokenPair } from 'cpmm'
 import { describe, test } from 'vitest'
 import { Powfi } from '../../../src/powfi'
@@ -25,9 +35,7 @@ async function run() {
     const fakeClmmTemplateId = clmmDeployments.contracts.PoolFactory.contractInstance.contractId
     const fakeCpmmTemplateId = cpmmDeployments.contracts.TokenPairFactory.contractInstance.contractId
     console.log(addressFromContractId(fakeClmmTemplateId), addressFromContractId(fakeCpmmTemplateId))
-    const {
-        contractInstance: factory
-    } = await FuzzingTestFactory.deploy(signers[0], {
+    const { contractInstance: factory } = await FuzzingTestFactory.deploy(signers[0], {
         initialFields: {
             fakeClmmTemplateId,
             fakeCpmmTemplateId,
@@ -45,16 +53,19 @@ async function run() {
     const userTokens: string[] = []
     const userCpmmFactories: string[] = []
     const userClmmFactories: string[] = []
-    const userPositions: Record<string, {
-        clmmPoolId: string;
-        tokenId0: string;
-        tokenId1: string;
-        tickLower: bigint;
-        tickUpper: bigint;
-        liquidity: bigint;
-        configIndex: bigint;
-    }[]> = {}
-    const poolToOwner: Record<string, { signer: any, clmmFactoryId: string }> = {}
+    const userPositions: Record<
+        string,
+        {
+            clmmPoolId: string
+            tokenId0: string
+            tokenId1: string
+            tickLower: bigint
+            tickUpper: bigint
+            liquidity: bigint
+            configIndex: bigint
+        }[]
+    > = {}
+    const poolToOwner: Record<string, { signer: any; clmmFactoryId: string }> = {}
 
     console.log(`Each signer is deploying their own factories and token...`)
     for (let i = 0; i < signers.length; i++) {
@@ -69,7 +80,7 @@ async function run() {
         })
 
         const events = await web3.getCurrentNodeProvider().events.getEventsTxIdTxid(tx.txId)
-        const creationEvent = events.events.find(e => e.eventIndex === 0)
+        const creationEvent = events.events.find((e) => e.eventIndex === 0)
         if (!creationEvent) throw new Error('FactoriesCreated event not found')
 
         // fields: caller, clmmFactoryId, cpmmFactoryId, tokenId
@@ -93,7 +104,7 @@ async function run() {
 
         const destinations = signers
             .filter((_, idx) => idx !== i)
-            .map(s => ({
+            .map((s) => ({
                 address: s.address,
                 attoAlphAmount: DUST_AMOUNT,
                 tokens: [{ id: tokenId, amount: amountPerUser }]
@@ -294,7 +305,9 @@ async function run() {
         try {
             const clmmPool = Pool.at(addressFromContractId(pos.clmmPoolId))
             const positionId = powfi.clmm.getPositionId(pos.clmmPoolId, swapSigner.address, pos.tickLower, pos.tickUpper)
-            const positionManager = PositionManager.at(addressFromContractId(clmmDeployments.contracts.PositionManager.contractInstance.contractId))
+            const positionManager = PositionManager.at(
+                addressFromContractId(clmmDeployments.contracts.PositionManager.contractInstance.contractId)
+            )
 
             // Collect tokens/rewards first
             await positionManager.transact.collect({
@@ -347,9 +360,7 @@ async function run() {
                     await clmmPool.transact.burn({
                         signer: swapSigner,
                         attoAlphAmount: ONE_ALPH / 10n,
-                        tokens: [
-                            { id: positionId, amount: 1n }
-                        ],
+                        tokens: [{ id: positionId, amount: 1n }],
                         args: {
                             operator: swapSigner.address,
                             owner: swapSigner.address,
