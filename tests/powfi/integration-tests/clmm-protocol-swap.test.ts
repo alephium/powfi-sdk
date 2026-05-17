@@ -9,7 +9,7 @@ import {
 import { Fixture as ClmmFixture } from '../../clmm/integration-tests/helpers'
 import { Fixture as StakingFixture } from '../../staking/integration-tests/helpers'
 import { Fixture as CpmmFixture } from '../../cpmm/integration-tests/helpers'
-import { TokenPair } from '../../../cpmm/artifacts/ts'
+import { TokenPair } from 'cpmm'
 
 import { getSigners } from '@alephium/web3-test'
 import { Powfi } from '../../../src/powfi'

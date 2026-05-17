@@ -1,8 +1,8 @@
 import type { SignerProvider } from '@alephium/web3'
 import { ONE_ALPH, web3, DUST_AMOUNT, ALPH_TOKEN_ID, groupOfAddress } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import type { TokenPairFactoryInstance, DexAccountInstance } from '../../../cpmm/artifacts/ts'
-import { TokenPair, TokenPairFactory, DexAccount, CreatePairAndAddLiquidity } from '../../../cpmm/artifacts/ts'
+import type { TokenPairFactoryInstance, DexAccountInstance } from 'cpmm'
+import { TokenPair, TokenPairFactory, DexAccount, CreatePairAndAddLiquidity } from 'cpmm'
 import { Powfi } from '../../../src/powfi'
 import { sortTokens } from '../../../src/common/utils'
 
