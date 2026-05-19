@@ -183,6 +183,7 @@ describe('CLMM Protocol Swap Integration Test', () => {
       lpBalanceAfterBurn.tokenBalances?.find((t) => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
     expect(BigInt(token1AmountAfterBurn)).toBeGreaterThan(0n)
 
+    const collectorBalanceBeforeCpmmSwap = await nodeProvider.addresses.getAddressesAddressBalance(rewardCollector.address)
     await powfi.staking.swapProtocolFeesCPMM(cpmmPoolId, cpmmFixture.tokenId1)
 
     const lpBalanceAfterSwap = await nodeProvider.addresses.getAddressesAddressBalance(lpVaultAddressFinal)
@@ -190,10 +191,8 @@ describe('CLMM Protocol Swap Integration Test', () => {
       lpBalanceAfterSwap.tokenBalances?.find((t) => t.id === cpmmFixture.tokenId1)?.amount ?? '0'
     expect(BigInt(token1AmountAfterSwap)).toBe(0n)
 
-    // Transfer ALPH to collector
-    await powfi.staking.transferALPH(cpmmPoolId)
-    const lpBalanceAfterTransfer = await nodeProvider.addresses.getAddressesAddressBalance(lpVaultAddressFinal)
-    expect(BigInt(lpBalanceAfterTransfer.balance)).toBeLessThan(BigInt(lpBalanceAfterSwap.balance))
+    const collectorBalanceAfterCpmmSwap = await nodeProvider.addresses.getAddressesAddressBalance(rewardCollector.address)
+    expect(BigInt(collectorBalanceAfterCpmmSwap.balance)).toBeGreaterThan(BigInt(collectorBalanceBeforeCpmmSwap.balance))
 
     // d. Set reward rate and Distribute Rewards to xALPH holders
     await stakingFixture.powfi.staking.setRewardRate(1000n)
