@@ -212,8 +212,8 @@ async function run() {
         }
     }
 }
-// describe('Powfi Fuzzing 2 Gas Tests', () => {
-// test('Long running test', async () => {
-run()
-// }, 2_000_000_000)
-// })
+describe('Powfi Fuzzing 2 Gas Tests', () => {
+    test.skip('Long running test', async () => {
+        await run()
+    }, 2_000_000_000)
+})

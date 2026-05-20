@@ -52,7 +52,7 @@ export class Fixture {
         counter: 0n,
         owner: address,
         parents: ['', ''],
-        refferer: address
+        referrer: address
       }
     })
     const dexAccountTemplate = dexAccountTemplateDeploy.contractInstance

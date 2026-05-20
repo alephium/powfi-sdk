@@ -117,7 +117,7 @@ export class Fixture {
         initialFields: {
           counter: 0n,
           owner: address,
-          refferer: address,
+          referrer: address,
           parents: ['', '']
         },
         issueTokenTo: address,

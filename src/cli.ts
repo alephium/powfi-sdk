@@ -1955,7 +1955,7 @@ async function main() {
         console.log(`- Address:   ${info.address}`)
         console.log(`- ID:        ${info.id}`)
         console.log(`- Owner:     ${info.state.fields.owner}`)
-        console.log(`- Referrer:  ${info.state.fields.refferer}`)
+        console.log(`- Referrer:  ${info.state.fields.referrer}`)
         console.log(`- Counter:   ${info.state.fields.counter}`)
       } catch (error) {
         console.error(`Failed to get referral account info for ${address}:`, error)
