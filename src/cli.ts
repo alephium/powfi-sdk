@@ -883,7 +883,7 @@ async function main() {
         })
       } catch (error: any) {
         if (error?.message?.includes('Error Code: 501') || error?.trace?.message?.includes('Error Code: 501')) {
-          console.error('\nError: Price limit violated (SPL). The target price may already be past the current price.')
+          console.error('\nError: Price limit violated. The target price may already be past the current price.')
         } else {
           console.error('Failed to swap-to:', error)
         }
