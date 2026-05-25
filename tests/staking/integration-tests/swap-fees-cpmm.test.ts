@@ -1,11 +1,4 @@
-import {
-  MINIMAL_CONTRACT_DEPOSIT,
-  ONE_ALPH,
-  web3,
-  ALPH_TOKEN_ID,
-  DUST_AMOUNT,
-  addressFromContractId
-} from '@alephium/web3'
+import { ONE_ALPH, web3, addressFromContractId } from '@alephium/web3'
 import { getSigners, expectAssertionError } from '@alephium/web3-test'
 import { Fixture as StakingFixture } from './helpers'
 import { Fixture as CpmmFixture } from '../../cpmm/integration-tests/helpers'
@@ -150,10 +143,6 @@ describe('SDK swapFeesOnCPMM Integration Test', () => {
 
     powfi.signer = invalidCallerSigner
 
-    await expectAssertionError(
-      powfi.staking.swapProtocolFeesCPMM(cpmmPoolId, token1Id),
-      lpVaultAddress,
-      18
-    )
+    await expectAssertionError(powfi.staking.swapProtocolFeesCPMM(cpmmPoolId, token1Id), lpVaultAddress, 18)
   }, 120000)
 })
