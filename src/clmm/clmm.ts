@@ -479,6 +479,7 @@ export class ClmmModule extends ModuleBase {
           token0: p.token0,
           token1: p.token1,
           owner: normalizedOwner,
+          recipient: normalizedOperator,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
           amount0Min: amount0Min,
