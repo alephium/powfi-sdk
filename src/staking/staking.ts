@@ -262,6 +262,20 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  /** Force disconnects from a dapp without invoking its unstake callback. */
+  async disconnectFromDappWithoutUnstaking(
+    contractId: string
+  ): Promise<XAlphStakeVaultTypes.SignExecuteMethodResult<'disconnectFromDappWithoutUnstaking'>> {
+    if (!this.stakeVaultContract) {
+      throw new Error('Stake vault contract not initialized')
+    }
+    return this.stakeVaultContract.transact.disconnectFromDappWithoutUnstaking({
+      signer: this.scope.signer,
+      args: { contractId },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
+    })
+  }
+
   /** Returns the user's staked xALPH amount and list of connected dapps. */
   async getUserStakeVaultInfo(address: string): Promise<StakeVaultUserInfo> {
     if (!this.stakeVaultContract) {
