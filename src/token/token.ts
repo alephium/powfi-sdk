@@ -60,10 +60,6 @@ export class TokenModule extends ModuleBase {
     if (!tokenInfo) {
       throw new Error(`Unknown token, symbol not found in token list: ${symbol}`)
     }
-    if (symbol === 'xALPH') {
-      const xAlphId = this.scope.staking.getConfig().xAlphTokenId
-      return { ...tokenInfo, id: xAlphId }
-    }
     return tokenInfo
   }
 

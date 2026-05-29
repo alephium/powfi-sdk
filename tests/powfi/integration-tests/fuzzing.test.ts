@@ -44,9 +44,9 @@ async function run() {
       tickTemplate: clmmDeployments.contracts.Tick.contractInstance.contractId,
       wordTemplate: clmmDeployments.contracts.BitmapWord.contractInstance.contractId,
       poolConfigTemplate: clmmDeployments.contracts.PoolConfig.contractInstance.contractId,
-      clmmDexAccountRoot: clmmDeployments.contracts.DexAccount.contractInstance.contractId,
+      clmmDexAccountRoot: clmmDeployments.contracts.DexAccountRoot!.contractInstance.contractId,
       cpmmPairTemplateId: cpmmDeployments.contracts.TokenPair.contractInstance.contractId,
-      cpmmDexAccount0: clmmDeployments.contracts.DexAccount.contractInstance.contractId
+      cpmmDexAccount0: clmmDeployments.contracts.DexAccountRoot!.contractInstance.contractId
     }
   })
 

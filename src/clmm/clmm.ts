@@ -33,7 +33,7 @@ import type {
   ClmmPoolRewardState
 } from './types'
 import type {
-  DexAccountInstance,
+  DexAccountRootInstance,
   PoolInstance,
   PoolTypes,
   PositionManagerInstance,
@@ -45,6 +45,7 @@ import {
   PoolConfig,
   PoolFactory,
   DexAccount,
+  DexAccountRoot,
   PositionManager,
   SwapWithoutAccount
 } from 'clmm/artifacts/ts'
@@ -611,7 +612,6 @@ export class ClmmModule extends ModuleBase {
     return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
       initialFields: {
-        dexAccount: this.config.accountRoot,
         pool: pool.contractId,
         tokenIn,
         tokenOut,
@@ -725,27 +725,24 @@ export class ClmmModule extends ModuleBase {
   }
 
   async migrateDexAccount(newBytecode: string): Promise<SignExecuteScriptTxResult> {
-    const dexRoot = DexAccount.at(addressFromContractId(this.config.accountRoot))
+    const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
     return await dexRoot.transact.upgrade({
       signer: this.scope.signer,
-      args: { newCode: newBytecode, tokenId: this.config.accountRoot, path: '' },
-      tokens: [{ id: this.config.accountRoot, amount: 1n }]
+      args: { newCode: newBytecode }
     })
   }
 
   async upgradeUserDexAccount(owner: string, newBytecode: string): Promise<SignExecuteScriptTxResult> {
+    const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
     const accountId = this.getDexAccountId(owner)
-    const account = DexAccount.at(addressFromContractId(accountId))
-    const path = binToHex(addressToBytes(owner))
-    return await account.transact.upgrade({
+    return await dexRoot.transact.upgradeDexAccount({
       signer: this.scope.signer,
-      args: { newCode: newBytecode, tokenId: this.config.accountRoot, path },
-      tokens: [{ id: this.config.accountRoot, amount: 1n }]
+      args: { newCode: newBytecode, dexAccount: accountId }
     })
   }
 
-  getDexAccountRoot(): DexAccountInstance {
-    return DexAccount.at(addressFromContractId(this.config.accountRoot))
+  getDexAccountRoot(): DexAccountRootInstance {
+    return DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
   }
 
   getDexAccountId(owner: string): string {
@@ -766,8 +763,8 @@ export class ClmmModule extends ModuleBase {
   }
 
   async createDexAccount(referrer: string): Promise<ExecuteScriptResult> {
-    const template = DexAccount.at(addressFromContractId(this.config.accountRoot))
-    return await template.transact.createAccount({
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.createAccount({
       signer: this.scope.signer,
       args: { ref: referrer },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
@@ -775,12 +772,10 @@ export class ClmmModule extends ModuleBase {
   }
 
   async setParents(parents: [string, string]): Promise<ExecuteScriptResult> {
-    const accountRoot = this.config.accountRoot
-    const account = DexAccount.at(addressFromContractId(accountRoot))
-    return await account.transact.setParents({
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.setParents({
       signer: this.scope.signer,
-      args: { newParents: parents },
-      tokens: [{ id: accountRoot, amount: 1n }]
+      args: { newParents: parents }
     })
   }
 
@@ -797,7 +792,7 @@ export class ClmmModule extends ModuleBase {
         factoryId: deployments.contracts.PoolFactory.contractInstance.contractId,
         positionManagerId: deployments.contracts.PositionManager.contractInstance.contractId,
         defaultConfigIndex: 0n,
-        accountRoot: deployments.contracts.DexAccount.contractInstance.contractId
+        accountRoot: deployments.contracts.DexAccountRoot.contractInstance.contractId
       }
     } catch (error) {
       this.logAndThrowError(`Failed to load deployments on ${networkId}`, error)

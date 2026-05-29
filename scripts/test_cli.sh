@@ -104,14 +104,14 @@ echo ""
 echo "2. Deposit"
 $CLI stake deposit 10
 
-echo ""
-echo "3. Start Unstake"
-# Note: uses the first vault index (0)
-$CLI stake start-unstake 5
+# Note: start-unstake is an SDK feature but not exposed in the CLI stake commands
+# echo ""
+# echo "3. Start Unstake"
+# $CLI stake start-unstake 5
 
 echo ""
 echo "4. Deposit Reward (Donation)"
-$CLI stake deposit-reward 1
+$CLI stake donate 1
 
 echo ""
 echo "5. Info (final)"

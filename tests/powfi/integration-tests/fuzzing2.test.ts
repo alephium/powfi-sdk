@@ -10,7 +10,7 @@ import {
   FuzzCollect,
   FuzzCleanup,
   FuzzCloseRewards,
-  DexAccount,
+  DexAccountRoot,
   FuzzPool,
   FuzzPoolInit,
   FuzzPoolClose
@@ -43,7 +43,7 @@ async function run() {
       tickTemplate: clmmDeployments.contracts.Tick.contractInstance.contractId,
       wordTemplate: clmmDeployments.contracts.BitmapWord.contractInstance.contractId,
       poolConfigTemplate: clmmDeployments.contracts.PoolConfig.contractInstance.contractId,
-      dexAccountRoot: clmmDeployments.contracts.DexAccount.contractInstance.contractId,
+      dexAccountRoot: clmmDeployments.contracts.DexAccountRoot.contractInstance.contractId,
       fuzzPositionTemplate: fuzzPositionTemplateInstance.contractId,
       fuzzPoolTemplate: fuzzPoolTemplateInstance.contractId,
       nextIndex: 0n,
@@ -52,7 +52,7 @@ async function run() {
     issueTokenAmount: U256_MAX,
     issueTokenTo: signer.address
   })
-  const dexRoot = DexAccount.at(clmmDeployments.contracts.DexAccount.contractInstance.address)
+  const dexRoot = DexAccountRoot.at(clmmDeployments.contracts.DexAccountRoot.contractInstance.address)
   const signer2 = PrivateKeyWallet.Random(signer.group)
   await dexRoot.transact.createAccount({
     signer,

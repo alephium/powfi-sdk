@@ -1,8 +1,8 @@
 import type { SignerProvider } from '@alephium/web3'
 import { ONE_ALPH, web3, DUST_AMOUNT, ALPH_TOKEN_ID, groupOfAddress } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import type { TokenPairFactoryInstance, DexAccountInstance } from 'cpmm'
-import { TokenPair, TokenPairFactory, DexAccount, CreatePairAndAddLiquidity } from 'cpmm'
+import type { TokenPairFactoryInstance, DummyDexRootInstance } from 'cpmm'
+import { TokenPair, TokenPairFactory, DummyDexRoot, CreatePairAndAddLiquidity } from 'cpmm'
 import { Powfi } from '../../../src/powfi'
 import { sortTokens } from '../../../src/common/utils'
 
@@ -24,7 +24,7 @@ export async function getBalances(address: string, tokenIds: string[]): Promise<
 export class Fixture {
   constructor(
     readonly factory: TokenPairFactoryInstance,
-    readonly dexAccountTemplate: DexAccountInstance,
+    readonly dexAccountTemplate: DummyDexRootInstance,
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly powfi: Powfi,
@@ -47,12 +47,9 @@ export class Fixture {
     const pairTemplateDeploy = await TokenPair.deployTemplate(deployer)
     const pairTemplate = pairTemplateDeploy.contractInstance
 
-    const dexAccountTemplateDeploy = await DexAccount.deploy(deployer, {
+    const dexAccountTemplateDeploy = await DummyDexRoot.deploy(deployer, {
       initialFields: {
-        counter: 0n,
-        owner: address,
-        parents: ['', ''],
-        referrer: address
+        owner: address
       }
     })
     const dexAccountTemplate = dexAccountTemplateDeploy.contractInstance
@@ -100,8 +97,7 @@ export class Fixture {
         token0Id: t0,
         token1Id: t1,
         amount0: a0,
-        amount1: a1,
-        dexAccount: this.dexAccountTemplate.contractId
+        amount1: a1
       },
       attoAlphAmount: ONE_ALPH + (t0 === ALPH_TOKEN_ID ? a0 : 0n) + (t1 === ALPH_TOKEN_ID ? a1 : 0n) + DUST_AMOUNT * 3n,
       tokens: [

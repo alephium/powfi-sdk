@@ -1,123 +1,97 @@
-import { ONE_ALPH, addressFromContractId, binToHex, addressToBytes, DUST_AMOUNT } from '@alephium/web3'
-import { getSigners, mintToken } from '@alephium/web3-test'
-import { DexAccount } from 'clmm/artifacts/ts'
+import { ONE_ALPH, addressFromContractId } from '@alephium/web3'
+import { getSigners } from '@alephium/web3-test'
+import { DexAccount, DexAccountRoot } from 'clmm/artifacts/ts'
 import { Fixture } from './helpers'
-import type { DexAccountInstance } from 'clmm/artifacts/ts'
+import type { DexAccountRootInstance } from 'clmm/artifacts/ts'
 import type { SignerProvider } from '@alephium/web3'
 
 describe('DexAccount Upgrade Integration Test', () => {
   let fixture: Fixture
   let owner: SignerProvider
   let ownerAddr: string
-  let dexRoot: DexAccountInstance
-  let newCode: string
+  let dexRoot: DexAccountRootInstance
+  let newRootCode: string
+  let newAccCode: string
 
   beforeAll(async () => {
     fixture = await Fixture.create()
     owner = fixture.deployer
     ownerAddr = (await owner.getSelectedAccount()).address
     dexRoot = fixture.powfi.clmm.getDexAccountRoot()
-    newCode = DexAccount.contract.bytecode
+    newRootCode = DexAccountRoot.contract.bytecode
+    newAccCode = DexAccount.contract.bytecode
     await fixture.powfi.clmm.createDexAccount(ownerAddr)
   })
 
-  it('should upgrade root template with NFT', async () => {
+  it('should upgrade root template', async () => {
     await dexRoot.transact.upgrade({
       signer: owner,
-      args: { newCode, tokenId: dexRoot.contractId, path: '' },
-      tokens: [{ id: dexRoot.contractId, amount: 1n }]
+      args: { newCode: newRootCode }
     })
   })
 
-  it('should fail to upgrade root template without NFT', async () => {
+  it('should fail to upgrade root template if caller is not owner', async () => {
+    const other = (await getSigners(2))[1]
     await expect(
       dexRoot.transact.upgrade({
-        signer: owner,
-        args: { newCode, tokenId: dexRoot.contractId, path: '' }
+        signer: other,
+        args: { newCode: newRootCode }
       })
     ).rejects.toThrow()
   })
 
   it('should upgrade root template using SDK migrateDexAccount', async () => {
-    await fixture.powfi.clmm.migrateDexAccount(newCode)
+    await fixture.powfi.clmm.migrateDexAccount(newRootCode)
   })
 
-  it('should upgrade user account using root template NFT', async () => {
+  it('should upgrade user account using root contract', async () => {
     const accountId = fixture.powfi.clmm.getDexAccountId(ownerAddr)
-    const account = DexAccount.at(addressFromContractId(accountId))
-    const path = binToHex(addressToBytes(ownerAddr))
-
-    await account.transact.upgrade({
+    await dexRoot.transact.upgradeDexAccount({
       signer: owner,
-      args: { newCode, tokenId: dexRoot.contractId, path },
-      tokens: [{ id: dexRoot.contractId, amount: 1n }]
+      args: { newCode: newAccCode, dexAccount: accountId }
     })
   })
 
-  it('should upgrade user account using SDK upgradeUserDexAccount', async () => {
-    const tx = await fixture.powfi.clmm.upgradeUserDexAccount(ownerAddr, newCode)
-    expect(tx.txId).toBeDefined()
-  })
-
-  it('should fail to upgrade root template with fake token', async () => {
-    const { tokenId: fakeTokenId } = await mintToken(ownerAddr, 1n)
-    await expect(
-      dexRoot.transact.upgrade({
-        signer: owner,
-        args: { newCode, tokenId: fakeTokenId, path: '' },
-        tokens: [{ id: fakeTokenId, amount: 1n }]
-      })
-    ).rejects.toThrow()
-  })
-
-  it('should fail to upgrade user account with invalid path', async () => {
+  it('should fail to upgrade user account directly', async () => {
     const accountId = fixture.powfi.clmm.getDexAccountId(ownerAddr)
     const account = DexAccount.at(addressFromContractId(accountId))
-    const invalidPath = binToHex(addressToBytes(fixture.factory.address)) // Use factory address as invalid path
-
     await expect(
       account.transact.upgrade({
         signer: owner,
-        args: { newCode, tokenId: dexRoot.contractId, path: invalidPath },
-        tokens: [{ id: dexRoot.contractId, amount: 1n }]
+        args: { newCode: newAccCode }
       })
     ).rejects.toThrow()
   })
 
-  it('should upgrade both root and user account after NFT transfer', async () => {
+  it('should upgrade user account using SDK upgradeUserDexAccount', async () => {
+    const tx = await fixture.powfi.clmm.upgradeUserDexAccount(ownerAddr, newAccCode)
+    expect(tx.txId).toBeDefined()
+  })
+
+  it('should upgrade both root and user account after ownership transfer', async () => {
     const [other] = await getSigners(1, 100n * ONE_ALPH)
     const otherAddr = (await other.getSelectedAccount()).address
 
     // 1. Create user account for owner
     const accountId = fixture.powfi.clmm.getDexAccountId(ownerAddr)
-    const account = DexAccount.at(addressFromContractId(accountId))
-    const path = binToHex(addressToBytes(ownerAddr))
 
-    // 2. Transfer root NFT and user account NFT to other
-    await owner.signAndSubmitTransferTx({
-      signerAddress: ownerAddr,
-      destinations: [
-        {
-          address: otherAddr,
-          tokens: [{ id: dexRoot.contractId, amount: 1n }],
-          attoAlphAmount: DUST_AMOUNT
-        }
-      ]
+    // 2. Transfer ownership of root to other
+    await dexRoot.transact.updateOwner({
+      signer: owner,
+      args: { newOwner: otherAddr }
     })
 
     // 3. Upgrade root using other
     const txRoot = await dexRoot.transact.upgrade({
       signer: other,
-      args: { newCode, tokenId: dexRoot.contractId, path: '' },
-      tokens: [{ id: dexRoot.contractId, amount: 1n }]
+      args: { newCode: newRootCode }
     })
     expect(txRoot.txId).toBeDefined()
 
     // 4. Upgrade user account using other
-    const txUser = await account.transact.upgrade({
+    const txUser = await dexRoot.transact.upgradeDexAccount({
       signer: other,
-      args: { newCode, tokenId: dexRoot.contractId, path },
-      tokens: [{ id: dexRoot.contractId, amount: 1n }]
+      args: { newCode: newAccCode, dexAccount: accountId }
     })
     expect(txUser.txId).toBeDefined()
   })

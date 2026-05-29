@@ -190,7 +190,6 @@ export class CpmmModule extends ModuleBase {
       const result = await SwapMinOut.execute({
         signer: this.scope.signer,
         initialFields: {
-          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,
@@ -215,7 +214,6 @@ export class CpmmModule extends ModuleBase {
       const result = await SwapMaxIn.execute({
         signer: this.scope.signer,
         initialFields: {
-          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,
@@ -437,7 +435,6 @@ export class CpmmModule extends ModuleBase {
       const { tokenAAmount, tokenBAmount } = initialLiquidity
       const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
       const [amount0, amount1] = token0Id === tokenAId ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount]
-      const state = await TokenPairFactory.at(addressFromContractId(this.config.factoryId)).fetchState()
 
       const result = await CreatePairAndAddLiquidity.execute({
         signer: this.scope.signer,
@@ -448,8 +445,7 @@ export class CpmmModule extends ModuleBase {
           token0Id,
           token1Id,
           amount0,
-          amount1,
-          dexAccount: state.fields.dexAccount0
+          amount1
         },
         attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenAId, tokenBId),
         tokens: [

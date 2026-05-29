@@ -13,10 +13,11 @@ import {
   ALPH_TOKEN_ID
 } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import type { DexAccountInstance, PoolFactoryInstance, PoolInstance } from 'clmm/artifacts/ts'
+import type { DexAccountInstance, DexAccountRootInstance, PoolFactoryInstance, PoolInstance } from 'clmm/artifacts/ts'
 import {
   BitmapWord,
   DexAccount,
+  DexAccountRoot,
   Pool,
   PoolFactory,
   PoolConfig,
@@ -88,6 +89,7 @@ export class Fixture {
   constructor(
     readonly factory: PoolFactoryInstance,
     readonly dexAccountTemplate: DexAccountInstance,
+    readonly dexAccountRoot: DexAccountRootInstance,
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly tokenDecimal: number,
@@ -115,10 +117,24 @@ export class Fixture {
     const dexAccountTemplate = (
       await DexAccount.deploy(deployer, {
         initialFields: {
-          counter: 0n,
+          root: address,
+          minSwapCount: 0n,
           owner: address,
           referrer: address,
           parents: ['', '']
+        },
+        issueTokenTo: address,
+        issueTokenAmount: 1n
+      })
+    ).contractInstance
+
+    const dexAccountRoot = (
+      await DexAccountRoot.deploy(deployer, {
+        initialFields: {
+          templateId: dexAccountTemplate.contractId,
+          owner: address,
+          parents: ['00'.repeat(32), '00'.repeat(32)],
+          minSwapCount: 0n
         },
         issueTokenTo: address,
         issueTokenAmount: 1n
@@ -134,12 +150,17 @@ export class Fixture {
           tickTemplate: tickTemplate.contractId,
           wordTemplate: wordTemplate.contractId,
           poolConfigTemplate: poolConfigTemplate.contractId,
-          dexAccountRoot: dexAccountTemplate.contractId,
+          dexAccountRoot: dexAccountRoot.contractId,
           nextConfigIndex: 0n,
           feeCollector: address
         }
       })
     ).contractInstance
+
+    await DexAccountRoot.at(dexAccountRoot.address).transact.setParents({
+      signer: deployer,
+      args: { newParents: [factory.contractId, '00'.repeat(32)] }
+    })
 
     const { contractInstance: positionManager } = await PositionManager.deploy(deployer, {
       initialFields: {
@@ -162,10 +183,10 @@ export class Fixture {
       factoryId: factory.contractId,
       positionManagerId: positionManager.contractId,
       defaultConfigIndex: 0n,
-      accountRoot: dexAccountTemplate.contractId
+      accountRoot: dexAccountRoot.contractId
     })
 
-    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, 18, powfi, deployer)
+    return new Fixture(factory, dexAccountTemplate, dexAccountRoot, tokenId0, tokenId1, 18, powfi, deployer)
   }
 
   async createConfigIndex(tickSpacing: bigint, fee: bigint, feeProtocol: bigint): Promise<bigint> {

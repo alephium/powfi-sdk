@@ -7,7 +7,7 @@ import { TickUtils } from './clmm/tick'
 import { ClmmLiquidityUtils } from './clmm/liquidity'
 import { sortTokens } from './common/utils'
 import Decimal from 'decimal.js'
-import { Position, DexAccount } from 'clmm'
+import { Position, DexAccount, DexAccountRoot } from 'clmm'
 import { PoolUtils } from './clmm/pool'
 import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
@@ -1956,7 +1956,7 @@ async function main() {
         console.log(`- ID:        ${info.id}`)
         console.log(`- Owner:     ${info.state.fields.owner}`)
         console.log(`- Referrer:  ${info.state.fields.referrer}`)
-        console.log(`- Counter:   ${info.state.fields.counter}`)
+        console.log(`- Min Swap Count: ${info.state.fields.minSwapCount}`)
       } catch (error) {
         console.error(`Failed to get referral account info for ${address}:`, error)
       }
@@ -1976,7 +1976,7 @@ async function main() {
         console.error('Failed to setup referral account parents:', error)
       }
     } else if (action === 'migrate') {
-      const newCode = DexAccount.contract.bytecode
+      const newCode = DexAccountRoot.contract.bytecode
       console.log(`Migrating referral account root template...`)
       try {
         const res = await powfi.clmm.migrateDexAccount(newCode)
