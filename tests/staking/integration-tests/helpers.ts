@@ -156,7 +156,8 @@ export class Fixture {
           rewardRate: 0n,
           burnRate: 0n,
           clmmFactoryId: '',
-          cpmmFactoryId: ''
+          cpmmFactoryId: '',
+          treasuryRate: 0n
         }
       })
     ).contractInstance
@@ -261,7 +262,8 @@ export class Fixture {
         rewardRate: 0n,
         burnRate: 0n,
         clmmFactoryId: params.clmmFactoryId,
-        cpmmFactoryId: params.cpmmFactoryId
+        cpmmFactoryId: params.cpmmFactoryId,
+        treasuryRate: 0n
       },
       initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH
     })

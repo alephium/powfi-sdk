@@ -192,7 +192,8 @@ describe('CLMM Managing Positions', () => {
         burnRate: 0n,
         clmmFactoryId: '',
         cpmmFactoryId: '',
-        locker: ''
+        locker: '',
+        treasuryRate: 0n
       },
       initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH
     })
