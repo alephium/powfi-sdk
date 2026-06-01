@@ -19,7 +19,7 @@ export interface CpmmPoolContractState {
   token0Info: TokenInfo
   token1Info: TokenInfo
   totalSupply: bigint
-  dexAccount: string
+  dexRoot: string
 }
 
 export interface CpmmSwapRequest {

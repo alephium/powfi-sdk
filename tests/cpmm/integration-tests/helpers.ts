@@ -56,7 +56,7 @@ export class Fixture {
 
     const factoryDeploy = await TokenPairFactory.deploy(deployer, {
       initialFields: {
-        dexAccount0: dexAccountTemplate.contractId,
+        dexRoot: dexAccountTemplate.contractId,
         pairTemplateId: pairTemplate.contractId,
         pairSize: 0n,
         owner: address,
