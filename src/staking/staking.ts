@@ -125,7 +125,20 @@ export class StakingModule extends ModuleBase {
     this.ensurePositiveAmount(amount, 'Stake amount')
     return this.xAlphTokenContract.transact.stake({
       signer: this.scope.signer,
-      args: { amount },
+      args: { amount, referral: this.config.xAlphTokenAddress },
+      attoAlphAmount: amount + MINIMAL_CONTRACT_DEPOSIT
+    })
+  }
+
+  /** Stakes ALPH and mints xALPH to the caller with a custom referral address. */
+  async stakeAlphWithReferral(
+    amount: bigint,
+    referral: string
+  ): Promise<XAlphTokenTypes.SignExecuteMethodResult<'stake'>> {
+    this.ensurePositiveAmount(amount, 'Stake amount')
+    return this.xAlphTokenContract.transact.stake({
+      signer: this.scope.signer,
+      args: { amount, referral },
       attoAlphAmount: amount + MINIMAL_CONTRACT_DEPOSIT
     })
   }
