@@ -1,6 +1,6 @@
 {
   "name": "@alephium/powfi-sdk",
-  "version": "0.0.1-rc.26",
+  "version": "0.0.1-rc.27",
   "description": "Typescript SDK for Alephium Powfi",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
@@ -49,12 +49,12 @@
   "license": "LGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/zetamarket/zeta-monorepo.git",
+    "url": "https://github.com/alephium/powfi.git",
     "directory": "packages/sdk"
   },
-  "homepage": "https://github.com/zetamarket/zeta-monorepo/tree/main/packages/sdk#readme",
+  "homepage": "https://github.com/alephium/powfi/blob/main/README.md",
   "bugs": {
-    "url": "https://github.com/zetamarket/zeta-monorepo/issues"
+    "url": "https://github.com/alephium/powfi/issues"
   },
   "dependencies": {
     "@alephium/token-list": "0.0.20",
