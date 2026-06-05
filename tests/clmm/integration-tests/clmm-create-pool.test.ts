@@ -38,7 +38,6 @@ describe('CLMM Create Pool', () => {
       configIndex,
       fixture.tokenId0,
       fixture.tokenId1,
-      '',
       currentTick,
       amount0,
       amount1,

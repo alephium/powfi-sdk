@@ -223,8 +223,7 @@ async function run() {
             token0: tokenId0,
             token1: tokenId1,
             configIndex: config.index,
-            sqrtPriceX96: sqrtPriceX96,
-            rewardToken: rewardTokenId
+            sqrtPriceX96: sqrtPriceX96
           }
         })
 

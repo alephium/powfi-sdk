@@ -196,7 +196,8 @@ export class Fixture {
         config: {
           tickSpacing,
           fee,
-          feeProtocol
+          feeProtocol,
+          rewardToken: ALPH_TOKEN_ID
         }
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
@@ -225,7 +226,6 @@ export class Fixture {
       configIndex,
       this.tokenId0,
       this.tokenId1,
-      '',
       currentTick,
       amount0,
       amount1,
@@ -489,7 +489,6 @@ export class Fixture {
       configIndex,
       this.tokenId0,
       this.tokenId1,
-      '',
       currentTick,
       amount0,
       amount1,

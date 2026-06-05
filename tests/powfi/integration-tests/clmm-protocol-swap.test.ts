@@ -44,7 +44,8 @@ describe('CLMM Protocol Swap Integration Test', () => {
         config: {
           tickSpacing: 1n,
           fee: 3000n,
-          feeProtocol
+          feeProtocol,
+          rewardToken: ALPH_TOKEN_ID
         }
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
@@ -56,7 +57,6 @@ describe('CLMM Protocol Swap Integration Test', () => {
       configIndex,
       ALPH_TOKEN_ID,
       tokenId1,
-      '',
       0n, // tick
       100n * ONE_ALPH,
       100n * ONE_ALPH,

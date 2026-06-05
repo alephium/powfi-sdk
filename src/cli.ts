@@ -341,7 +341,6 @@ async function main() {
           configIndex,
           t0Info.id,
           t1Info.id,
-          powfi.staking.getConfig().xAlphTokenId, // Use xALPH as reward token by default
           tick,
           amount0,
           amount1,

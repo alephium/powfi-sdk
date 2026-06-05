@@ -197,8 +197,7 @@ describe('CLMM Add Liquidity', () => {
         token0,
         token1,
         configIndex,
-        sqrtPriceX96: TickUtils.getSqrtRatioAtTick(currentTick),
-        rewardToken: ''
+        sqrtPriceX96: TickUtils.getSqrtRatioAtTick(currentTick)
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
     })
