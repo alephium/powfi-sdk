@@ -102,6 +102,7 @@ export class Fixture {
 
   static async load(powfi: Powfi, unstakeDuration: bigint = UNSTAKE_DURATION): Promise<Fixture> {
     const deployer = powfi.signer
+    const deployerAddress = (await deployer.getSelectedAccount()).address
 
     powfi.setCurrentProviders()
 
@@ -137,7 +138,7 @@ export class Fixture {
           maxConnectedDapps: MAX_CONNECTED_DAPPS,
           merkleRoot: whitelist.root,
           totalStakedAmount: 0n,
-          owner: (await deployer.getSelectedAccount()).address
+          owner: deployerAddress
         }
       })
     ).contractInstance
@@ -148,7 +149,7 @@ export class Fixture {
     const feeCollectorContract = (
       await RewardFeeCollector.deploy(deployer, {
         initialFields: {
-          owner: (await deployer.getSelectedAccount()).address,
+          owner: deployerAddress,
           xAlph: xAlphTokenContract.contractId,
           distributorVaultTemplateId: distributorVaultTemplate.contractId,
           locker: alphLock.contractId,
@@ -158,7 +159,7 @@ export class Fixture {
           clmmFactoryId: '',
           cpmmFactoryId: '',
           treasuryRate: 0n,
-          treasury: (await deployer.getSelectedAccount()).address
+          treasury: deployerAddress
         }
       })
     ).contractInstance
