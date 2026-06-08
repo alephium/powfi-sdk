@@ -141,7 +141,7 @@ describe('CLMM Remove Liquidity', () => {
     const beforePool = await getBalances(pool.address, tokenIds)
     const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, liquidity)
+    await fixture.removeLiquidity(lp, configIndex, liquidity, tickLower, tickUpper, amt0Out, amt1Out)
 
     const afterLp = await getBalances(lpAddr, tokenIds)
     const afterPool = await getBalances(pool.address, tokenIds)

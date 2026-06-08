@@ -3,6 +3,8 @@ import { MINIMAL_CONTRACT_DEPOSIT, ONE_ALPH, web3 } from '@alephium/web3'
 import { getSigner } from '@alephium/web3-test'
 import { UNLIMITED_AMOUNT } from '../../../src'
 import { PoolNotFoundError } from '../../../src/common'
+import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
+import { TickUtils } from '../../../src/clmm/tick'
 import { Fixture, getBalances, timeout } from './helpers'
 import { DistributorVault, RewardFeeCollector } from 'staking/artifacts/ts'
 
@@ -126,7 +128,13 @@ describe('CLMM Managing Positions', () => {
     const posId = fixture.powfi.clmm.getPositionId(pool.contractId, lpAddr, tickLower, tickUpper)
     const beforeLp2 = await getBalances(lpAddr, [posId])
     expect(beforeLp2.tokens[posId]).toBe(1n)
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, liquidity)
+    const [amt0Out, amt1Out] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      beforeState.fields.slot0.sqrtPriceX96,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      liquidity
+    )
+    await fixture.removeLiquidity(lp, configIndex, liquidity, tickLower, tickUpper, amt0Out, amt1Out)
 
     const afterLp = await getBalances(lpAddr, [posId])
     expect(afterLp.tokens[posId]).toBe(0n)
