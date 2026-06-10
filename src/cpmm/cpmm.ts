@@ -102,8 +102,7 @@ export class CpmmModule extends ModuleBase {
         reserve1: state.fields.reserve1,
         token0Info,
         token1Info,
-        totalSupply: state.fields.totalSupply,
-        dexRoot: state.fields.dexRoot
+        totalSupply: state.fields.totalSupply
       }
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {

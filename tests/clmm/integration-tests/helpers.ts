@@ -157,9 +157,9 @@ export class Fixture {
       })
     ).contractInstance
 
-    await DexAccountRoot.at(dexAccountRoot.address).transact.setParents({
+    await DexAccountRoot.at(dexAccountRoot.address).transact.setClmmParent({
       signer: deployer,
-      args: { newParents: [factory.contractId, '00'.repeat(32)] }
+      args: { clmmParent: factory.contractId }
     })
 
     const { contractInstance: positionManager } = await PositionManager.deploy(deployer, {

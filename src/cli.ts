@@ -1967,9 +1967,13 @@ async function main() {
         console.log(`- CLMM Factory: ${clmmFactory}`)
         console.log(`- CPMM Factory: ${cpmmFactory}`)
 
-        const res = await powfi.clmm.setParents([clmmFactory, cpmmFactory])
-        console.log(`- Submitted: ${res.txId}`)
-        await waitForTx(res.txId)
+        const res1 = await powfi.clmm.setClmmParent(clmmFactory)
+        console.log(`- Submitted CLMM Parent: ${res1.txId}`)
+        await waitForTx(res1.txId)
+
+        const res2 = await powfi.clmm.setCpmmParent(cpmmFactory)
+        console.log(`- Submitted CPMM Parent: ${res2.txId}`)
+        await waitForTx(res2.txId)
         console.log('Referral account parents setup completed.')
       } catch (error) {
         console.error('Failed to setup referral account parents:', error)

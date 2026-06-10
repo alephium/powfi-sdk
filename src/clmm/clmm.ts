@@ -769,13 +769,23 @@ export class ClmmModule extends ModuleBase {
     })
   }
 
-  async setParents(parents: [string, string]): Promise<ExecuteScriptResult> {
+  async setClmmParent(clmmParent: string): Promise<ExecuteScriptResult> {
     const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
-    return await root.transact.setParents({
+    return await root.transact.setClmmParent({
       signer: this.scope.signer,
-      args: { newParents: parents }
+      args: { clmmParent }
     })
   }
+
+  async setCpmmParent(cpmmParent: string): Promise<ExecuteScriptResult> {
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.setCpmmParent({
+      signer: this.scope.signer,
+      args: { cpmmParent }
+    })
+  }
+
+
 
   buildSwapPath(tokenId: string, configIndex: bigint): string {
     return tokenId + configIndex.toString(16).padStart(4, '0')
