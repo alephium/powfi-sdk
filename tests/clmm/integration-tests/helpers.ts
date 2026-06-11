@@ -95,7 +95,7 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) {}
+  ) { }
 
   static async create(isAlph: boolean = false): Promise<Fixture> {
     const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
@@ -156,11 +156,6 @@ export class Fixture {
         }
       })
     ).contractInstance
-
-    await DexAccountRoot.at(dexAccountRoot.address).transact.setClmmParent({
-      signer: deployer,
-      args: { clmmParent: factory.contractId }
-    })
 
     const { contractInstance: positionManager } = await PositionManager.deploy(deployer, {
       initialFields: {
