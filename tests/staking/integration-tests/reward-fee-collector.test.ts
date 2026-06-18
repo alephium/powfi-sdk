@@ -22,4 +22,35 @@ describe('SDK RewardFeeCollector Caller Redundancy', () => {
 
     await expectAssertionError(fixture.powfi.staking.enableToken(ALPH_TOKEN_ID), rewardCollectorAddress, 18)
   })
+
+  test('should transfer ownership successfully and be able to transfer it back', async () => {
+    const feeCollectorId = fixture.powfi.staking.getConfig().feeCollectorId
+    const owner = fixture.deployer
+    const ownerAddress = (await owner.getSelectedAccount()).address
+    const other = (await getSigners(2))[1]
+    const otherAddress = other.address
+
+    // 1. Try to transfer ownership with non-owner signer (invalidCallerSigner)
+    fixture.powfi.signer = other
+    await expect(fixture.powfi.staking.transferOwnership(otherAddress)).rejects.toThrow()
+
+    // 2. Transfer ownership correctly with owner
+    fixture.powfi.signer = owner
+    const tx = await fixture.powfi.staking.transferOwnership(otherAddress)
+    expect(tx.txId).toBeDefined()
+
+    // Verify ownership has transferred
+    const rewardCollector = fixture.powfi.staking.getRewardFeeCollector(feeCollectorId)
+    let state = await rewardCollector.fetchState()
+    expect(state.fields.owner).toBe(otherAddress)
+
+    // 3. Transfer ownership back
+    fixture.powfi.signer = other
+    const txBack = await fixture.powfi.staking.transferOwnership(ownerAddress)
+    expect(txBack.txId).toBeDefined()
+
+    // Verify ownership has transferred back
+    state = await rewardCollector.fetchState()
+    expect(state.fields.owner).toBe(ownerAddress)
+  })
 })

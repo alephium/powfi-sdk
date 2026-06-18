@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { Powfi } from './powfi'
-import { ALPH_TOKEN_ID, addressFromContractId, KeyType, hexToString, subContractId } from '@alephium/web3'
+import { ALPH_TOKEN_ID, addressFromContractId, KeyType, hexToString, subContractId, binToHex } from '@alephium/web3'
 import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { testPrivateKeyWallet } from '@alephium/web3-test'
 import { TickUtils } from './clmm/tick'
@@ -12,8 +12,8 @@ import { PoolUtils } from './clmm/pool'
 import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
 import type { TokenInfo } from '@alephium/token-list'
-import { TokenPair } from 'cpmm'
-import { DistributorVault } from 'staking'
+import { TokenPair, TokenPairFactory } from 'cpmm'
+import { DistributorVault, RewardFeeCollector } from 'staking'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -1046,7 +1046,14 @@ async function main() {
         return
       }
       try {
-        const result = await powfi.clmm.migrateDexAccount(newBytecode)
+        const dexRoot = DexAccountRoot.at(addressFromContractId(powfi.clmm.getClmmConfig().accountRoot))
+        const rootState = await dexRoot.fetchState()
+        const { encodedImmFields, encodedMutFields } = DexAccountRoot.encodeFields(rootState.fields)
+        const result = await powfi.clmm.migrateDexAccount(
+          newBytecode,
+          binToHex(encodedImmFields),
+          binToHex(encodedMutFields)
+        )
         console.log(`Account migration submitted: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('Account migration confirmed.')
@@ -1513,7 +1520,14 @@ async function main() {
         return
       }
       try {
-        const result = await powfi.cpmm.migrateFactory(newBytecode)
+        const factory = TokenPairFactory.at(addressFromContractId(powfi.cpmm.getCpmmConfig().factoryId))
+        const factoryState = await factory.fetchState()
+        const { encodedImmFields, encodedMutFields } = TokenPairFactory.encodeFields(factoryState.fields)
+        const result = await powfi.cpmm.migrateFactory(
+          newBytecode,
+          binToHex(encodedImmFields),
+          binToHex(encodedMutFields)
+        )
         console.log(`Factory migration submitted: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('Factory migration confirmed.')
@@ -1527,7 +1541,17 @@ async function main() {
         return
       }
       try {
-        const result = await powfi.cpmm.migratePool(tokenA.id, tokenB.id, newBytecode)
+        const poolId = powfi.cpmm.getPoolId(tokenA.id, tokenB.id)
+        const pool = TokenPair.at(addressFromContractId(poolId))
+        const poolState = await pool.fetchState()
+        const { encodedImmFields, encodedMutFields } = TokenPair.encodeFields(poolState.fields)
+        const result = await powfi.cpmm.migratePool(
+          tokenA.id,
+          tokenB.id,
+          newBytecode,
+          binToHex(encodedImmFields),
+          binToHex(encodedMutFields)
+        )
         console.log(`Pool migration submitted: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('Pool migration confirmed.')
@@ -1892,7 +1916,13 @@ async function main() {
     } else if (action === 'upgrade') {
       console.log('Upgrading RewardFeeCollector...')
       try {
-        const result = await powfi.staking.migrateRewardFeeCollector()
+        const feeCollector = powfi.staking.getRewardFeeCollector(powfi.staking.getConfig().feeCollectorId)
+        const state = await feeCollector.fetchState()
+        const { encodedImmFields, encodedMutFields } = RewardFeeCollector.encodeFields(state.fields)
+        const result = await powfi.staking.migrateRewardFeeCollector(
+          binToHex(encodedImmFields),
+          binToHex(encodedMutFields)
+        )
         console.log(`Collector upgrade submitted: ${result.txId}`)
         await waitForTx(result.txId)
         console.log('Collector upgrade confirmed.')
@@ -1982,7 +2012,10 @@ async function main() {
       const newCode = DexAccountRoot.contract.bytecode
       console.log(`Migrating referral account root template...`)
       try {
-        const res = await powfi.clmm.migrateDexAccount(newCode)
+        const dexRoot = DexAccountRoot.at(addressFromContractId(powfi.clmm.getClmmConfig().accountRoot))
+        const rootState = await dexRoot.fetchState()
+        const { encodedImmFields, encodedMutFields } = DexAccountRoot.encodeFields(rootState.fields)
+        const res = await powfi.clmm.migrateDexAccount(newCode, binToHex(encodedImmFields), binToHex(encodedMutFields))
         console.log(`- Submitted: ${res.txId}`)
         await waitForTx(res.txId)
         console.log('Root template migrated.')
@@ -1994,7 +2027,14 @@ async function main() {
       const newCode = DexAccount.contract.bytecode
       console.log(`Upgrading referral account for ${address}...`)
       try {
-        const res = await powfi.clmm.upgradeUserDexAccount(address, newCode)
+        const accountState = await powfi.clmm.getDexAccountState(address)
+        const { encodedImmFields, encodedMutFields } = DexAccount.encodeFields(accountState.state.fields)
+        const res = await powfi.clmm.upgradeUserDexAccount(
+          address,
+          newCode,
+          binToHex(encodedImmFields),
+          binToHex(encodedMutFields)
+        )
         console.log(`- Submitted: ${res.txId}`)
         await waitForTx(res.txId)
         console.log('Referral account upgraded.')

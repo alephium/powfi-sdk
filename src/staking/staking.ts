@@ -33,7 +33,8 @@ import {
   XAlphToken,
   XAlphUnlockAndStartUnstake,
   DistributorVault,
-  CollectProtocolCLMMToken
+  CollectProtocolCLMMToken,
+  CollectProtocolCPMMToken
 } from 'staking/artifacts/ts'
 import { loadDeployments } from 'staking/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -397,13 +398,14 @@ export class StakingModule extends ModuleBase {
     }
   }
 
-  async collectProtocolFees(factoryId: string, lpToken: string, data: string): Promise<ExecuteScriptResult> {
-    const vault = this.getVault(lpToken)
-    return await vault.transact.collectProtocolFees({
+  async collectProtocolFeesCPMM(factoryId: string, token0: string, token1: string): Promise<ExecuteScriptResult> {
+    return await CollectProtocolCPMMToken.execute({
       signer: this.scope.signer,
-      args: {
-        protocolFeeCollector: factoryId,
-        data
+      initialFields: {
+        collector: this.config.feeCollectorId,
+        factory: factoryId,
+        token0,
+        token1
       },
       attoAlphAmount: DUST_AMOUNT * 2n
     })
@@ -465,10 +467,18 @@ export class StakingModule extends ModuleBase {
     })
   }
 
-  async migrateRewardFeeCollector(): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
-    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.upgrade({
+  async migrateRewardFeeCollector(
+    immFields: string,
+    mutFields: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'upgrade'>> {
+    const feeCollector = this.getRewardFeeCollector(this.config.feeCollectorId)
+    return feeCollector.transact.upgrade({
       signer: this.scope.signer,
-      args: { newBytecode: RewardFeeCollector.contract.bytecode }
+      args: {
+        newBytecode: RewardFeeCollector.contract.bytecode,
+        immFields,
+        mutFields
+      }
     })
   }
 
@@ -487,6 +497,17 @@ export class StakingModule extends ModuleBase {
     return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setCpmmFactoryId({
       signer: this.scope.signer,
       args: { newId: factoryId }
+    })
+  }
+
+  async transferOwnership(
+    newOwner: string
+  ): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'transferOwnership'>> {
+    const feeCollectorId = this.config.feeCollectorId
+    return this.getRewardFeeCollector(feeCollectorId).transact.transferOwnership({
+      signer: this.scope.signer,
+      args: { newOwner },
+      tokens: [{ id: feeCollectorId, amount: 1n }]
     })
   }
 

@@ -5,6 +5,9 @@ set -e
 CLI="npx ts-node src/cli.ts"
 INDEX=0
 
+echo "--- Initial Staking Deposit ---"
+$CLI stake deposit 500
+
 echo "--- Token List ---"
 $CLI token list
 

@@ -160,7 +160,9 @@ export class Fixture {
           cpmmFactoryId: '',
           treasuryRate: 0n,
           treasury: deployerAddress
-        }
+        },
+        issueTokenAmount: 1n,
+        issueTokenTo: deployerAddress
       })
     ).contractInstance
 
@@ -268,7 +270,9 @@ export class Fixture {
         treasuryRate: 0n,
         treasury: deployerAddress
       },
-      initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH
+      initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH,
+      issueTokenAmount: 1n,
+      issueTokenTo: deployerAddress
     })
     const rewardCollector = rewardCollectorDeploy.contractInstance
 

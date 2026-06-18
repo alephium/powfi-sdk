@@ -1,4 +1,4 @@
-import { ONE_ALPH, addressFromContractId } from '@alephium/web3'
+import { ONE_ALPH, addressFromContractId, binToHex } from '@alephium/web3'
 import { getSigners } from '@alephium/web3-test'
 import { DexAccount, DexAccountRoot } from 'clmm/artifacts/ts'
 import { Fixture } from './helpers'
@@ -24,47 +24,70 @@ describe('DexAccount Upgrade Integration Test', () => {
   })
 
   it('should upgrade root template', async () => {
+    const rootState = await dexRoot.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccountRoot.encodeFields(rootState.fields)
     await dexRoot.transact.upgrade({
       signer: owner,
-      args: { newCode: newRootCode }
+      args: { newCode: newRootCode, immFields: binToHex(encodedImmFields), mutFields: binToHex(encodedMutFields) }
     })
   })
 
   it('should fail to upgrade root template if caller is not owner', async () => {
     const other = (await getSigners(2))[1]
+    const rootState = await dexRoot.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccountRoot.encodeFields(rootState.fields)
     await expect(
       dexRoot.transact.upgrade({
         signer: other,
-        args: { newCode: newRootCode }
+        args: { newCode: newRootCode, immFields: binToHex(encodedImmFields), mutFields: binToHex(encodedMutFields) }
       })
     ).rejects.toThrow()
   })
 
   it('should upgrade root template using SDK migrateDexAccount', async () => {
-    await fixture.powfi.clmm.migrateDexAccount(newRootCode)
+    const rootState = await dexRoot.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccountRoot.encodeFields(rootState.fields)
+    await fixture.powfi.clmm.migrateDexAccount(newRootCode, binToHex(encodedImmFields), binToHex(encodedMutFields))
   })
 
   it('should upgrade user account using root contract', async () => {
     const accountId = fixture.powfi.clmm.getDexAccountId(ownerAddr)
+    const account = DexAccount.at(addressFromContractId(accountId))
+    const state = await account.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccount.encodeFields(state.fields)
     await dexRoot.transact.upgradeDexAccount({
       signer: owner,
-      args: { newCode: newAccCode, dexAccount: accountId }
+      args: {
+        newCode: newAccCode,
+        dexAccount: accountId,
+        immFields: binToHex(encodedImmFields),
+        mutFields: binToHex(encodedMutFields)
+      }
     })
   })
 
   it('should fail to upgrade user account directly', async () => {
     const accountId = fixture.powfi.clmm.getDexAccountId(ownerAddr)
     const account = DexAccount.at(addressFromContractId(accountId))
+    const state = await account.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccount.encodeFields(state.fields)
     await expect(
       account.transact.upgrade({
         signer: owner,
-        args: { newCode: newAccCode }
+        args: { newCode: newAccCode, immFields: binToHex(encodedImmFields), mutFields: binToHex(encodedMutFields) }
       })
     ).rejects.toThrow()
   })
 
   it('should upgrade user account using SDK upgradeUserDexAccount', async () => {
-    const tx = await fixture.powfi.clmm.upgradeUserDexAccount(ownerAddr, newAccCode)
+    const accountState = await fixture.powfi.clmm.getDexAccountState(ownerAddr)
+    const { encodedImmFields, encodedMutFields } = DexAccount.encodeFields(accountState.state.fields)
+    const tx = await fixture.powfi.clmm.upgradeUserDexAccount(
+      ownerAddr,
+      newAccCode,
+      binToHex(encodedImmFields),
+      binToHex(encodedMutFields)
+    )
     expect(tx.txId).toBeDefined()
   })
 
@@ -82,16 +105,26 @@ describe('DexAccount Upgrade Integration Test', () => {
     })
 
     // 3. Upgrade root using other
+    const rootState = await dexRoot.fetchState()
+    const { encodedImmFields: rootImm, encodedMutFields: rootMut } = DexAccountRoot.encodeFields(rootState.fields)
     const txRoot = await dexRoot.transact.upgrade({
       signer: other,
-      args: { newCode: newRootCode }
+      args: { newCode: newRootCode, immFields: binToHex(rootImm), mutFields: binToHex(rootMut) }
     })
     expect(txRoot.txId).toBeDefined()
 
     // 4. Upgrade user account using other
+    const account = DexAccount.at(addressFromContractId(accountId))
+    const state = await account.fetchState()
+    const { encodedImmFields, encodedMutFields } = DexAccount.encodeFields(state.fields)
     const txUser = await dexRoot.transact.upgradeDexAccount({
       signer: other,
-      args: { newCode: newAccCode, dexAccount: accountId }
+      args: {
+        newCode: newAccCode,
+        dexAccount: accountId,
+        immFields: binToHex(encodedImmFields),
+        mutFields: binToHex(encodedMutFields)
+      }
     })
     expect(txUser.txId).toBeDefined()
   })

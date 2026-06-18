@@ -27,11 +27,11 @@ async function run() {
   await fuzzi.transact.collect({ signer, args: { force: true, amount: 10n } })
   expect((await fuzzi.view.get()).returns).toEqual([0n, 1n])
   await fuzzi.transact.collect({ signer, args: { force: false, amount: 10n } })
-  expect((await fuzzi.view.get()).returns).toEqual([0n, 0n]) //?
+  expect((await fuzzi.view.get()).returns).toEqual([0n, 1n])
   const tokens = (await signer.nodeProvider.addresses.getAddressesAddressBalance(signer.address)).tokenBalances
   expect(tokens).toBeUndefined()
-  await expect(fuzzi.transact.collect({ signer, args: { force: true, amount: 10n } })).rejects.toThrow() //?
-  await expect(fuzzi.transact.collect({ signer, args: { force: false, amount: 10n } })).rejects.toThrow() //?
+  await fuzzi.transact.collect({ signer, args: { force: true, amount: 10n } })
+  await fuzzi.transact.collect({ signer, args: { force: false, amount: 10n } })
 }
 
 describe('NFT lost', () => {

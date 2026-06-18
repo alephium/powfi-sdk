@@ -102,7 +102,8 @@ export class CpmmModule extends ModuleBase {
         reserve1: state.fields.reserve1,
         token0Info,
         token1Info,
-        totalSupply: state.fields.totalSupply
+        totalSupply: state.fields.totalSupply,
+        dexRoot: state.fields.dexRoot
       }
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -479,9 +480,8 @@ export class CpmmModule extends ModuleBase {
   }
 
   async collectProtocolFees(params: CpmmCollectProtocolFeesRequest): Promise<ExecuteScriptResult> {
-    const data = this.getCollectProtocolFeesData(params.tokenAId, params.tokenBId)
-    const lpTokenId = this.getPoolId(params.tokenAId, params.tokenBId)
-    return await this.scope.staking.collectProtocolFees(this.config.factoryId, lpTokenId, data)
+    const [token0Id, token1Id] = sortTokens(params.tokenAId, params.tokenBId)
+    return await this.scope.staking.collectProtocolFeesCPMM(this.config.factoryId, token0Id, token1Id)
   }
 
   async setFeeCollector(): Promise<ExecuteScriptResult> {
@@ -493,15 +493,29 @@ export class CpmmModule extends ModuleBase {
     })
   }
 
-  async migrateFactory(newBytecode: string): Promise<ExecuteScriptResult> {
+  async migrateFactory(newBytecode: string, immFields: string, mutFields: string): Promise<ExecuteScriptResult> {
     const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
     return await factory.transact.upgrade({
       signer: this.scope.signer,
-      args: { newBytecode }
+      args: { newBytecode, immFields, mutFields }
     })
   }
 
-  async migratePool(tokenA: string, tokenB: string, newBytecode: string): Promise<ExecuteScriptResult> {
+  async changeUpgrader(newUpgrader: string): Promise<ExecuteScriptResult> {
+    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.changeUpgrader({
+      signer: this.scope.signer,
+      args: { newUpgrader }
+    })
+  }
+
+  async migratePool(
+    tokenA: string,
+    tokenB: string,
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<ExecuteScriptResult> {
     const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
     const [token0Id, token1Id] = sortTokens(tokenA, tokenB)
     return await factory.transact.upgradeTokenPair({
@@ -509,7 +523,9 @@ export class CpmmModule extends ModuleBase {
       args: {
         newBytecode,
         token0Id,
-        token1Id
+        token1Id,
+        immFields,
+        mutFields
       }
     })
   }

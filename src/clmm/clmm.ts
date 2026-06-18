@@ -716,26 +716,64 @@ export class ClmmModule extends ModuleBase {
 
   async migrateFactory(newBytecode: string): Promise<SignExecuteScriptTxResult> {
     const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    const factoryState = await factory.fetchState()
+    const { encodedImmFields, encodedMutFields } = PoolFactory.encodeFields(factoryState.fields)
     return await factory.transact.upgrade({
       signer: this.scope.signer,
-      args: { newBytecode }
+      args: { newBytecode, immFields: binToHex(encodedImmFields), mutFields: binToHex(encodedMutFields) }
     })
   }
 
-  async migrateDexAccount(newBytecode: string): Promise<SignExecuteScriptTxResult> {
+  async changeUpgrader(newUpgrader: string): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.changeUpgrader({
+      signer: this.scope.signer,
+      args: { newUpgrader }
+    })
+  }
+
+  async finalizeFactory(): Promise<SignExecuteScriptTxResult> {
+    return await this.changeUpgrader('111111111111111111111111111111111')
+  }
+
+  async transferOwnership(newOwner: string): Promise<SignExecuteScriptTxResult> {
+    const factoryId = this.config.factoryId
+    const factory = PoolFactory.at(addressFromContractId(factoryId))
+    return await factory.transact.transferOwnership({
+      signer: this.scope.signer,
+      args: { newOwner },
+      tokens: [{ id: factoryId, amount: 1n }]
+    })
+  }
+
+  async migrateDexAccount(
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<SignExecuteScriptTxResult> {
     const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
     return await dexRoot.transact.upgrade({
       signer: this.scope.signer,
-      args: { newCode: newBytecode }
+      args: { newCode: newBytecode, immFields, mutFields }
     })
   }
 
-  async upgradeUserDexAccount(owner: string, newBytecode: string): Promise<SignExecuteScriptTxResult> {
+  async upgradeUserDexAccount(
+    owner: string,
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<SignExecuteScriptTxResult> {
     const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
     const accountId = this.getDexAccountId(owner)
     return await dexRoot.transact.upgradeDexAccount({
       signer: this.scope.signer,
-      args: { newCode: newBytecode, dexAccount: accountId }
+      args: {
+        newCode: newBytecode,
+        dexAccount: accountId,
+        immFields,
+        mutFields
+      }
     })
   }
 
@@ -784,8 +822,6 @@ export class ClmmModule extends ModuleBase {
       args: { cpmmParent }
     })
   }
-
-
 
   buildSwapPath(tokenId: string, configIndex: bigint): string {
     return tokenId + configIndex.toString(16).padStart(4, '0')

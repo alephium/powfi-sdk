@@ -61,7 +61,8 @@ export class Fixture {
         pairSize: 0n,
         owner: address,
         feeCollector: address,
-        refRate: 0n
+        refRate: 0n,
+        upgrader: address
       }
     })
     const factory = factoryDeploy.contractInstance

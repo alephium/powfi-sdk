@@ -95,7 +95,7 @@ export class Fixture {
     readonly tokenDecimal: number,
     readonly powfi: Powfi,
     readonly deployer: SignerProvider
-  ) { }
+  ) {}
 
   static async create(isAlph: boolean = false): Promise<Fixture> {
     const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
@@ -152,8 +152,11 @@ export class Fixture {
           poolConfigTemplate: poolConfigTemplate.contractId,
           dexAccountRoot: dexAccountRoot.contractId,
           nextConfigIndex: 0n,
-          feeCollector: address
-        }
+          feeCollector: address,
+          upgrader: address
+        },
+        issueTokenAmount: 1n,
+        issueTokenTo: address
       })
     ).contractInstance
 
