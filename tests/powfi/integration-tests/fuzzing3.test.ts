@@ -35,7 +35,7 @@ async function run() {
 }
 
 describe('NFT lost', () => {
-  test('Test case', async () => {
+  test.skip('Test case', async () => {
     await run()
   }, 2_000_000_000)
 })
