@@ -93,33 +93,22 @@ describe('PoolFactory Upgrade Integration Test', () => {
   })
 
   it('should transfer ownership successfully and be able to transfer it back', async () => {
-    const factoryId = fixture.factory.contractId
     const factory = fixture.factory
     const other = (await getSigners(2))[1]
     const otherAddress = other.address
 
-    // 1. Trying to transfer ownership without approving the selfTokenId should fail
+    // 1. Transferring ownership with non-owner signer should fail
     await expect(
       factory.transact.transferOwnership({
-        signer: owner,
+        signer: other,
         args: { newOwner: otherAddress }
       })
     ).rejects.toThrow()
 
-    // 2. Transferring ownership with non-owner signer should fail
-    await expect(
-      factory.transact.transferOwnership({
-        signer: other,
-        args: { newOwner: otherAddress },
-        tokens: [{ id: factoryId, amount: 1n }]
-      })
-    ).rejects.toThrow()
-
-    // 3. Transferring ownership correctly (owner + approves token) should succeed
+    // 2. Transferring ownership correctly should succeed without token approval
     const tx = await factory.transact.transferOwnership({
       signer: owner,
-      args: { newOwner: otherAddress },
-      tokens: [{ id: factoryId, amount: 1n }]
+      args: { newOwner: otherAddress }
     })
     expect(tx.txId).toBeDefined()
 
@@ -127,11 +116,10 @@ describe('PoolFactory Upgrade Integration Test', () => {
     let state = await factory.fetchState()
     expect(state.fields.owner).toBe(otherAddress)
 
-    // 4. Now the new owner (other) transfers ownership back to the original owner
+    // 3. Now the new owner (other) transfers ownership back to the original owner
     const txBack = await factory.transact.transferOwnership({
       signer: other,
-      args: { newOwner: ownerAddress },
-      tokens: [{ id: factoryId, amount: 1n }]
+      args: { newOwner: ownerAddress }
     })
     expect(txBack.txId).toBeDefined()
 

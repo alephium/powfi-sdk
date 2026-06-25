@@ -741,8 +741,7 @@ export class ClmmModule extends ModuleBase {
     const factory = PoolFactory.at(addressFromContractId(factoryId))
     return await factory.transact.transferOwnership({
       signer: this.scope.signer,
-      args: { newOwner },
-      tokens: [{ id: factoryId, amount: 1n }]
+      args: { newOwner }
     })
   }
 

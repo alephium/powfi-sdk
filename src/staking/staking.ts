@@ -506,8 +506,7 @@ export class StakingModule extends ModuleBase {
     const feeCollectorId = this.config.feeCollectorId
     return this.getRewardFeeCollector(feeCollectorId).transact.transferOwnership({
       signer: this.scope.signer,
-      args: { newOwner },
-      tokens: [{ id: feeCollectorId, amount: 1n }]
+      args: { newOwner }
     })
   }
 
