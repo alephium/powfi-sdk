@@ -1,9 +1,12 @@
 import type { SignerProvider } from '@alephium/web3'
-import { ONE_ALPH, web3 } from '@alephium/web3'
+import { MINIMAL_CONTRACT_DEPOSIT, ONE_ALPH, web3 } from '@alephium/web3'
 import { getSigner } from '@alephium/web3-test'
 import { UNLIMITED_AMOUNT } from '../../../src'
 import { PoolNotFoundError } from '../../../src/common'
-import { Fixture, getBalances } from './helpers'
+import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
+import { TickUtils } from '../../../src/clmm/tick'
+import { Fixture, getBalances, timeout } from './helpers'
+import { DistributorVault, RewardFeeCollector } from 'staking/artifacts/ts'
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch)
 
@@ -13,7 +16,7 @@ describe('CLMM Managing Positions', () => {
 
   beforeEach(async () => {
     fixture = await Fixture.create()
-    lp = await getSigner(3_000n * ONE_ALPH)
+    lp = await getSigner(20n * ONE_ALPH)
     await fixture.transferToken(fixture.tokenId0, 2_000n * ONE_ALPH, lp)
     await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp)
   })
@@ -125,7 +128,13 @@ describe('CLMM Managing Positions', () => {
     const posId = fixture.powfi.clmm.getPositionId(pool.contractId, lpAddr, tickLower, tickUpper)
     const beforeLp2 = await getBalances(lpAddr, [posId])
     expect(beforeLp2.tokens[posId]).toBe(1n)
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, liquidity)
+    const [amt0Out, amt1Out] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      beforeState.fields.slot0.sqrtPriceX96,
+      TickUtils.getSqrtRatioAtTick(tickLower),
+      TickUtils.getSqrtRatioAtTick(tickUpper),
+      liquidity
+    )
+    await fixture.removeLiquidity(lp, configIndex, liquidity, tickLower, tickUpper, amt0Out, amt1Out)
 
     const afterLp = await getBalances(lpAddr, [posId])
     expect(afterLp.tokens[posId]).toBe(0n)
@@ -152,5 +161,67 @@ describe('CLMM Managing Positions', () => {
     await expect(fixture.powfi.clmm.findBestRoute('invalid-token-0', 'invalid-token-1')).rejects.toThrow(
       'No concentrated liquidity pool found for token pair'
     )
+  })
+
+  test('collecting protocol fees from factory', async () => {
+    const feeProtocol = 4n // 1/4 of trading fees
+    const { configIndex, pool } = await fixture.setupPool(1n, 3000n, feeProtocol)
+    const poolState = await pool.fetchState()
+    const sqrtPriceCurrent = poolState.fields.slot0.sqrtPriceX96
+    const { tickLower, tickUpper } = fixture.buildRange(sqrtPriceCurrent, 1n, 0.9, 1.1)
+
+    await fixture.addRangePosition({
+      lp,
+      pool,
+      configIndex,
+      sqrtPriceCurrent,
+      range: { tickLower, tickUpper },
+      amount0Desired: 100n * ONE_ALPH,
+      amount1Desired: UNLIMITED_AMOUNT
+    })
+
+    // Generate fees
+    fixture.powfi.signer = fixture.deployer
+    await fixture.swap(fixture.deployer, configIndex, 10n * ONE_ALPH, 300)
+
+    const poolStateAfterSwap = await pool.fetchState()
+    expect(poolStateAfterSwap.fields.protocolFees.token0).toBeGreaterThan(0n)
+
+    const deployer = fixture.deployer
+    const deployerAddress = (await deployer.getSelectedAccount()).address
+    const distributorVaultTemplate = (await DistributorVault.deployTemplate(deployer)).contractInstance
+    const { contractInstance: rewardCollector } = await RewardFeeCollector.deploy(deployer, {
+      initialFields: {
+        owner: deployerAddress,
+        xAlph: fixture.tokenId1,
+        distributorVaultTemplateId: distributorVaultTemplate.contractId,
+        lastUpdate: 0n,
+        rewardRate: (1n << 256n) - 1n,
+        burnRate: 0n,
+        clmmFactoryId: '',
+        cpmmFactoryId: '',
+        locker: '',
+        treasuryRate: 0n,
+        treasury: deployerAddress
+      },
+      initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH
+    })
+    fixture.powfi.staking.setConfig({
+      ...fixture.powfi.staking.getConfig(),
+      feeCollectorId: rewardCollector.contractId
+    })
+    await fixture.powfi.staking.enableToken(fixture.tokenId0)
+    await fixture.powfi.staking.enableToken(fixture.tokenId1)
+    await timeout(1000)
+    await fixture.powfi.clmm.setFeeCollector()
+    await fixture.powfi.clmm.collectProtocolFees({
+      token0: fixture.tokenId0,
+      token1: fixture.tokenId1,
+      configIndex,
+      tokenId: fixture.tokenId0
+    })
+
+    const poolStateAfterCollect = await pool.fetchState()
+    expect(poolStateAfterCollect.fields.protocolFees.token0).toBe(0n)
   })
 })

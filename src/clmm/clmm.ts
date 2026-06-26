@@ -1,4 +1,4 @@
-import type { SignExecuteScriptTxResult, Token } from '@alephium/web3'
+import type { ExecuteScriptResult, SignExecuteScriptTxResult, Token } from '@alephium/web3'
 import {
   ALPH_TOKEN_ID,
   addressFromContractId,
@@ -8,7 +8,8 @@ import {
   subContractId,
   codec,
   encodePrimitiveValues,
-  groupOfAddress
+  groupOfAddress,
+  addressToBytes
 } from '@alephium/web3'
 import { loadDeployments } from 'clmm/artifacts/ts/deployments'
 import ModuleBase from '../moduleBase'
@@ -26,11 +27,28 @@ import type {
   ClmmSetRewardParamsRequest,
   ClmmSimulateSwapParams,
   ClmmSwapRequest,
+  ClmmSwapToRequest,
   ClmmRemoveLiquidityRequest,
-  ClmmPositionInfo
+  ClmmPositionInfo,
+  ClmmPoolRewardState
 } from './types'
-import type { PoolInstance, PoolTypes, PositionManagerInstance, PositionManagerTypes } from 'clmm/artifacts/ts'
-import { CreateLiquidPool, Pool, PoolConfig, PoolFactory, PositionManager, SwapWithoutAccount } from 'clmm/artifacts/ts'
+import type {
+  DexAccountRootInstance,
+  PoolInstance,
+  PoolTypes,
+  PositionManagerInstance,
+  PositionManagerTypes
+} from 'clmm/artifacts/ts'
+import {
+  CreateLiquidPool,
+  Pool,
+  PoolConfig,
+  PoolFactory,
+  DexAccount,
+  DexAccountRoot,
+  PositionManager,
+  SwapWithoutAccount
+} from 'clmm/artifacts/ts'
 import { PoolUtils } from './pool'
 import { TickUtils } from './tick'
 import { ClmmLiquidityUtils } from './liquidity'
@@ -47,7 +65,7 @@ export class ClmmModule extends ModuleBase {
   constructor(scope: Powfi) {
     super({ scope, moduleName: 'ClmmModule' })
 
-    this.config = this._getClmmConfig()
+    this.config = this.getConfig()
   }
 
   /** Overrides the CLMM deployment configuration (factory, position manager, etc.). */
@@ -153,10 +171,37 @@ export class ClmmModule extends ModuleBase {
     }
   }
 
-  /**
-   * Fetches the actual token balances held by the pool contract on-chain.
-   * @throws {PoolNotFoundError} If no pool exists for the given ID.
-   */
+  async getPoolProtocolFees(poolId: string): Promise<{ token0: bigint; token1: bigint }> {
+    const pool = Pool.at(addressFromContractId(poolId))
+    const state = await pool.fetchState()
+    return {
+      token0: state.fields.protocolFees.token0,
+      token1: state.fields.protocolFees.token1
+    }
+  }
+
+  async getPoolRewardState(poolId: string): Promise<ClmmPoolRewardState> {
+    try {
+      const poolAddress = addressFromContractId(poolId)
+      const pool = Pool.at(poolAddress)
+      const state = await pool.fetchState()
+      const token2Info = await this.scope.token.getTokenById(state.fields.token2)
+
+      const rewardInfos = state.fields.rewardInfos.map((r) => ({
+        amount: r.amount,
+        openTime: r.nextOpenTime,
+        endTime: r.endTime
+      }))
+
+      return {
+        token2Info,
+        rewardInfos
+      }
+    } catch (error) {
+      this.logAndThrowError(`Failed to fetch CLMM pool reward state for ${poolId}`, error)
+    }
+  }
+
   async getPoolTokenBalances(poolId: string): Promise<{ token0Balance: bigint; token1Balance: bigint }> {
     try {
       const poolAddress = addressFromContractId(poolId)
@@ -240,14 +285,13 @@ export class ClmmModule extends ModuleBase {
     configIndex: bigint,
     token0: string,
     token1: string,
-    rewardToken: string,
     tick: bigint,
     amount0: bigint,
     amount1: bigint,
     tickLower: bigint,
     tickUpper: bigint,
     dustAmount?: bigint
-  ): Promise<{ poolAddress: string; result: SignExecuteScriptTxResult }> {
+  ): Promise<{ poolId: string; result: ExecuteScriptResult }> {
     const sqrtPriceX96 = TickUtils.getSqrtRatioAtTick(tick)
     const tokens = [token0, token1]
     const amounts = [amount0, amount1]
@@ -274,7 +318,6 @@ export class ClmmModule extends ModuleBase {
         factory: this.config.factoryId,
         token0: tokens[0],
         token1: tokens[1],
-        rewardToken,
         liquidity,
         tickLower: ticks[0],
         tickUpper: ticks[1],
@@ -290,8 +333,8 @@ export class ClmmModule extends ModuleBase {
       ],
       dustAmount: dustAmount ?? MINIMAL_CONTRACT_DEPOSIT * 2n
     })
-    const poolAddress = this.getPoolAddress(tokens[0], tokens[1], configIndex)
-    return { poolAddress, result }
+    const poolId = this.getPoolId(tokens[0], tokens[1], configIndex)
+    return { poolId, result }
   }
 
   /** Adds liquidity to a tick range, minting a new position or updating an existing one. */
@@ -360,8 +403,9 @@ export class ClmmModule extends ModuleBase {
     )
 
     const positionId = PoolUtils.getPositionId(poolAddress, owner, p.tickLower, p.tickUpper)
+    const attoAlphAmount = DUST_AMOUNT * 2n
     const tokens: Token[] = [
-      { id: p.token0, amount: p.amount0 },
+      { id: p.token0, amount: p.amount0 + (p.token0 === ALPH_TOKEN_ID ? attoAlphAmount : 0n) },
       { id: p.token1, amount: p.amount1 }
     ]
 
@@ -387,7 +431,7 @@ export class ClmmModule extends ModuleBase {
         }
       },
       tokens,
-      attoAlphAmount: this.getAddLiquidityAttoAlphAmount(p.token0, p.token1),
+      attoAlphAmount,
       dustAmount: deposit,
       positionId
     }
@@ -434,6 +478,7 @@ export class ClmmModule extends ModuleBase {
           token0: p.token0,
           token1: p.token1,
           owner: normalizedOwner,
+          recipient: normalizedOperator,
           tickLower: p.tickLower,
           tickUpper: p.tickUpper,
           amount0Min: amount0Min,
@@ -565,7 +610,6 @@ export class ClmmModule extends ModuleBase {
     return await SwapWithoutAccount.execute({
       signer: this.scope.signer,
       initialFields: {
-        dexAccount: this.config.accountRoot,
         pool: pool.contractId,
         tokenIn,
         tokenOut,
@@ -579,23 +623,31 @@ export class ClmmModule extends ModuleBase {
     })
   }
 
-  /** Collects accumulated protocol fees from a pool. Admin only. */
-  async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
-    const poolFactoryAddress = addressFromContractId(this.config.factoryId)
-    const poolFactory = PoolFactory.at(poolFactoryAddress)
-    const result = await poolFactory.transact.collectProtocolFees({
+  async swapTo(p: ClmmSwapToRequest): Promise<SignExecuteScriptTxResult> {
+    const pool = this.getPool(p.tokenIn, p.tokenOut, p.configIndex)
+    const poolState = await pool.fetchState()
+    const zeroForOne = poolState.fields.token0 === p.tokenIn
+    const signerAccount = await this.scope.signer.getSelectedAccount()
+    const signerAddress = signerAccount.address
+
+    const MAX_AMOUNT = (1n << 127n) - 1n // close to I256 max
+
+    return await pool.transact.swap({
       signer: this.scope.signer,
       args: {
-        recipient: p.recipient,
-        configIndex: p.configIndex,
-        token0: p.token0,
-        token1: p.token1
-      }
+        payer: signerAddress,
+        recipient: signerAddress,
+        token: p.tokenOut,
+        zeroForOne,
+        amountSpecified: MAX_AMOUNT,
+        sqrtPriceLimitX96: p.targetSqrtPriceX96,
+        data: ''
+      },
+      tokens: [{ id: p.tokenIn, amount: p.amountInMax }],
+      attoAlphAmount: DUST_AMOUNT * 2n
     })
-    return result
   }
 
-  /** Configures farming reward parameters (token, amount, and time window) for a pool. Admin only. */
   async setRewardParams(p: ClmmSetRewardParamsRequest): Promise<SignExecuteScriptTxResult> {
     const poolFactoryAddress = addressFromContractId(this.config.factoryId)
     const poolFactory = PoolFactory.at(poolFactoryAddress)
@@ -637,12 +689,144 @@ export class ClmmModule extends ModuleBase {
     return result
   }
 
-  private getAddLiquidityAttoAlphAmount(token0Id: string, token1Id: string): bigint {
-    const nonAlphTokenCount = [token0Id, token1Id].filter((tokenId) => tokenId !== ALPH_TOKEN_ID).length
-    return BigInt(nonAlphTokenCount) * DUST_AMOUNT
+  getCollectProtocolFeesData(token0: string, token1: string, configIndex: bigint, tokenId: string): string {
+    const [t0, t1] = sortTokens(token0, token1)
+    const poolPath = t0 + t1 + this.getPoolConfigId(configIndex)
+    return tokenId + poolPath
   }
 
-  private _getClmmConfig(): ClmmConfig {
+  async collectProtocolFees(p: ClmmCollectProtocolFeesRequest): Promise<SignExecuteScriptTxResult> {
+    return await this.scope.staking.collectProtocolFeesCLMM(
+      this.config.factoryId,
+      p.token0,
+      p.token1,
+      p.configIndex,
+      p.tokenId
+    )
+  }
+
+  async setFeeCollector(): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    const newFeeCollector = addressFromContractId(this.scope.staking.getConfig().feeCollectorId)
+    return factory.transact.setFeeCollector({
+      signer: this.scope.signer,
+      args: { newFeeCollector }
+    })
+  }
+
+  async migrateFactory(newBytecode: string): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    const factoryState = await factory.fetchState()
+    const { encodedImmFields, encodedMutFields } = PoolFactory.encodeFields(factoryState.fields)
+    return await factory.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newBytecode, immFields: binToHex(encodedImmFields), mutFields: binToHex(encodedMutFields) }
+    })
+  }
+
+  async changeUpgrader(newUpgrader: string): Promise<SignExecuteScriptTxResult> {
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.changeUpgrader({
+      signer: this.scope.signer,
+      args: { newUpgrader }
+    })
+  }
+
+  async finalizeFactory(): Promise<SignExecuteScriptTxResult> {
+    return await this.changeUpgrader('111111111111111111111111111111111')
+  }
+
+  async transferOwnership(newOwner: string): Promise<SignExecuteScriptTxResult> {
+    const factoryId = this.config.factoryId
+    const factory = PoolFactory.at(addressFromContractId(factoryId))
+    return await factory.transact.transferOwnership({
+      signer: this.scope.signer,
+      args: { newOwner }
+    })
+  }
+
+  async migrateDexAccount(
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<SignExecuteScriptTxResult> {
+    const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await dexRoot.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newCode: newBytecode, immFields, mutFields }
+    })
+  }
+
+  async upgradeUserDexAccount(
+    owner: string,
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<SignExecuteScriptTxResult> {
+    const dexRoot = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    const accountId = this.getDexAccountId(owner)
+    return await dexRoot.transact.upgradeDexAccount({
+      signer: this.scope.signer,
+      args: {
+        newCode: newBytecode,
+        dexAccount: accountId,
+        immFields,
+        mutFields
+      }
+    })
+  }
+
+  getDexAccountRoot(): DexAccountRootInstance {
+    return DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+  }
+
+  getDexAccountId(owner: string): string {
+    const group = this.config.groupIndex
+    const path = binToHex(addressToBytes(owner))
+    const accountRoot = this.config.accountRoot
+    return subContractId(accountRoot, path, group)
+  }
+
+  async getDexAccountState(owner: string) {
+    const accountId = this.getDexAccountId(owner)
+    const account = DexAccount.at(addressFromContractId(accountId))
+    return {
+      address: account.address,
+      id: account.contractId,
+      state: await account.fetchState()
+    }
+  }
+
+  async createDexAccount(referrer: string): Promise<ExecuteScriptResult> {
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.createAccount({
+      signer: this.scope.signer,
+      args: { ref: referrer },
+      attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
+    })
+  }
+
+  async setClmmParent(clmmParent: string): Promise<ExecuteScriptResult> {
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.setClmmParent({
+      signer: this.scope.signer,
+      args: { clmmParent }
+    })
+  }
+
+  async setCpmmParent(cpmmParent: string): Promise<ExecuteScriptResult> {
+    const root = DexAccountRoot.at(addressFromContractId(this.config.accountRoot))
+    return await root.transact.setCpmmParent({
+      signer: this.scope.signer,
+      args: { cpmmParent }
+    })
+  }
+
+  buildSwapPath(tokenId: string, configIndex: bigint): string {
+    return tokenId + configIndex.toString(16).padStart(4, '0')
+  }
+
+  getConfig(): ClmmConfig {
     const networkId = this.scope.network.id
     try {
       const deployments = loadDeployments(networkId)
@@ -651,7 +835,7 @@ export class ClmmModule extends ModuleBase {
         factoryId: deployments.contracts.PoolFactory.contractInstance.contractId,
         positionManagerId: deployments.contracts.PositionManager.contractInstance.contractId,
         defaultConfigIndex: 0n,
-        accountRoot: deployments.contracts.DexAccount.contractInstance.contractId
+        accountRoot: deployments.contracts.DexAccountRoot.contractInstance.contractId
       }
     } catch (error) {
       this.logAndThrowError(`Failed to load deployments on ${networkId}`, error)

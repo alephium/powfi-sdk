@@ -8,7 +8,8 @@ import {
   addressToBytes,
   codec,
   subContractId,
-  groupOfAddress
+  groupOfAddress,
+  MINIMAL_CONTRACT_DEPOSIT
 } from '@alephium/web3'
 import { getSigners } from '@alephium/web3-test'
 import {
@@ -16,6 +17,9 @@ import {
   XAlphStakeVault,
   AlphUnstakeVault,
   RewardSharingVault,
+  RewardFeeCollector,
+  DistributorVault,
+  ALPHLock,
   type XAlphTokenInstance,
   type XAlphStakeVaultInstance,
   type AlphUnstakeVaultInstance
@@ -90,10 +94,16 @@ export class Fixture {
     return this.stakeVaultContract.contractId
   }
 
-  static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 10_000n * ONE_ALPH)
-
+  static async create(unstakeDuration: bigint = UNSTAKE_DURATION): Promise<Fixture> {
+    const [deployer] = await getSigners(1, 20n * ONE_ALPH)
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
+    return this.load(powfi, unstakeDuration)
+  }
+
+  static async load(powfi: Powfi, unstakeDuration: bigint = UNSTAKE_DURATION): Promise<Fixture> {
+    const deployer = powfi.signer
+    const deployerAddress = (await deployer.getSelectedAccount()).address
+
     powfi.setCurrentProviders()
 
     const unstakeVaultTemplate = (await AlphUnstakeVault.deployTemplate(deployer)).contractInstance
@@ -106,7 +116,7 @@ export class Fixture {
           decimals: 18n,
           unstakeVaultTemplateId: unstakeVaultTemplate.contractId,
           maxActiveUnstakeRequestsPerUser: MAX_ACTIVE_UNSTAKE_REQUESTS,
-          unstakeDuration: UNSTAKE_DURATION,
+          unstakeDuration: unstakeDuration,
           totalDepositedAlph: 0n,
           totalXAlphSupply: 0n,
           lastUnstakeVaultIndex: 0n
@@ -128,21 +138,41 @@ export class Fixture {
           maxConnectedDapps: MAX_CONNECTED_DAPPS,
           merkleRoot: whitelist.root,
           totalStakedAmount: 0n,
-          owner: (await deployer.getSelectedAccount()).address
+          owner: deployerAddress
         }
+      })
+    ).contractInstance
+
+    const distributorVaultTemplate = (await DistributorVault.deployTemplate(deployer)).contractInstance
+    const alphLock = (await ALPHLock.deploy(deployer, { initialFields: {} })).contractInstance
+
+    const feeCollectorContract = (
+      await RewardFeeCollector.deploy(deployer, {
+        initialFields: {
+          owner: deployerAddress,
+          xAlph: xAlphTokenContract.contractId,
+          distributorVaultTemplateId: distributorVaultTemplate.contractId,
+          locker: alphLock.contractId,
+          lastUpdate: 0n,
+          rewardRate: 0n,
+          burnRate: 0n,
+          clmmFactoryId: '',
+          cpmmFactoryId: '',
+          treasuryRate: 0n,
+          treasury: deployerAddress
+        },
+        issueTokenAmount: 1n,
+        issueTokenTo: deployerAddress
       })
     ).contractInstance
 
     // Configure Powfi SDK to use the deployed contracts
     const stakingConfig: StakingConfig = {
-      groupIndex: stakeVaultContract.groupIndex,
+      groupIndex: xAlphTokenContract.groupIndex,
       alphUnstakeVaultTemplateId: unstakeVaultTemplate.contractId,
       xAlphTokenId: xAlphTokenContract.contractId,
       xAlphTokenAddress: xAlphTokenContract.address,
-      xAlphStakeVaultId: stakeVaultContract.contractId,
-      xAlphStakeVaultAddress: stakeVaultContract.address,
-      rewardSharingTemplateId: rewardSharingTemplate.contractId,
-      governanceDemoTemplateId: '' // Not needed for tests
+      feeCollectorId: feeCollectorContract.contractId
     }
     powfi.staking.setConfig(stakingConfig)
 
@@ -169,34 +199,12 @@ export class Fixture {
     return this.powfi.staking.cancelUnstake(vaultIndex)
   }
 
-  async stakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.stakeXAlph(amount)
-  }
-
-  async unstakeXAlph(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.unstakeXAlph(amount)
-  }
-
-  async unlockAndStartUnstake(signer: SignerProvider, amount: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.unlockAndStartUnstake(amount)
-  }
-
   async getXAlphTokenState(): Promise<StakingState> {
     const state = await this.powfi.staking.getXAlphTokenState()
     return {
       totalDepositedAlph: state.fields.totalDepositedAlph,
       totalXAlphSupply: state.fields.totalXAlphSupply,
       lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex
-    }
-  }
-
-  async getStakeVaultState(): Promise<StakeVaultState> {
-    const state = await this.powfi.staking.getStakeVaultState()
-    return {
-      totalStakedAmount: state.fields.totalStakedAmount
     }
   }
 
@@ -208,18 +216,6 @@ export class Fixture {
   async getClaimableAmount(signer: SignerProvider, vaultIndex: bigint): Promise<bigint> {
     const account = await signer.getSelectedAccount()
     return this.powfi.staking.getClaimableAmount(account.address, vaultIndex)
-  }
-
-  async getUserStakingInfo(address: string): Promise<{ amount: bigint; connectedDapps: string[] }> {
-    return this.powfi.staking.getUserStakeVaultInfo(address)
-  }
-
-  async isUserStaking(address: string): Promise<boolean> {
-    return this.powfi.staking.isUserStaking(address)
-  }
-
-  async getUserWeight(address: string): Promise<bigint> {
-    return this.powfi.staking.getUserWeight(address)
   }
 
   getUnstakeVaultAddress(userAddress: string, vaultIndex: bigint): string {
@@ -245,6 +241,47 @@ export class Fixture {
       unstakeStartTime: state.fields.unstakeStartTime,
       unstakeDuration: state.fields.unstakeDuration
     }
+  }
+
+  async setupFeeCollector(params: { clmmFactoryId: string; cpmmFactoryId: string }) {
+    const deployerAccount = await this.deployer.getSelectedAccount()
+    const deployerAddress = deployerAccount.address
+
+    const lockerDeploy = await ALPHLock.deploy(this.deployer, {
+      initialFields: {},
+      initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
+    })
+    const lockerId = lockerDeploy.contractInstance.contractId
+
+    const vaultTemplateDeploy = await DistributorVault.deployTemplate(this.deployer)
+    const vaultTemplateId = vaultTemplateDeploy.contractInstance.contractId
+
+    const rewardCollectorDeploy = await RewardFeeCollector.deploy(this.deployer, {
+      initialFields: {
+        owner: deployerAddress,
+        xAlph: this.xAlphTokenId,
+        distributorVaultTemplateId: vaultTemplateId,
+        locker: lockerId,
+        lastUpdate: BigInt(Date.now()),
+        rewardRate: 0n,
+        burnRate: 0n,
+        clmmFactoryId: params.clmmFactoryId,
+        cpmmFactoryId: params.cpmmFactoryId,
+        treasuryRate: 0n,
+        treasury: deployerAddress
+      },
+      initialAttoAlphAmount: MINIMAL_CONTRACT_DEPOSIT + 1n * ONE_ALPH,
+      issueTokenAmount: 1n,
+      issueTokenTo: deployerAddress
+    })
+    const rewardCollector = rewardCollectorDeploy.contractInstance
+
+    this.powfi.staking.setConfig({
+      ...this.powfi.staking.getConfig(),
+      feeCollectorId: rewardCollector.contractId
+    })
+
+    return rewardCollector
   }
 
   async getBalances(address: string): Promise<Balances> {

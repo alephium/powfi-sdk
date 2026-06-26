@@ -34,7 +34,8 @@ import type {
   CpmmRemoveLiquidityRequest,
   CpmmSwapQuote,
   CpmmSwapQuoteParams,
-  CpmmSwapRequest
+  CpmmSwapRequest,
+  CpmmCollectProtocolFeesRequest
 } from './types'
 import type { Powfi } from '../powfi'
 import ModuleBase from '../moduleBase'
@@ -56,6 +57,16 @@ export class CpmmModule extends ModuleBase {
 
     this.config = this.getCpmmConfig()
     this.scope = scope
+  }
+
+  /** Overrides the CPMM deployment configuration. */
+  setConfig(config: CpmmConfig) {
+    this.config = config
+  }
+
+  /** Returns the current CPMM deployment configuration. */
+  getConfig(): CpmmConfig {
+    return this.config
   }
 
   /** Derives the on-chain contract ID for a token pair, independent of token order. */
@@ -92,7 +103,7 @@ export class CpmmModule extends ModuleBase {
         token0Info,
         token1Info,
         totalSupply: state.fields.totalSupply,
-        dexAccount: state.fields.dexAccount0
+        dexRoot: state.fields.dexRoot
       }
     } catch (error) {
       if (error instanceof Error && error.message.includes('not found')) {
@@ -102,7 +113,12 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
-  /** Checks whether a pool contract exists on-chain for the given token pair. */
+  async getPoolProtocolFees(poolAddress: string): Promise<bigint> {
+    const pool = TokenPairContract.at(poolAddress)
+    const state = await pool.fetchState()
+    return state.fields.protocolFees
+  }
+
   async poolExists(tokenA: string, tokenB: string): Promise<boolean> {
     const address = this.getPoolAddress(tokenA, tokenB)
 
@@ -117,15 +133,20 @@ export class CpmmModule extends ModuleBase {
       })
   }
 
-  /**
-   * Executes a token swap transaction on-chain.
-   * @param balances - Optional wallet balances used for pre-flight insufficient-balance checks.
-   * @throws {PriceImpactTooHighError} If the computed price impact exceeds the maximum threshold.
-   * @throws {InsufficientBalanceError} If the wallet balance is too low for the swap input.
-   */
   async swap(params: CpmmSwapRequest, balances?: Map<string, bigint>): Promise<ExecuteScriptResult> {
+    return this.internalSwap(params, balances, false)
+  }
+
+  private async internalSwap(
+    params: CpmmSwapRequest,
+    balances?: Map<string, bigint>,
+    bypassPriceImpact = false
+  ): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for swap operation')
+    }
+    if (!params.sender) {
+      throw new Error('Sender is required for swap operation')
     }
 
     const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId)
@@ -135,10 +156,10 @@ export class CpmmModule extends ModuleBase {
       tokenOutId: params.tokenOutId,
       amountIn: params.amountIn,
       amountOut: params.amountOut,
-      slippageBps: params.slippageBps
+      slippageBps: params.slippageBps ?? 100n // Default 1%
     })
 
-    if (swapDetails.priceImpact >= MAX_PRICE_IMPACT) {
+    if (!bypassPriceImpact && swapDetails.priceImpact >= MAX_PRICE_IMPACT) {
       throw new PriceImpactTooHighError(swapDetails.priceImpact, MAX_PRICE_IMPACT)
     }
 
@@ -169,7 +190,6 @@ export class CpmmModule extends ModuleBase {
       const result = await SwapMinOut.execute({
         signer: this.scope.signer,
         initialFields: {
-          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,
@@ -194,7 +214,6 @@ export class CpmmModule extends ModuleBase {
       const result = await SwapMaxIn.execute({
         signer: this.scope.signer,
         initialFields: {
-          dexAccount: poolState.dexAccount,
           sender: params.sender,
           router: this.config.routerId,
           pair: swapDetails.state.poolId,
@@ -210,11 +229,77 @@ export class CpmmModule extends ModuleBase {
     }
   }
 
-  /**
-   * Adds liquidity to an existing pool on-chain.
-   * @param balances - Optional wallet balances used for pre-flight insufficient-balance checks.
-   * @throws {InsufficientBalanceError} If the wallet balance is too low for either token.
-   */
+  async simSwap(params: CpmmSwapRequest): Promise<CpmmSwapQuote> {
+    const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId)
+    return CpmmModule.computeSwapAmount({
+      state: poolState,
+      tokenInId: params.tokenInId,
+      tokenOutId: params.tokenOutId,
+      amountIn: params.amountIn,
+      amountOut: params.amountOut,
+      slippageBps: params.slippageBps ?? 100n
+    })
+  }
+
+  async swapTo(params: {
+    tokenA: string
+    tokenB: string
+    targetPrice: number | BigNumber
+    sender: string
+    slippageBps?: bigint
+  }): Promise<ExecuteScriptResult> {
+    const state = await this.getPoolState(params.tokenA, params.tokenB)
+    const reserve0 = new BigNumber(state.reserve0.toString())
+    const reserve1 = new BigNumber(state.reserve1.toString())
+    const k = reserve0.times(reserve1)
+
+    // targetP is token1/token0
+    const targetP = new BigNumber(params.targetPrice.toString()).times(
+      new BigNumber(10).pow(state.token1Info.decimals - state.token0Info.decimals)
+    )
+    const currentP = reserve1.div(reserve0)
+
+    if (targetP.eq(currentP)) {
+      throw new Error('Target price equals current price — nothing to do.')
+    }
+
+    const isSellingToken0 = targetP.lt(currentP)
+    let amountIn: bigint
+    let tokenInId: string
+    let tokenOutId: string
+
+    if (isSellingToken0) {
+      // targetP = y_new / x_new = (k/x_new) / x_new = k / x_new^2
+      // x_new = sqrt(k / targetP)
+      const x_new = k.div(targetP).sqrt()
+      const dx_virtual = x_new.minus(reserve0)
+      amountIn = BigInt(dx_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toString())
+      tokenInId = state.token0Info.id
+      tokenOutId = state.token1Info.id
+    } else {
+      // Selling token1 to increase P = y/x
+      // 1 / targetP = x_new / y_new = (k/y_new) / y_new = k / y_new^2
+      // y_new = sqrt(k * targetP)
+      const y_new = k.times(targetP).sqrt()
+      const dy_virtual = y_new.minus(reserve1)
+      amountIn = BigInt(dy_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toString())
+      tokenInId = state.token1Info.id
+      tokenOutId = state.token0Info.id
+    }
+
+    return this.internalSwap(
+      {
+        tokenInId,
+        tokenOutId,
+        amountIn,
+        slippageBps: params.slippageBps ?? 50n,
+        sender: params.sender
+      },
+      undefined,
+      true
+    )
+  }
+
   async addLiquidity(params: CpmmAddLiquidityRequest, balances?: Map<string, bigint>): Promise<ExecuteScriptResult> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for addLiquidity operation')
@@ -338,7 +423,7 @@ export class CpmmModule extends ModuleBase {
   }
 
   /** Creates a new CPMM pool on-chain, optionally seeded with initial liquidity. */
-  async createPool(params: CpmmCreatePoolRequest): Promise<ExecuteScriptResult & { poolId: string }> {
+  async createPool(params: CpmmCreatePoolRequest): Promise<{ poolId: string; result: ExecuteScriptResult }> {
     if (!this.scope.signer) {
       throw new Error('Signer is required for createPool operation')
     }
@@ -350,7 +435,6 @@ export class CpmmModule extends ModuleBase {
       const { tokenAAmount, tokenBAmount } = initialLiquidity
       const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
       const [amount0, amount1] = token0Id === tokenAId ? [tokenAAmount, tokenBAmount] : [tokenBAmount, tokenAAmount]
-      const state = await TokenPairFactory.at(addressFromContractId(this.config.factoryId)).fetchState()
 
       const result = await CreatePairAndAddLiquidity.execute({
         signer: this.scope.signer,
@@ -361,8 +445,7 @@ export class CpmmModule extends ModuleBase {
           token0Id,
           token1Id,
           amount0,
-          amount1,
-          dexAccount: state.fields.dexAccount0
+          amount1
         },
         attoAlphAmount: ONE_ALPH + this.getExtraAlphAmount(tokenAId, tokenBId),
         tokens: [
@@ -370,7 +453,7 @@ export class CpmmModule extends ModuleBase {
           { id: token1Id, amount: amount1 }
         ]
       })
-      return { ...result, poolId }
+      return { result, poolId }
     }
 
     const result = await CreatePair.execute({
@@ -388,10 +471,65 @@ export class CpmmModule extends ModuleBase {
         { id: tokenBId, amount: 1n }
       ]
     })
-    return { ...result, poolId }
+    return { result, poolId }
   }
 
-  /** Loads the CPMM deployment addresses (factory, router) for the current network. */
+  getCollectProtocolFeesData(tokenAId: string, tokenBId: string): string {
+    const [token0Id, token1Id] = sortTokens(tokenAId, tokenBId)
+    return token0Id + token1Id
+  }
+
+  async collectProtocolFees(params: CpmmCollectProtocolFeesRequest): Promise<ExecuteScriptResult> {
+    const [token0Id, token1Id] = sortTokens(params.tokenAId, params.tokenBId)
+    return await this.scope.staking.collectProtocolFeesCPMM(this.config.factoryId, token0Id, token1Id)
+  }
+
+  async setFeeCollector(): Promise<ExecuteScriptResult> {
+    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
+    const newFeeCollector = addressFromContractId(this.scope.staking.getConfig().feeCollectorId)
+    return factory.transact.updateFeeCollector({
+      signer: this.scope.signer,
+      args: { newFeeCollector }
+    })
+  }
+
+  async migrateFactory(newBytecode: string, immFields: string, mutFields: string): Promise<ExecuteScriptResult> {
+    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.upgrade({
+      signer: this.scope.signer,
+      args: { newBytecode, immFields, mutFields }
+    })
+  }
+
+  async changeUpgrader(newUpgrader: string): Promise<ExecuteScriptResult> {
+    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
+    return await factory.transact.changeUpgrader({
+      signer: this.scope.signer,
+      args: { newUpgrader }
+    })
+  }
+
+  async migratePool(
+    tokenA: string,
+    tokenB: string,
+    newBytecode: string,
+    immFields: string,
+    mutFields: string
+  ): Promise<ExecuteScriptResult> {
+    const factory = TokenPairFactory.at(addressFromContractId(this.config.factoryId))
+    const [token0Id, token1Id] = sortTokens(tokenA, tokenB)
+    return await factory.transact.upgradeTokenPair({
+      signer: this.scope.signer,
+      args: {
+        newBytecode,
+        token0Id,
+        token1Id,
+        immFields,
+        mutFields
+      }
+    })
+  }
+
   getCpmmConfig(): CpmmConfig {
     const networkId = this.scope.network.id
     try {

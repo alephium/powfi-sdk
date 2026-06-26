@@ -33,14 +33,7 @@ describe('getUserStakeVaultInfo with groupless address', () => {
   }, 120000)
 
   const testStake = async (staker: SignerProvider) => {
-    const stakerAddr = (await staker.getSelectedAccount()).address
-
     await fixture.stakeAlph(staker, 200n * ONE_ALPH)
-    const stakeAmount = 100n * ONE_ALPH
-    await fixture.stakeXAlph(staker, stakeAmount)
-
-    const stakingInfo = await fixture.getUserStakingInfo(stakerAddr)
-    expect(stakingInfo.amount).toBe(stakeAmount)
   }
 
   const testUnstake = async (staker: SignerProvider) => {

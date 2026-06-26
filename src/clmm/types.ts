@@ -19,6 +19,14 @@ export interface ClmmSwapRequest {
   routePlan: bigint[]
 }
 
+export interface ClmmSwapToRequest {
+  tokenIn: string
+  tokenOut: string
+  configIndex: bigint
+  targetSqrtPriceX96: bigint
+  amountInMax: bigint
+}
+
 export interface ClmmSimulateSwapParams {
   configIndex: bigint
   token0: string
@@ -95,7 +103,7 @@ export interface ClmmCollectProtocolFeesRequest {
   token0: string
   token1: string
   configIndex: bigint
-  recipient: string
+  tokenId: string
 }
 
 export interface ClmmSetRewardParamsRequest {
@@ -116,6 +124,17 @@ export interface ClmmExtendRewardsRequest {
   rewardToken: string
   payer: string
   amount: bigint
+}
+
+export interface ClmmRewardInfo {
+  amount: bigint
+  openTime: bigint
+  endTime: bigint
+}
+
+export interface ClmmPoolRewardState {
+  token2Info: TokenInfo
+  rewardInfos: ClmmRewardInfo[]
 }
 
 export interface ClmmPoolContractState extends ClmmPoolConfig {

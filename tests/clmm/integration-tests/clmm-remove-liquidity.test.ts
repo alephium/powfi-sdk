@@ -3,7 +3,7 @@ import { ONE_ALPH, web3 } from '@alephium/web3'
 import { getSigners, getSigner } from '@alephium/web3-test'
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
 import { TickUtils } from '../../../src/clmm/tick'
-import { UNLIMITED_AMOUNT } from '../../../src'
+import { MAX_TICK, MIN_TICK, UNLIMITED_AMOUNT } from '../../../src'
 import { Fixture, getBalances } from './helpers'
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch)
@@ -141,7 +141,7 @@ describe('CLMM Remove Liquidity', () => {
     const beforePool = await getBalances(pool.address, tokenIds)
     const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, liquidity)
+    await fixture.removeLiquidity(lp, configIndex, liquidity, tickLower, tickUpper, amt0Out, amt1Out)
 
     const afterLp = await getBalances(lpAddr, tokenIds)
     const afterPool = await getBalances(pool.address, tokenIds)
@@ -217,4 +217,40 @@ describe('CLMM Remove Liquidity', () => {
     const finalState = await pool.fetchState()
     expect(finalState.fields.liquidity - afterState.fields.liquidity).toBe(addedLiquidity)
   })
+})
+
+describe('CLMM Remove Liquidity with ALPH', () => {
+  let fixture: Fixture
+  let lp: SignerProvider
+  let lp2: SignerProvider
+
+  beforeAll(async () => {
+    fixture = await Fixture.create(true)
+
+    const signers = await getSigners(2, 3_000n * ONE_ALPH)
+    lp = signers[0]
+    lp2 = signers[1]
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp)
+    await fixture.transferToken(fixture.tokenId1, 2_000n * ONE_ALPH, lp2)
+  })
+
+  test('remove liquidity for small amount of ALPHs', async () => {
+    const { configIndex, pool } = await fixture.setupWidePool(-307267n, 20n * ONE_ALPH, ONE_ALPH)
+    const poolStateBefore = await pool.fetchState()
+    const [amt0Out, amt1Out] = ClmmLiquidityUtils.getAmountsForLiquidity(
+      poolStateBefore.fields.slot0.sqrtPriceX96,
+      TickUtils.getSqrtRatioAtTick(MIN_TICK),
+      TickUtils.getSqrtRatioAtTick(MAX_TICK),
+      poolStateBefore.fields.liquidity
+    )
+    await fixture.removeLiquidity(
+      fixture.deployer,
+      configIndex,
+      poolStateBefore.fields.liquidity,
+      MIN_TICK,
+      MAX_TICK,
+      amt0Out,
+      amt1Out
+    )
+  }, 99999)
 })

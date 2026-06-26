@@ -9,13 +9,15 @@ import {
   contractIdFromAddress,
   groupOfAddress,
   DUST_AMOUNT,
-  encodePrimitiveValues
+  encodePrimitiveValues,
+  ALPH_TOKEN_ID
 } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import type { DexAccountInstance, PoolFactoryInstance, PoolInstance } from 'clmm/artifacts/ts'
+import type { DexAccountInstance, DexAccountRootInstance, PoolFactoryInstance, PoolInstance } from 'clmm/artifacts/ts'
 import {
   BitmapWord,
   DexAccount,
+  DexAccountRoot,
   Pool,
   PoolFactory,
   PoolConfig,
@@ -25,7 +27,7 @@ import {
 } from 'clmm/artifacts/ts'
 import { TickUtils } from '../../../src/clmm/tick'
 import { Powfi } from '../../../src/powfi'
-import { ClmmLiquidityUtils, PoolUtils, sortTokens } from '../../../src'
+import { ClmmLiquidityUtils, MAX_TICK, MIN_TICK, PoolUtils, sortTokens } from '../../../src'
 
 export interface Balances {
   alph: bigint
@@ -40,6 +42,10 @@ export async function getBalances(address: string, tokenIds: string[]): Promise<
     tokens[id] = token ? BigInt(token.amount) : 0n
   }
   return { alph: BigInt(balance.balance), tokens }
+}
+
+export function timeout(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export async function assertBalancesChange(params: {
@@ -83,6 +89,7 @@ export class Fixture {
   constructor(
     readonly factory: PoolFactoryInstance,
     readonly dexAccountTemplate: DexAccountInstance,
+    readonly dexAccountRoot: DexAccountRootInstance,
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly tokenDecimal: number,
@@ -90,10 +97,16 @@ export class Fixture {
     readonly deployer: SignerProvider
   ) {}
 
-  static async create(): Promise<Fixture> {
-    const [deployer] = await getSigners(1, 5_000n * ONE_ALPH)
-
+  static async create(isAlph: boolean = false): Promise<Fixture> {
+    const [deployer] = await getSigners(1, 2000n * ONE_ALPH)
     const powfi = new Powfi({ networkId: 'devnet', signer: deployer })
+    return this.load(powfi, isAlph)
+  }
+
+  static async load(powfi: Powfi, isAlph: boolean = false): Promise<Fixture> {
+    const deployer = powfi.signer
+    const address = (await deployer.getSelectedAccount()).address
+
     powfi.setCurrentProviders()
 
     const poolTemplate = (await Pool.deployTemplate(deployer)).contractInstance
@@ -104,26 +117,46 @@ export class Fixture {
     const dexAccountTemplate = (
       await DexAccount.deploy(deployer, {
         initialFields: {
-          counter: 0n,
-          owner: deployer.address,
-          refferer: deployer.address,
+          root: address,
+          minSwapCount: 0n,
+          owner: address,
+          referrer: address,
           parents: ['', '']
-        }
+        },
+        issueTokenTo: address,
+        issueTokenAmount: 1n
+      })
+    ).contractInstance
+
+    const dexAccountRoot = (
+      await DexAccountRoot.deploy(deployer, {
+        initialFields: {
+          templateId: dexAccountTemplate.contractId,
+          owner: address,
+          parents: ['00'.repeat(32), '00'.repeat(32)],
+          minSwapCount: 0n
+        },
+        issueTokenTo: address,
+        issueTokenAmount: 1n
       })
     ).contractInstance
 
     const factory = (
       await PoolFactory.deploy(deployer, {
         initialFields: {
-          owner: deployer.address,
+          owner: address,
           poolTemplate: poolTemplate.contractId,
           positionTemplate: positionTemplate.contractId,
           tickTemplate: tickTemplate.contractId,
           wordTemplate: wordTemplate.contractId,
           poolConfigTemplate: poolConfigTemplate.contractId,
-          dexAccountTemplate: dexAccountTemplate.contractId,
-          nextConfigIndex: 0n
-        }
+          dexAccountRoot: dexAccountRoot.contractId,
+          nextConfigIndex: 0n,
+          feeCollector: address,
+          upgrader: address
+        },
+        issueTokenAmount: 1n,
+        issueTokenTo: address
       })
     ).contractInstance
 
@@ -134,19 +167,24 @@ export class Fixture {
     })
 
     const initialAmount = 1_000_000n * ONE_ALPH
-    const { tokenId: tokenA } = await mintToken(deployer.address, initialAmount)
-    const { tokenId: tokenB } = await mintToken(deployer.address, initialAmount)
-    const [tokenId0, tokenId1] = sortTokens(tokenA, tokenB)
+
+    const { tokenId: tokenA } = await mintToken(address, initialAmount)
+    const { tokenId: tokenB } = await mintToken(address, initialAmount)
+    const tokens = sortTokens(tokenA, tokenB)
+    if (isAlph) {
+      tokens[0] = ALPH_TOKEN_ID
+    }
+    const [tokenId0, tokenId1] = tokens
 
     powfi.clmm.setConfig({
       groupIndex: 0,
       factoryId: factory.contractId,
       positionManagerId: positionManager.contractId,
       defaultConfigIndex: 0n,
-      accountRoot: dexAccountTemplate.contractId
+      accountRoot: dexAccountRoot.contractId
     })
 
-    return new Fixture(factory, dexAccountTemplate, tokenId0, tokenId1, 18, powfi, deployer)
+    return new Fixture(factory, dexAccountTemplate, dexAccountRoot, tokenId0, tokenId1, 18, powfi, deployer)
   }
 
   async createConfigIndex(tickSpacing: bigint, fee: bigint, feeProtocol: bigint): Promise<bigint> {
@@ -156,7 +194,8 @@ export class Fixture {
         config: {
           tickSpacing,
           fee,
-          feeProtocol
+          feeProtocol,
+          rewardToken: ALPH_TOKEN_ID
         }
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
@@ -185,7 +224,6 @@ export class Fixture {
       configIndex,
       this.tokenId0,
       this.tokenId1,
-      '',
       currentTick,
       amount0,
       amount1,
@@ -433,6 +471,29 @@ export class Fixture {
   ) {
     const configIndex = await this.createConfigIndex(tickSpacing, fee, feeProtocol)
     const pool = await this.createPoolWithInitialLiquidity(configIndex, amount0, amount1, tickSpacing)
+    return { configIndex, pool }
+  }
+
+  async setupWidePool(
+    currentTick: bigint,
+    amount0: bigint,
+    amount1: bigint,
+    tickSpacing: bigint = 1n,
+    fee: bigint = 3_000n,
+    feeProtocol: bigint = 0n
+  ) {
+    const configIndex = await this.createConfigIndex(tickSpacing, fee, feeProtocol)
+    await this.powfi.clmm.createPool(
+      configIndex,
+      this.tokenId0,
+      this.tokenId1,
+      currentTick,
+      amount0,
+      amount1,
+      MIN_TICK,
+      MAX_TICK
+    )
+    const pool = this.powfi.clmm.getPool(this.tokenId0, this.tokenId1, configIndex)
     return { configIndex, pool }
   }
 }
