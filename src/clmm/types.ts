@@ -33,6 +33,8 @@ export interface ClmmSimulateSwapParams {
   token1: string
   zeroForOne: boolean
   amount: bigint
+  data?: string
+  interestedContracts?: string[]
 }
 
 export interface LiquidityForPrice {

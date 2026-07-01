@@ -572,9 +572,10 @@ export class ClmmModule extends ModuleBase {
       args: {
         amountSpecified: p.amount,
         zeroForOne: p.zeroForOne,
-        data: '',
+        data: p.data ?? '',
         maxSteps: 500n
-      }
+      },
+      interestedContracts: p.interestedContracts
     })
 
     const poolState = result.contracts.at(0)?.fields as PoolTypes.Fields
