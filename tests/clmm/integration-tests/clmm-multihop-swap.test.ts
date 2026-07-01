@@ -2,7 +2,7 @@ import type { SignerProvider } from '@alephium/web3'
 import { ONE_ALPH, web3, addressFromContractId } from '@alephium/web3'
 import { getSigners, mintToken } from '@alephium/web3-test'
 import { Fixture } from './helpers'
-import { Pool, SwapWithoutAccount } from 'clmm/artifacts/ts'
+import { SwapWithoutAccount } from 'clmm/artifacts/ts'
 import { MIN_SQRT_RATIO } from 'clmm/artifacts/ts/constants'
 import { PoolUtils } from '../../../src'
 
@@ -46,8 +46,16 @@ describe('CLMM Multihop Swap Simulation', () => {
         await fixture.deployer.signAndSubmitTransferTx({
           signerAddress: deployerAddress,
           destinations: [
-            { address: (await lp.getSelectedAccount()).address, attoAlphAmount: ONE_ALPH, tokens: [{ id: t, amount: 2_000n * ONE_ALPH }] },
-            { address: (await trader.getSelectedAccount()).address, attoAlphAmount: ONE_ALPH, tokens: [{ id: t, amount: 1_000n * ONE_ALPH }] }
+            {
+              address: (await lp.getSelectedAccount()).address,
+              attoAlphAmount: ONE_ALPH,
+              tokens: [{ id: t, amount: 2_000n * ONE_ALPH }]
+            },
+            {
+              address: (await trader.getSelectedAccount()).address,
+              attoAlphAmount: ONE_ALPH,
+              tokens: [{ id: t, amount: 1_000n * ONE_ALPH }]
+            }
           ]
         })
       }
@@ -83,7 +91,6 @@ describe('CLMM Multihop Swap Simulation', () => {
   }, 120000)
 
   test('SDK simulateSwap multi-hop', async () => {
-    const pool1Id = fixture.powfi.clmm.getPoolId(token0, token1, configIndex)
     const pool3Id = fixture.powfi.clmm.getPoolId(token1, token2, configIndex)
     const pool3Address = addressFromContractId(pool3Id)
 
@@ -162,8 +169,6 @@ describe('CLMM Multihop Swap Simulation', () => {
 
   test('SDK swap transaction multi-hop', async () => {
     const pool1Id = fixture.powfi.clmm.getPoolId(token0, token1, configIndex)
-    const pool3Id = fixture.powfi.clmm.getPoolId(token1, token2, configIndex)
-    const pool3Address = addressFromContractId(pool3Id)
     const swapData = fixture.powfi.clmm.buildSwapPath(token2, configIndex)
 
     fixture.powfi.signer = trader
@@ -193,7 +198,7 @@ describe('CLMM Multihop Swap Simulation', () => {
     const traderAddress = (await trader.getSelectedAccount()).address
     const getTraderBalances = async () => {
       const balance = await web3.getCurrentNodeProvider().addresses.getAddressesAddressBalance(traderAddress)
-      const getAmount = (id: string) => BigInt(balance.tokenBalances?.find(t => t.id === id)?.amount ?? '0')
+      const getAmount = (id: string) => BigInt(balance.tokenBalances?.find((t) => t.id === id)?.amount ?? '0')
       return {
         token0: getAmount(token0),
         token1: getAmount(token1),
