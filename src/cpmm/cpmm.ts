@@ -21,7 +21,7 @@ import {
 } from 'cpmm/artifacts/ts'
 import { loadDeployments } from 'cpmm/artifacts/ts/deployments'
 import type { TokenInfo } from '@alephium/token-list'
-import { sortTokens, validateIntegratorFee } from '../common/utils'
+import { normalizeAddress, sortTokens, validateIntegratorFee } from '../common/utils'
 import { MAX_PRICE_IMPACT } from './constants'
 import { InsufficientBalanceError, PriceImpactTooHighError, PoolNotFoundError } from '../common/error'
 import type {
@@ -151,10 +151,12 @@ export class CpmmModule extends ModuleBase {
       throw new Error('Sender is required for swap operation')
     }
 
+    const group = this.config.groupIndex
+    const feeRecipient = params.feeRecipient === undefined ? undefined : normalizeAddress(params.feeRecipient, group)
     const feeAmount = validateIntegratorFee({
       fee: params.fee,
-      feeRecipient: params.feeRecipient,
-      sender: params.sender,
+      feeRecipient,
+      sender: normalizeAddress(params.sender, group),
       tokenInId: params.tokenInId
     })
 
@@ -214,7 +216,7 @@ export class CpmmModule extends ModuleBase {
       if (feeAmount > 0n) {
         return SwapMinOutWithFee.execute({
           signer: this.scope.signer,
-          initialFields: { ...initialFields, feeRecipient: params.feeRecipient!, feeAmount },
+          initialFields: { ...initialFields, feeRecipient: feeRecipient!, feeAmount },
           attoAlphAmount,
           tokens
         })
@@ -248,7 +250,7 @@ export class CpmmModule extends ModuleBase {
       if (feeAmount > 0n) {
         return SwapMaxInWithFee.execute({
           signer: this.scope.signer,
-          initialFields: { ...initialFields, feeRecipient: params.feeRecipient!, feeAmount },
+          initialFields: { ...initialFields, feeRecipient: feeRecipient!, feeAmount },
           attoAlphAmount,
           tokens
         })

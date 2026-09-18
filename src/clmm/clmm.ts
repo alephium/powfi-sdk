@@ -608,11 +608,13 @@ export class ClmmModule extends ModuleBase {
     const tokens = sortTokens(p.token0, p.token1)
     const [tokenIn, tokenOut] = zeroForOne ? tokens : tokens.reverse()
 
+    const group = this.config.groupIndex
     const sender = (await this.scope.signer.getSelectedAccount()).address
+    const feeRecipient = p.feeRecipient === undefined ? undefined : normalizeAddress(p.feeRecipient, group)
     const feeAmount = validateIntegratorFee({
       fee: p.fee,
-      feeRecipient: p.feeRecipient,
-      sender,
+      feeRecipient,
+      sender: normalizeAddress(sender, group),
       tokenInId: tokenIn
     })
 
@@ -632,7 +634,7 @@ export class ClmmModule extends ModuleBase {
     if (feeAmount > 0n) {
       return await SwapWithoutAccountWithFee.execute({
         signer: this.scope.signer,
-        initialFields: { ...initialFields, feeRecipient: p.feeRecipient!, feeAmount },
+        initialFields: { ...initialFields, feeRecipient: feeRecipient!, feeAmount },
         tokens: [{ id: tokenIn, amount }],
         attoAlphAmount
       })
