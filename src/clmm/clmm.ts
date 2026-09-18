@@ -47,12 +47,13 @@ import {
   DexAccount,
   DexAccountRoot,
   PositionManager,
-  SwapWithoutAccount
+  SwapWithoutAccount,
+  SwapWithoutAccountWithFee
 } from 'clmm/artifacts/ts'
 import { PoolUtils } from './pool'
 import { TickUtils } from './tick'
 import { ClmmLiquidityUtils } from './liquidity'
-import { normalizeAddress, PoolNotFoundError, sortTokens } from '../common'
+import { normalizeAddress, PoolNotFoundError, sortTokens, validateIntegratorFee } from '../common'
 
 /**
  * Provides operations for Alephium's concentrated liquidity AMM (Uniswap V3-style).
@@ -606,22 +607,43 @@ export class ClmmModule extends ModuleBase {
 
     const tokens = sortTokens(p.token0, p.token1)
     const [tokenIn, tokenOut] = zeroForOne ? tokens : tokens.reverse()
-    const attoAlphAmount = DUST_AMOUNT * 2n
-    const amount = p.amountIn + (tokenIn == ALPH_TOKEN_ID ? attoAlphAmount : 0n)
-    return await SwapWithoutAccount.execute({
-      signer: this.scope.signer,
-      initialFields: {
-        pool: pool.contractId,
-        tokenIn,
-        tokenOut,
-        zeroForOne,
-        amountSpecified: p.amount,
-        sqrtPriceLimitX96,
-        data: ''
-      },
-      tokens: [{ id: tokenIn, amount }],
-      attoAlphAmount
+
+    const sender = (await this.scope.signer.getSelectedAccount()).address
+    const feeAmount = validateIntegratorFee({
+      fee: p.fee,
+      feeRecipient: p.feeRecipient,
+      sender,
+      tokenInId: tokenIn
     })
+
+    const attoAlphAmount = DUST_AMOUNT * 2n + (feeAmount > 0n && tokenIn !== ALPH_TOKEN_ID ? DUST_AMOUNT : 0n)
+    const amount = p.amountIn + feeAmount + (tokenIn == ALPH_TOKEN_ID ? attoAlphAmount : 0n)
+
+    const initialFields = {
+      pool: pool.contractId,
+      tokenIn,
+      tokenOut,
+      zeroForOne,
+      amountSpecified: p.amount,
+      sqrtPriceLimitX96,
+      data: ''
+    }
+
+    if (feeAmount > 0n) {
+      return await SwapWithoutAccountWithFee.execute({
+        signer: this.scope.signer,
+        initialFields: { ...initialFields, feeRecipient: p.feeRecipient!, feeAmount },
+        tokens: [{ id: tokenIn, amount }],
+        attoAlphAmount
+      })
+    } else {
+      return await SwapWithoutAccount.execute({
+        signer: this.scope.signer,
+        initialFields,
+        tokens: [{ id: tokenIn, amount }],
+        attoAlphAmount
+      })
+    }
   }
 
   async swapTo(p: ClmmSwapToRequest): Promise<SignExecuteScriptTxResult> {

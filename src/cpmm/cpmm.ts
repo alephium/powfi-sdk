@@ -10,7 +10,9 @@ import {
 import {
   TokenPair as TokenPairContract,
   SwapMaxIn,
+  SwapMaxInWithFee,
   SwapMinOut,
+  SwapMinOutWithFee,
   AddLiquidity,
   RemoveLiquidity,
   CreatePair,
@@ -19,7 +21,7 @@ import {
 } from 'cpmm/artifacts/ts'
 import { loadDeployments } from 'cpmm/artifacts/ts/deployments'
 import type { TokenInfo } from '@alephium/token-list'
-import { sortTokens } from '../common/utils'
+import { sortTokens, validateIntegratorFee } from '../common/utils'
 import { MAX_PRICE_IMPACT } from './constants'
 import { InsufficientBalanceError, PriceImpactTooHighError, PoolNotFoundError } from '../common/error'
 import type {
@@ -149,6 +151,13 @@ export class CpmmModule extends ModuleBase {
       throw new Error('Sender is required for swap operation')
     }
 
+    const feeAmount = validateIntegratorFee({
+      fee: params.fee,
+      feeRecipient: params.feeRecipient,
+      sender: params.sender,
+      tokenInId: params.tokenInId
+    })
+
     const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId)
     const swapDetails = CpmmModule.computeSwapAmount({
       state: poolState,
@@ -165,67 +174,87 @@ export class CpmmModule extends ModuleBase {
 
     if (balances) {
       const available = balances.get(swapDetails.tokenInInfo.id) ?? 0n
-      if (available < swapDetails.tokenInAmount) {
+      const required = swapDetails.tokenInAmount + feeAmount
+      if (available < required) {
         throw new InsufficientBalanceError(
           swapDetails.tokenInInfo.symbol,
-          prettifyTokenAmount(swapDetails.tokenInAmount, swapDetails.tokenInInfo.decimals) ??
-            `${swapDetails.tokenInAmount}`,
+          prettifyTokenAmount(required, swapDetails.tokenInInfo.decimals) ?? `${required}`,
           prettifyTokenAmount(available, swapDetails.tokenInInfo.decimals) ?? `${available}`
         )
       }
     }
 
     const ttlMinutes = params.ttlMinutes ?? 60
+    const feeNeedsDust = feeAmount > 0n && swapDetails.tokenInInfo.id !== ALPH_TOKEN_ID
 
     if (swapDetails.swapType === 'ExactIn') {
       let attoAlphAmount = this.getExtraAlphAmount(swapDetails.state.token0Info.id, swapDetails.state.token1Info.id)
+      if (feeNeedsDust) {
+        attoAlphAmount += DUST_AMOUNT
+      }
       const tokens: Array<{ id: string; amount: bigint }> = []
+      const totalAmountIn = swapDetails.tokenInAmount + feeAmount
 
       if (swapDetails.tokenInInfo.id === ALPH_TOKEN_ID) {
-        attoAlphAmount += swapDetails.tokenInAmount
+        attoAlphAmount += totalAmountIn
       } else {
-        tokens.push({ id: swapDetails.tokenInInfo.id, amount: swapDetails.tokenInAmount })
+        tokens.push({ id: swapDetails.tokenInInfo.id, amount: totalAmountIn })
       }
 
-      const result = await SwapMinOut.execute({
-        signer: this.scope.signer,
-        initialFields: {
-          sender: params.sender,
-          router: this.config.routerId,
-          pair: swapDetails.state.poolId,
-          tokenInId: swapDetails.tokenInInfo.id,
-          amountIn: swapDetails.tokenInAmount,
-          amountOutMin: swapDetails.minimalTokenOutAmount!,
-          deadline: deadline(ttlMinutes)
-        },
-        attoAlphAmount,
-        tokens
-      })
-      return result
+      const initialFields = {
+        sender: params.sender,
+        router: this.config.routerId,
+        pair: swapDetails.state.poolId,
+        tokenInId: swapDetails.tokenInInfo.id,
+        amountIn: swapDetails.tokenInAmount,
+        amountOutMin: swapDetails.minimalTokenOutAmount!,
+        deadline: deadline(ttlMinutes)
+      }
+
+      if (feeAmount > 0n) {
+        return SwapMinOutWithFee.execute({
+          signer: this.scope.signer,
+          initialFields: { ...initialFields, feeRecipient: params.feeRecipient!, feeAmount },
+          attoAlphAmount,
+          tokens
+        })
+      } else {
+        return SwapMinOut.execute({ signer: this.scope.signer, initialFields, attoAlphAmount, tokens })
+      }
     } else {
       let attoAlphAmount = this.getExtraAlphAmount(swapDetails.state.token0Info.id, swapDetails.state.token1Info.id)
+      if (feeNeedsDust) {
+        attoAlphAmount += DUST_AMOUNT
+      }
       const tokens: Array<{ id: string; amount: bigint }> = []
+      const totalAmountInMax = swapDetails.maximalTokenInAmount! + feeAmount
 
       if (swapDetails.tokenInInfo.id === ALPH_TOKEN_ID) {
-        attoAlphAmount += swapDetails.maximalTokenInAmount!
+        attoAlphAmount += totalAmountInMax
       } else {
-        tokens.push({ id: swapDetails.tokenInInfo.id, amount: swapDetails.maximalTokenInAmount! })
+        tokens.push({ id: swapDetails.tokenInInfo.id, amount: totalAmountInMax })
       }
-      const result = await SwapMaxIn.execute({
-        signer: this.scope.signer,
-        initialFields: {
-          sender: params.sender,
-          router: this.config.routerId,
-          pair: swapDetails.state.poolId,
-          tokenInId: swapDetails.tokenInInfo.id,
-          amountInMax: swapDetails.maximalTokenInAmount!,
-          amountOut: swapDetails.tokenOutAmount,
-          deadline: deadline(ttlMinutes)
-        },
-        attoAlphAmount,
-        tokens
-      })
-      return result
+
+      const initialFields = {
+        sender: params.sender,
+        router: this.config.routerId,
+        pair: swapDetails.state.poolId,
+        tokenInId: swapDetails.tokenInInfo.id,
+        amountInMax: swapDetails.maximalTokenInAmount!,
+        amountOut: swapDetails.tokenOutAmount,
+        deadline: deadline(ttlMinutes)
+      }
+
+      if (feeAmount > 0n) {
+        return SwapMaxInWithFee.execute({
+          signer: this.scope.signer,
+          initialFields: { ...initialFields, feeRecipient: params.feeRecipient!, feeAmount },
+          attoAlphAmount,
+          tokens
+        })
+      } else {
+        return SwapMaxIn.execute({ signer: this.scope.signer, initialFields, attoAlphAmount, tokens })
+      }
     }
   }
 
