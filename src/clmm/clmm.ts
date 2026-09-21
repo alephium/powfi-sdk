@@ -725,6 +725,41 @@ export class ClmmModule extends ModuleBase {
     })
   }
 
+  async migratePoolRewardToken(
+    tokenA: string,
+    tokenB: string,
+    configIndex: bigint,
+    rewardToken: string
+  ): Promise<SignExecuteScriptTxResult> {
+    const [token0, token1] = sortTokens(tokenA, tokenB)
+    if (rewardToken === token0 || rewardToken === token1) {
+      throw new Error('Reward token must be different from the pool tokens')
+    }
+
+    const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
+    const pool = this.getPool(token0, token1, configIndex)
+    const poolState = await pool.fetchState()
+    if (poolState.fields.token2 !== '') {
+      throw new Error(`Pool reward token is already configured as ${poolState.fields.token2}`)
+    }
+
+    const { encodedImmFields, encodedMutFields } = Pool.encodeFields({
+      ...poolState.fields,
+      token2: rewardToken
+    })
+    return factory.transact.upgradePool({
+      signer: this.scope.signer,
+      args: {
+        newBytecode: Pool.contract.bytecode,
+        token0,
+        token1,
+        configIndex,
+        immFields: binToHex(encodedImmFields),
+        mutFields: binToHex(encodedMutFields)
+      }
+    })
+  }
+
   async changeUpgrader(newUpgrader: string): Promise<SignExecuteScriptTxResult> {
     const factory = PoolFactory.at(addressFromContractId(this.config.factoryId))
     return await factory.transact.changeUpgrader({
