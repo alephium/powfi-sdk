@@ -18,7 +18,7 @@ describe('CPMM Swap', () => {
   let tokenIds: string[]
 
   const reserve = 1_000n * ONE_ALPH
-  const swapIn = ONE_ALPH
+  const amountIn = ONE_ALPH
   const fee = ONE_ALPH / 100n
 
   beforeAll(async () => {
@@ -53,34 +53,34 @@ describe('CPMM Swap', () => {
 
   test('exact-in swap without fee', async () => {
     const recipient = freshRecipient()
-    const quote = await getQuote({ amountIn: swapIn })
+    const quote = await getQuote({ amountIn: amountIn })
     const before = await snapshot(recipient)
 
     await fixture.powfi.cpmm.swap({
       tokenInId: fixture.tokenId0,
       tokenOutId: fixture.tokenId1,
-      amountIn: swapIn,
+      amountIn: amountIn,
       slippageBps: 100n,
       sender: traderAddress
     })
 
     const after = await snapshot(recipient)
-    expect(delta(before, after, 'trader', fixture.tokenId0)).toBe(-swapIn)
+    expect(delta(before, after, 'trader', fixture.tokenId0)).toBe(-amountIn)
     expect(delta(before, after, 'trader', fixture.tokenId1)).toBe(quote.tokenOutAmount)
-    expect(delta(before, after, 'pool', fixture.tokenId0)).toBe(swapIn)
+    expect(delta(before, after, 'pool', fixture.tokenId0)).toBe(amountIn)
     expect(delta(before, after, 'pool', fixture.tokenId1)).toBe(-quote.tokenOutAmount)
   }, 60000)
 
   test('exact-in swap with fee', async () => {
     const feeRecipient = freshRecipient()
-    const quote = await getQuote({ amountIn: swapIn })
+    const quote = await getQuote({ amountIn: amountIn })
     const before = await snapshot(feeRecipient)
     expect(before.recipient.tokens[fixture.tokenId0]).toBe(0n)
 
     await fixture.powfi.cpmm.swap({
       tokenInId: fixture.tokenId0,
       tokenOutId: fixture.tokenId1,
-      amountIn: swapIn,
+      amountIn: amountIn,
       slippageBps: 100n,
       sender: traderAddress,
       fee,
@@ -89,8 +89,8 @@ describe('CPMM Swap', () => {
 
     const after = await snapshot(feeRecipient)
 
-    expect(delta(before, after, 'trader', fixture.tokenId0)).toBe(-(swapIn + fee))
-    expect(delta(before, after, 'pool', fixture.tokenId0)).toBe(swapIn)
+    expect(delta(before, after, 'trader', fixture.tokenId0)).toBe(-(amountIn + fee))
+    expect(delta(before, after, 'pool', fixture.tokenId0)).toBe(amountIn)
     expect(delta(before, after, 'recipient', fixture.tokenId0)).toBe(fee)
     // Fee has no impact on the swap
     expect(delta(before, after, 'trader', fixture.tokenId1)).toBe(quote.tokenOutAmount)
@@ -142,14 +142,14 @@ describe('CPMM Swap', () => {
   }, 60000)
 
   test('the balance check accounts for both amount in and fee', async () => {
-    const balances = new Map([[fixture.tokenId0, swapIn]])
+    const balances = new Map([[fixture.tokenId0, amountIn]])
 
     await expect(
       fixture.powfi.cpmm.swap(
         {
           tokenInId: fixture.tokenId0,
           tokenOutId: fixture.tokenId1,
-          amountIn: swapIn,
+          amountIn: amountIn,
           slippageBps: 100n,
           sender: traderAddress,
           fee,
@@ -165,7 +165,7 @@ describe('CPMM Swap', () => {
       fixture.powfi.cpmm.swap({
         tokenInId: fixture.tokenId0,
         tokenOutId: fixture.tokenId1,
-        amountIn: swapIn,
+        amountIn: amountIn,
         slippageBps: 100n,
         sender: traderAddress,
         fee
@@ -178,13 +178,27 @@ describe('CPMM Swap', () => {
       fixture.powfi.cpmm.swap({
         tokenInId: fixture.tokenId0,
         tokenOutId: fixture.tokenId1,
-        amountIn: swapIn,
+        amountIn: amountIn,
         slippageBps: 100n,
         sender: traderAddress,
         fee,
         feeRecipient: traderAddress
       })
     ).rejects.toThrow(/differ from the sender/)
+  })
+
+  test('rejects a fee equal to the amount in', async () => {
+    await expect(
+      fixture.powfi.cpmm.swap({
+        tokenInId: fixture.tokenId0,
+        tokenOutId: fixture.tokenId1,
+        amountIn: amountIn,
+        slippageBps: 100n,
+        sender: traderAddress,
+        fee: amountIn,
+        feeRecipient: freshRecipient()
+      })
+    ).rejects.toThrow(/less than the swapped amount/)
   })
 })
 
@@ -195,7 +209,7 @@ describe('CPMM Swap with an ALPH fee', () => {
   let tokenIds: string[]
 
   const reserve = 1_000n * ONE_ALPH
-  const swapIn = ONE_ALPH
+  const amountIn = ONE_ALPH
   const fee = DUST_AMOUNT
 
   beforeAll(async () => {
@@ -215,7 +229,7 @@ describe('CPMM Swap with an ALPH fee', () => {
       state,
       tokenInId: fixture.tokenId0,
       tokenOutId: fixture.tokenId1,
-      amountIn: swapIn,
+      amountIn: amountIn,
       slippageBps: 100n
     })
 
@@ -227,7 +241,7 @@ describe('CPMM Swap with an ALPH fee', () => {
     await fixture.powfi.cpmm.swap({
       tokenInId: fixture.tokenId0,
       tokenOutId: fixture.tokenId1,
-      amountIn: swapIn,
+      amountIn: amountIn,
       slippageBps: 100n,
       sender: traderAddress,
       fee,
@@ -239,9 +253,9 @@ describe('CPMM Swap with an ALPH fee', () => {
     const recipientAfter = await getBalances(feeRecipient, tokenIds)
 
     expect(recipientAfter.alph - recipientBefore.alph).toBe(fee)
-    expect(poolAfter.alph - poolBefore.alph).toBe(swapIn)
+    expect(poolAfter.alph - poolBefore.alph).toBe(amountIn)
     expect(traderAfter.tokens[fixture.tokenId1] - traderBefore.tokens[fixture.tokenId1]).toBe(quote.tokenOutAmount)
-    expect(traderAfter.alph - traderBefore.alph).toBeLessThan(-(swapIn + fee))
+    expect(traderAfter.alph - traderBefore.alph).toBeLessThan(-(amountIn + fee))
   }, 60000)
 
   test('rejects an ALPH fee below the dust amount', async () => {
@@ -249,7 +263,7 @@ describe('CPMM Swap with an ALPH fee', () => {
       fixture.powfi.cpmm.swap({
         tokenInId: fixture.tokenId0,
         tokenOutId: fixture.tokenId1,
-        amountIn: swapIn,
+        amountIn: amountIn,
         slippageBps: 100n,
         sender: traderAddress,
         fee: DUST_AMOUNT - 1n,

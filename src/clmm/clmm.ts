@@ -615,7 +615,8 @@ export class ClmmModule extends ModuleBase {
       fee: p.fee,
       feeRecipient,
       sender: normalizeAddress(sender, group),
-      tokenInId: tokenIn
+      tokenInId: tokenIn,
+      amountIn: p.amountIn
     })
 
     const attoAlphAmount = DUST_AMOUNT * 2n + (feeAmount > 0n && tokenIn !== ALPH_TOKEN_ID ? DUST_AMOUNT : 0n)

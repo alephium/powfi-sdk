@@ -16,13 +16,14 @@ export function validateIntegratorFee(params: {
   feeRecipient?: string
   sender: string
   tokenInId: string
+  amountIn: bigint
 }): bigint {
-  const { fee, feeRecipient, sender, tokenInId } = params
+  const { fee, feeRecipient, sender, tokenInId, amountIn } = params
 
-  if (fee === undefined && feeRecipient === undefined) {
+  if (fee == null && feeRecipient == null) {
     return 0n
   }
-  if (fee === undefined || feeRecipient === undefined) {
+  if (fee == null || feeRecipient == null) {
     throw new Error('fee and feeRecipient must be provided together')
   }
   if (fee <= 0n) {
@@ -33,6 +34,9 @@ export function validateIntegratorFee(params: {
   }
   if (tokenInId === ALPH_TOKEN_ID && fee < DUST_AMOUNT) {
     throw new Error(`an ALPH fee must be at least the dust amount ${DUST_AMOUNT}, got ${fee}`)
+  }
+  if (fee >= amountIn) {
+    throw new Error(`fee must be less than the swapped amount ${amountIn}, got ${fee}`)
   }
 
   return fee

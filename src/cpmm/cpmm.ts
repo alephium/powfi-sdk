@@ -153,12 +153,6 @@ export class CpmmModule extends ModuleBase {
 
     const group = this.config.groupIndex
     const feeRecipient = params.feeRecipient === undefined ? undefined : normalizeAddress(params.feeRecipient, group)
-    const feeAmount = validateIntegratorFee({
-      fee: params.fee,
-      feeRecipient,
-      sender: normalizeAddress(params.sender, group),
-      tokenInId: params.tokenInId
-    })
 
     const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId)
     const swapDetails = CpmmModule.computeSwapAmount({
@@ -173,6 +167,14 @@ export class CpmmModule extends ModuleBase {
     if (!bypassPriceImpact && swapDetails.priceImpact >= MAX_PRICE_IMPACT) {
       throw new PriceImpactTooHighError(swapDetails.priceImpact, MAX_PRICE_IMPACT)
     }
+
+    const feeAmount = validateIntegratorFee({
+      fee: params.fee,
+      feeRecipient,
+      sender: normalizeAddress(params.sender, group),
+      tokenInId: params.tokenInId,
+      amountIn: swapDetails.swapType === 'ExactIn' ? swapDetails.tokenInAmount : swapDetails.maximalTokenInAmount!
+    })
 
     if (balances) {
       const available = balances.get(swapDetails.tokenInInfo.id) ?? 0n
