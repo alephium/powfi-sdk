@@ -1,10 +1,15 @@
 import type { SignerProvider } from '@alephium/web3'
 import { ONE_ALPH, web3, DUST_AMOUNT, ALPH_TOKEN_ID, groupOfAddress } from '@alephium/web3'
+import type { TokenInfo } from '@alephium/token-list'
 import { getSigners, mintToken } from '@alephium/web3-test'
-import type { TokenPairFactoryInstance, DummyDexRootInstance } from 'cpmm'
-import { TokenPair, TokenPairFactory, DummyDexRoot, CreatePairAndAddLiquidity } from 'cpmm'
+import type { TokenPairFactoryInstance, DummyDexRootInstance, RouterInstance } from 'cpmm'
+import { TokenPair, TokenPairFactory, DummyDexRoot, Router, CreatePairAndAddLiquidity } from 'cpmm'
 import { Powfi } from '../../../src/powfi'
 import { sortTokens } from '../../../src/common/utils'
+
+function testTokenInfo(id: string, symbol: string): TokenInfo {
+  return { id, name: symbol, symbol, decimals: 18, description: '', logoURI: '' }
+}
 
 export interface Balances {
   alph: bigint
@@ -25,6 +30,7 @@ export class Fixture {
   constructor(
     readonly factory: TokenPairFactoryInstance,
     readonly dexAccountTemplate: DummyDexRootInstance,
+    readonly router: RouterInstance,
     readonly tokenId0: string,
     readonly tokenId1: string,
     readonly powfi: Powfi,
@@ -67,6 +73,9 @@ export class Fixture {
     })
     const factory = factoryDeploy.contractInstance
 
+    const routerDeploy = await Router.deploy(deployer, { initialFields: {} })
+    const router = routerDeploy.contractInstance
+
     const initialAmount = 1_000_000n * ONE_ALPH
     const { tokenId: tokenA } = await mintToken(address, initialAmount)
     const { tokenId: tokenB } = await mintToken(address, initialAmount)
@@ -75,13 +84,19 @@ export class Fixture {
       tokens[0] = ALPH_TOKEN_ID
     }
 
+    const tokenInfos = [ALPH_TOKEN_ID, tokens[0], tokens[1]]
+      .filter((id, index, ids) => ids.indexOf(id) === index)
+      .map((id, index) => testTokenInfo(id, id === ALPH_TOKEN_ID ? 'ALPH' : `TT${index}`))
+    powfi.token.getTokens = () => Promise.resolve(tokenInfos)
+
     powfi.cpmm.setConfig({
       ...powfi.cpmm.getConfig(),
       factoryId: factory.contractId,
+      routerId: router.contractId,
       groupIndex: groupOfAddress(address)
     })
 
-    return new Fixture(factory, dexAccountTemplate, tokens[0], tokens[1], powfi, deployer)
+    return new Fixture(factory, dexAccountTemplate, router, tokens[0], tokens[1], powfi, deployer)
   }
 
   async createPool(amount0: bigint, amount1: bigint) {

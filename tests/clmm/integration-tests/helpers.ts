@@ -256,7 +256,7 @@ export class Fixture {
     configIndex: bigint,
     amountIn: bigint,
     slippage: number,
-    opts?: { token0?: string; token1?: string }
+    opts?: { token0?: string; token1?: string; fee?: bigint; feeRecipient?: string }
   ) {
     this.powfi.signer = trader
     const token0 = opts?.token0 ?? this.tokenId0
@@ -267,7 +267,9 @@ export class Fixture {
       amount: amountIn,
       amountIn,
       routePlan: [configIndex],
-      slippage: BigInt(slippage)
+      slippage: BigInt(slippage),
+      fee: opts?.fee,
+      feeRecipient: opts?.feeRecipient
     })
   }
 
