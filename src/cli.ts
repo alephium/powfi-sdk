@@ -7,7 +7,7 @@ import { TickUtils } from './clmm/tick'
 import { ClmmLiquidityUtils } from './clmm/liquidity'
 import { sortTokens } from './common/utils'
 import Decimal from 'decimal.js'
-import { Position, DexAccount, DexAccountRoot } from 'clmm'
+import { Position, DexAccount, DexAccountRoot, PoolFactory } from 'clmm'
 import { PoolUtils } from './clmm/pool'
 import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
@@ -240,6 +240,19 @@ async function main() {
   if (command === 'clmm') {
     const clmmActionOrTokenA = args[1]
 
+    if (clmmActionOrTokenA === 'migrate-factory') {
+      console.log('Migrating CLMM factory...')
+      try {
+        const result = await powfi.clmm.migrateFactory(PoolFactory.contract.bytecode)
+        console.log(`Factory migration submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+        console.log('Factory migration confirmed.')
+      } catch (error) {
+        console.error('Failed to migrate factory:', error)
+      }
+      return
+    }
+
     if (clmmActionOrTokenA === 'set-fee-collector') {
       console.log(`Setting CLMM fee collector...`)
       try {
@@ -263,6 +276,7 @@ async function main() {
       console.log('Usage: npx ts-node src/cli.ts clmm <symbolA> <symbolB> <index> <action> [args]')
       console.log('Global Actions:')
       console.log('  clmm set-fee-collector')
+      console.log('  clmm migrate-factory')
       console.log('\nPool Actions:')
       console.log('  create <price> [amountA] [amountB]')
       console.log('  info [priceMin] [priceMax]                  # Pool or position info')
@@ -277,7 +291,7 @@ async function main() {
       console.log('  protocol-swap')
       console.log('  rewards set <rewardSymbol> <amount> <durationDays>')
       console.log('  rewards extend <rewardSymbol> <amount>')
-      console.log('  migrate-factory <newBytecode>')
+      console.log('  migrate-reward-token <rewardSymbol>')
       console.log('  migrate-account <newBytecode>')
       return
     }
@@ -1039,6 +1053,29 @@ async function main() {
       } catch (error) {
         console.error('Failed to swap protocol fees:', error)
       }
+    } else if (action === 'migrate-reward-token') {
+      const rewardSymbol = actionArgs[0]
+      if (!rewardSymbol) {
+        console.log('Usage: clmm <T1> <T2> <INDEX> migrate-reward-token <rewardSymbol>')
+        return
+      }
+
+      try {
+        const rewardToken = await getTokenInfo(rewardSymbol)
+        console.log(`Migrating ${symbolA}/${symbolB} config ${configIndex} reward token to ${rewardToken.symbol}...`)
+        const result = await powfi.clmm.migratePoolRewardToken(t0Info.id, t1Info.id, configIndex, rewardToken.id)
+        console.log(`Pool migration submitted: ${result.txId}`)
+        await waitForTx(result.txId)
+
+        const pool = powfi.clmm.getPool(t0Info.id, t1Info.id, configIndex)
+        const poolState = await pool.fetchState()
+        if (poolState.fields.token2 !== rewardToken.id) {
+          throw new Error('Pool reward token was not updated')
+        }
+        console.log('Pool reward-token migration confirmed.')
+      } catch (error) {
+        console.error('Failed to migrate pool reward token:', error)
+      }
     } else if (action === 'migrate-account') {
       const newBytecode = actionArgs[0]
       if (newBytecode === undefined) {
@@ -1059,20 +1096,6 @@ async function main() {
         console.log('Account migration confirmed.')
       } catch (error) {
         console.error('Failed to migrate account:', error)
-      }
-    } else if (action === 'migrate-factory') {
-      const newBytecode = actionArgs[0]
-      if (newBytecode === undefined) {
-        console.log('Usage: clmm migrate-factory <newBytecode>')
-        return
-      }
-      try {
-        const result = await powfi.clmm.migrateFactory(newBytecode)
-        console.log(`Factory migration submitted: ${result.txId}`)
-        await waitForTx(result.txId)
-        console.log('Factory migration confirmed.')
-      } catch (error) {
-        console.error('Failed to migrate factory:', error)
       }
     } else {
       console.log(`Unknown action ${action} for module clmm`)

@@ -187,7 +187,12 @@ export class Fixture {
     return new Fixture(factory, dexAccountTemplate, dexAccountRoot, tokenId0, tokenId1, 18, powfi, deployer)
   }
 
-  async createConfigIndex(tickSpacing: bigint, fee: bigint, feeProtocol: bigint): Promise<bigint> {
+  async createConfigIndex(
+    tickSpacing: bigint,
+    fee: bigint,
+    feeProtocol: bigint,
+    rewardToken: string = ALPH_TOKEN_ID
+  ): Promise<bigint> {
     const configTx = await this.factory.transact.createConfig({
       signer: this.deployer,
       args: {
@@ -195,7 +200,7 @@ export class Fixture {
           tickSpacing,
           fee,
           feeProtocol,
-          rewardToken: ALPH_TOKEN_ID
+          rewardToken
         }
       },
       attoAlphAmount: MINIMAL_CONTRACT_DEPOSIT
