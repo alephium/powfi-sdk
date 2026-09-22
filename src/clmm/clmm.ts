@@ -610,7 +610,7 @@ export class ClmmModule extends ModuleBase {
 
     const group = this.config.groupIndex
     const sender = (await this.scope.signer.getSelectedAccount()).address
-    const feeRecipient = p.feeRecipient === undefined ? undefined : normalizeAddress(p.feeRecipient, group)
+    const feeRecipient = p.feeRecipient == null ? undefined : normalizeAddress(p.feeRecipient, group)
     const feeAmount = validateIntegratorFee({
       fee: p.fee,
       feeRecipient,

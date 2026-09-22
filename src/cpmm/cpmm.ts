@@ -152,7 +152,7 @@ export class CpmmModule extends ModuleBase {
     }
 
     const group = this.config.groupIndex
-    const feeRecipient = params.feeRecipient === undefined ? undefined : normalizeAddress(params.feeRecipient, group)
+    const feeRecipient = params.feeRecipient == null ? undefined : normalizeAddress(params.feeRecipient, group)
 
     const poolState = await this.getPoolState(params.tokenInId, params.tokenOutId)
     const swapDetails = CpmmModule.computeSwapAmount({
