@@ -6,6 +6,5 @@ export default defineConfig({
   dts: true,
   sourcemap: true,
   splitting: false,
-  outDir: 'lib',
-  noExternal: ['clmm', 'cpmm', 'staking']
+  outDir: 'lib'
 })

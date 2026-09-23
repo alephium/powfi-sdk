@@ -1,8 +1,6 @@
 /lib
 /node_modules
-dist/
 *.log
-.ralph-lsp
 .npmrc
 
 .env

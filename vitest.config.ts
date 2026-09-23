@@ -5,11 +5,6 @@ export default defineConfig({
   test: {
     globals: true,
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    coverage: {
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/index.ts'],
-      reporter: ['text', 'lcov', 'html']
-    },
     fileParallelism: false,
     sequence: {
       concurrent: false

@@ -1,7 +1,2 @@
-lib
-dist
-node_modules
 artifacts
 deployments
-coverage
-.project.json

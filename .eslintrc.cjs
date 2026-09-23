@@ -24,7 +24,7 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }]
   },
-  ignorePatterns: ['lib', 'dist', 'node_modules', '*.d.ts'],
+  ignorePatterns: ['lib', 'artifacts', '*.d.ts'],
   overrides: [
     {
       files: ['**/*.test.ts', '**/*.spec.ts'],
