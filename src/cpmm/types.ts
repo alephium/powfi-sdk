@@ -30,6 +30,8 @@ export interface CpmmSwapRequest {
   slippageBps: CpmmSlippageBps
   sender: string
   ttlMinutes?: number // defaults to 60
+  fee?: bigint
+  feeRecipient?: string
 }
 
 export interface CpmmSwapQuoteParams {

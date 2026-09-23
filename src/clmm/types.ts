@@ -17,6 +17,8 @@ export interface ClmmSwapRequest {
   amountIn: bigint
   slippage: bigint
   routePlan: bigint[]
+  fee?: bigint
+  feeRecipient?: string
 }
 
 export interface ClmmSwapToRequest {
