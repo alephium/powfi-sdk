@@ -60,6 +60,30 @@ For write operations (swap, add/remove liquidity, staking), pass a signer when l
 const powfi = Powfi.load({ networkId: 'testnet', signer })
 ```
 
+## Architecture
+
+The SDK is organized around a central `Powfi` class that initializes all modules:
+
+```ts
+const powfi = Powfi.load({ networkId: 'mainnet', signer })
+powfi.cpmm // CpmmModule — constant-product AMM operations
+powfi.clmm // ClmmModule — concentrated liquidity operations
+powfi.staking // StakingModule — xALPH staking lifecycle
+powfi.token // TokenModule — token metadata from token list
+```
+
+Each module extends `ModuleBase`, which provides access to the parent `Powfi` instance (node provider, signer, network config) and structured logging.
+
+**Dependency flow** (no circular dependencies):
+
+```
+index.ts → Powfi → CpmmModule, ClmmModule, StakingModule, TokenModule
+                         │            │              │
+                         └────────────┴──────────────┘
+                                      │
+                               common/ (math, numeric, error, utils)
+```
+
 ## Development Commands
 
 ```bash
