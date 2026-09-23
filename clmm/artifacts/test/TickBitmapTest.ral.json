@@ -1,0 +1,238 @@
+{
+  "version": "v4.5.3",
+  "name": "TickBitmapTest",
+  "bytecode": "020a1e40434075409140d54136414c4167418f419f0000010101120e16007a7a1241003a7a05294b033a904a023a2213026402010001020114d3227d9cf316007a7ace013a7a05294b033a904a023a22170116010000cb0200000105011b1600000017011601cb17021602c54c02160202b21301640c130164170417031601ce0016031604c11816020200000103010d1600000017011601cb17021602c54c02160202ce0002000002050040281600ce0123052413412d7b16007a7ace013a7a05294b033a904a023a22170216020002170316020d0d16030102170416040c2f4c0516010d0c160301030000020602403016007a7ace013a7a05294b033a904a023a2216014c02054a01061f170216020003170316021601ce010f0e1603010417051704160412bff27618264c0212bff276181704160412800d89e8284c0212800d89e817041604160502010003030108d37afb14100d1600160116021304640201000405010ad35b19984c1601160216030006170416001604cc02010303060113d3b7624ae716011602130264130064170417031600d1a2b116031604af1705160502010001010004d3a2f62a8d1600b40004",
+  "codeHash": "3375d32c5860ca5fea19e0d1f25c8a3873cf6996a9f2bc97467981e3e418b144",
+  "fieldsSig": {
+    "names": [
+      "wordTemplate",
+      "tickSpacing"
+    ],
+    "types": [
+      "ByteVec",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "wordPath",
+      "paramNames": [
+        "compressed"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getWordId",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getWord",
+      "paramNames": [
+        "compressed"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "BitmapWord"
+      ]
+    },
+    {
+      "name": "getWordOrTemplate",
+      "paramNames": [
+        "compressed"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "BitmapWord"
+      ]
+    },
+    {
+      "name": "flipTick",
+      "paramNames": [
+        "tick",
+        "recipient"
+      ],
+      "paramTypes": [
+        "I256",
+        "Address"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "nextInitializedTickWithinOneWord",
+      "paramNames": [
+        "tick",
+        "zeroForOne"
+      ],
+      "paramTypes": [
+        "I256",
+        "Bool"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256",
+        "Bool"
+      ]
+    },
+    {
+      "name": "positionPath",
+      "paramNames": [
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "positionContractId",
+      "paramNames": [
+        "pool",
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Pool",
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "deploy",
+      "paramNames": [
+        "payer",
+        "word",
+        "ts"
+      ],
+      "paramTypes": [
+        "Address",
+        "BitmapWord",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "TickBitmapTest"
+      ]
+    },
+    {
+      "name": "flipTick_",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "TickBitmapError",
+      "fields": [
+        {
+          "name": "TickNotAligned",
+          "value": {
+            "type": "U256",
+            "value": "301"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PathPrefixes",
+      "fields": [
+        {
+          "name": "Tick",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "Position",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "Word",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        }
+      ]
+    }
+  ]
+}

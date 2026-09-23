@@ -1,0 +1,192 @@
+{
+  "version": "v4.5.1",
+  "name": "ExampleOracleSimple",
+  "bytecode": "060640354103414c419f41f0422701000205021bd3ebaef653160016010c0d36871702160016013717031602160336170416021603314c0416040d36170416031604020100030801407fd340d735c316020c300d7b1600160100001704170316040c2f4c04160316022d0216021604330c7b16001601160287170516051603334c0416040d361704160316053617030c1602361602381706160216062d1702160316062d17030c16063616062d0d351706160316041606373917030f1602370e3a170716070e16021607373637170716070e16021607373637170716070e16021607373637170716070e16021607373637170716070e16021607373637170716070e16021607373637170716031607370201000203014028d30dcd6a6a16010c300d7b16000c2f4c020c0216000d1340903b314c0616001340703b16012d4a0616000d1340703b16010001170216020d1340e03b310e7b1602020000010602402e0c0dce00010917010c0dce00010a17020c0ece0001071704170316000c0dce0001082b170516050c304c10160116041603000216052c351701160216031604000216052c351702160116020201000004004028d3948fae95561343e82d0d13203b2e17001600a0022b170116011380015180340f7b16000003170317021602a0003616012da1031603a0013616012da1041602a1001603a1011600a10201000204011cd3a9d209fc0c0ece0001061703170216001602414c06a00316012c1340703c021600160341107ba00416012c1340703c02",
+  "codeHash": "786350e624030bc0784323155cd4ee64640676bce1f49ee29d5fc8b3e51ed529",
+  "fieldsSig": {
+    "names": [
+      "pair",
+      "price0CumulativeLast",
+      "price1CumulativeLast",
+      "blockTimeStampLast",
+      "price0Average",
+      "price1Average"
+    ],
+    "types": [
+      "TokenPair",
+      "U256",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "fullMul",
+      "paramNames": [
+        "x",
+        "y"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "fraction",
+      "paramNames": [
+        "numerator",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "currentCumulativePrices",
+      "paramNames": [
+        "currentBlockTimeStamp"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "update",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "consult",
+      "paramNames": [
+        "tokenId",
+        "amountIn"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [
+    {
+      "name": "Resolution",
+      "value": {
+        "type": "U256",
+        "value": "112"
+      }
+    },
+    {
+      "name": "Period",
+      "value": {
+        "type": "U256",
+        "value": "86400"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "FullDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "FractionOverflow",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "PeriodNotElapsed",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "InvalidToken",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        }
+      ]
+    }
+  ]
+}

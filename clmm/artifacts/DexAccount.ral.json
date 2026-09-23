@@ -1,0 +1,93 @@
+{
+  "version": "v4.5.3",
+  "name": "DexAccount",
+  "bytecode": "0603404a4063407d01030508004029d3bd48152816047a0e314d0d2acf170516054313202f1341e37b16051603cc1706b417071607160677451341e47b1600ce0416011602aaa0000c304c04a0000d2ba10001000101010ad358cbdacfa0000c2f4c03ce03024a0216000201000303000ad366ed4ca8b4ce00451341e17b160016011602bb",
+  "codeHash": "2658486f32078fc2ec8f0bc9a8c8b476472142790a2d41eef0979c967b8183e7",
+  "fieldsSig": {
+    "names": [
+      "root",
+      "parents",
+      "owner",
+      "referrer",
+      "minSwapCount"
+    ],
+    "types": [
+      "Address",
+      "[ByteVec;2]",
+      "Address",
+      "Address",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "deposit",
+      "paramNames": [
+        "payer",
+        "tokenId",
+        "amount",
+        "path",
+        "at"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec",
+        "U256",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "asRef",
+      "paramNames": [
+        "defaultRef"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "Address"
+      ]
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newCode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

@@ -1,0 +1,28 @@
+{
+  "version": "v4.5.1",
+  "name": "SetDexCpmmParent",
+  "bytecodeTemplate": "01010300000005{1}0d0c{0}d4565ba487",
+  "fieldsSig": {
+    "names": [
+      "dexAccountRoot",
+      "cpmmFactory"
+    ],
+    "types": [
+      "ISetCpmmParent",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzPoolInit",
+  "bytecodeTemplate": "010103000f00408bb41700{0}{1}66cc170116011702{0}{2}66cc170316017116037131170416044c0216014a011603170516044c0216034a01160117060c170716071306314c40651602160740cc170816021605160644160844cc17091609170a0c0f160a0138170b181812bff276187a7a160b3a7a05294b033a224a023a90160b21170c12800d89e87a7a160b3a7a05294b033a904a023a22160b21170d16007a160513d80fffffffffffffffffffffffffffffffffffffffffffffffffffffffa3160613d80fffffffffffffffffffffffffffffffffffffffffffffffffffffffa316001600160c160d1343e8110e160a01261818160a1600160c160d100d{0}0103170e1600160e0da3160c160d160a160e100c{0}010c16070d2a17074a7f97",
+  "fieldsSig": {
+    "names": [
+      "fuzz",
+      "index",
+      "index2"
+    ],
+    "types": [
+      "FuzzFactory",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

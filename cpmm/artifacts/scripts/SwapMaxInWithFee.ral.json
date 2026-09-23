@@ -1,0 +1,49 @@
+{
+  "version": "v4.5.3",
+  "name": "SwapMaxInWithFee",
+  "bytecodeTemplate": "01010300000014{0}{5}{3}{6}aa{0}{3}{4}a3{2}{0}{3}{4}{7}{0}{8}13070c{1}0105",
+  "fieldsSig": {
+    "names": [
+      "sender",
+      "router",
+      "pair",
+      "tokenInId",
+      "amountInMax",
+      "feeRecipient",
+      "feeAmount",
+      "amountOut",
+      "deadline"
+    ],
+    "types": [
+      "Address",
+      "Router",
+      "TokenPair",
+      "ByteVec",
+      "U256",
+      "Address",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

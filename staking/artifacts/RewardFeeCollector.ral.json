@@ -1,0 +1,485 @@
+{
+  "version": "v4.5.3",
+  "name": "RewardFeeCollector",
+  "bytecode": "0b1340ea40f9419341ca4236429e42dc42fa4321434843644372438f43ac43cc43eb4429444944620000030901409216020c3013415e7b160016010c0d3687170316001601371704160316043616031604314c020d4a010c36170516050c2f4c04160416022d02160216053313415f7b160016011602871706160516061604334c020d4a010c361705160416063617040c1602361602381707160216072d1702160416072d17040c16073616072d0d351707160416051607373917040f1602370e3a170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e160216083736371708160416083702010701010004d38794a45fb41600a90002020a004051b217021602a4d12b17031600a0021367100000160113c10757b12c000000170416041603344c0216034a011604170516050c334c40361605a00613671000001706160516062b17071607a00313671000001708160716082b170916060c334c041602a0071606a716090c334c0816021609a216090d0cce00011016080c334c0c16021608a2160216080e0cce0201000516085e01000003001bd34aa5ada95617001600a001334c041600a0012b4a010c17011600a10116010c334c080c0dce00010d17021602160100020107040a00402fd35521b6161600b24613197b13d0fffd8963efd1fc6a506488495d951d5263988d260d2b1704a00417051605160140cc1706cd160244160644170716051607cc170816081709160016021603a31600b2cd0416033f1604140013070e1609d4d6407a2118180107030b004034d35bda581c1600b24613197ba0051703cd160144170416031604cc1705160517060c0e1606d47de99ed1170817071343e516022c1709160916072c16091343e816082c2a2d170a160016011602a31600b20c1602160a0c13060c1606d42570119d01030408001ed3a189b4561600b24613197ba00517041601160244170516041605cc170616061707160016061603a3160016030e0e1607d449c452fd181801000101000dd38a69f141b4a0004513127b000307a00216005f1600a102010001010012d34c696713b4a0004513127b16001367103213157b000308a00316005f1600a103010001010012d320353c5bb4a0004513127b16001367103213187b000309a00616005f1600a10601000101000cd326755bbeb4a0004513127b0aa00416005f1600a104010000000103d3dc5f9132a0040201000101000cd3d6d6a7c2b4a0004513127b1206a00516005f1600a10501000101000cd33d02d243b4a0004513127b1207a00716005f1600a10701000303010ed35ee2294d1601cbb34113137bb416020e0d1600d4fc123a230201040202010dd378915634b4a0004513127bb216010e0d1600d4fc123a230201000104014020d39026f3feb4a0004513127b1600cd4213177bb11600a000130364130064170217011600ce0116011602c117031208160016035f16030201000102000ed31b2c73fcb417011601a0004513127b06a00016005f1600a10001000303000ad366ed4ca8b4a0004513127b160016011602bb",
+  "codeHash": "47be44fd153b7fa1b63511d4f12ce4b4652ac31f7440407177502191f3969b5f",
+  "fieldsSig": {
+    "names": [
+      "owner",
+      "xAlph",
+      "distributorVaultTemplateId",
+      "locker",
+      "lastUpdate",
+      "rewardRate",
+      "burnRate",
+      "clmmFactoryId",
+      "cpmmFactoryId",
+      "treasuryRate",
+      "treasury"
+    ],
+    "types": [
+      "Address",
+      "XAlphToken",
+      "ByteVec",
+      "ALPHLock",
+      "U256",
+      "U256",
+      "U256",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address"
+    ],
+    "isMutable": [
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "Burnt",
+      "fieldNames": [
+        "amount"
+      ],
+      "fieldTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "OwnerUpdated",
+      "fieldNames": [
+        "previousOwner",
+        "newOwner"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "RewardRateUpdated",
+      "fieldNames": [
+        "previousRate",
+        "newRate"
+      ],
+      "fieldTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "BurnRateUpdated",
+      "fieldNames": [
+        "previousRate",
+        "newRate"
+      ],
+      "fieldTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "TreasuryRateUpdated",
+      "fieldNames": [
+        "previousRate",
+        "newRate"
+      ],
+      "fieldTypes": [
+        "U256",
+        "U256"
+      ]
+    },
+    {
+      "name": "ClmmFactoryIdUpdated",
+      "fieldNames": [
+        "previousId",
+        "newId"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "CpmmFactoryIdUpdated",
+      "fieldNames": [
+        "previousId",
+        "newId"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "TreasuryUpdated",
+      "fieldNames": [
+        "previousTreasury",
+        "newTreasury"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "TokenEnabled",
+      "fieldNames": [
+        "token",
+        "vault"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "donate",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "distributeRewardsInner",
+      "paramNames": [
+        "totalDepositedAlph",
+        "elapsed"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "distributeRewards",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "swapFeesOnCLMM",
+      "paramNames": [
+        "payer",
+        "configIndex",
+        "token",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swapFeesOnCPMM",
+      "paramNames": [
+        "payer",
+        "token",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "burnFeesOnCPMM",
+      "paramNames": [
+        "payer",
+        "token0",
+        "token1",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setRewardRate",
+      "paramNames": [
+        "newRate"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setBurnRate",
+      "paramNames": [
+        "newRate"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setTreasuryRate",
+      "paramNames": [
+        "newRate"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setClmmFactoryId",
+      "paramNames": [
+        "newId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "getClmmFactoryId",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "setCpmmFactoryId",
+      "paramNames": [
+        "newId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setTreasury",
+      "paramNames": [
+        "newTreasury"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "collectProtocolFees",
+      "paramNames": [
+        "protocolFeeCollector",
+        "tokenIn",
+        "data"
+      ],
+      "paramTypes": [
+        "IProtocolFeeCollector",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "collectALPHProtocolFees",
+      "paramNames": [
+        "protocolFeeCollector",
+        "data"
+      ],
+      "paramTypes": [
+        "IProtocolFeeCollector",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "enableToken",
+      "paramNames": [
+        "token"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "transferOwnership",
+      "paramNames": [
+        "newOwner"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newBytecode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [
+    {
+      "name": "BPS",
+      "value": {
+        "type": "U256",
+        "value": "10000"
+      }
+    },
+    {
+      "name": "MS_PER_YEAR",
+      "value": {
+        "type": "U256",
+        "value": "31536000000"
+      }
+    },
+    {
+      "name": "MAX_SQRT_RATIO",
+      "value": {
+        "type": "U256",
+        "value": "1461446703485210103287273052203988822378723970342"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "FullMathError",
+      "fields": [
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "350"
+          }
+        },
+        {
+          "name": "MulDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "351"
+          }
+        }
+      ]
+    }
+  ]
+}

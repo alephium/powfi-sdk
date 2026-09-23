@@ -1,0 +1,44 @@
+{
+  "version": "v4.5.3",
+  "name": "TestDexAccountPool",
+  "bytecode": "0101402101030404000ed3b0685c46160116021603a3160116021603ce000c110c16000100",
+  "codeHash": "3f1fb343334b79f9883f8a82dfc4e3bed7bc4349c9dec876ec7b85b970c2e6f5",
+  "fieldsSig": {
+    "names": [
+      "path"
+    ],
+    "types": [
+      "ByteVec"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "callDeposit",
+      "paramNames": [
+        "acc",
+        "payer",
+        "tokenId",
+        "amount"
+      ],
+      "paramTypes": [
+        "DexAccount",
+        "Address",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

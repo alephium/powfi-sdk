@@ -1,0 +1,84 @@
+{
+  "version": "v4.4.0",
+  "name": "RevertingStakingDapp",
+  "bytecode": "02024032407f010002050019d3926b380bb417021602ce007745133c7b16000d0ece00010d170417031603160134133d7ba00016012aa1000100020700402ad365b06caeb417021602ce007745133c7b16000d0ece00010d17041703160316012aa0002f17051603a0002f7a4c04181601a0002f170616057a4b02181606133d7b04133e7b",
+  "codeHash": "0a3718843c99af33999d7b6a8086bf941b6dee23b82a29808d9c9757feb2ddb0",
+  "fieldsSig": {
+    "names": [
+      "stakeVault",
+      "stakedAmount"
+    ],
+    "types": [
+      "XAlphStakeVault",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "onStake",
+      "paramNames": [
+        "user",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "onUnstake",
+      "paramNames": [
+        "user",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "StakeVaultCallerOnly",
+          "value": {
+            "type": "U256",
+            "value": "60"
+          }
+        },
+        {
+          "name": "InvalidUnstakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "61"
+          }
+        },
+        {
+          "name": "RevertedOnUnstake",
+          "value": {
+            "type": "U256",
+            "value": "62"
+          }
+        }
+      ]
+    }
+  ]
+}

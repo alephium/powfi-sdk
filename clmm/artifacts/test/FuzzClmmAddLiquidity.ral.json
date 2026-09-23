@@ -1,0 +1,46 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzClmmAddLiquidity",
+  "bytecodeTemplate": "010103001300408bb41700{0}1404636c6d6d{1}4044cc1701{0}1404636c6d6d{2}4044cc1702160171160271334c06160117031602170116031702{4}17041604{3}40cc17051601160244160544170616041606cc170716071708587117090c170a{5}{6}0e0f1608012f170d170c170b160a{7}314c404a16001601a5170e16001602a5170f160e136710337a4c0418160f136710334c402e1609160e2e17101609404e7117091609160f2e1711160b160c160d16101611110d{0}0107171216120c334c1316007a1601160ea31602160fa316001600{5}{6}1612110e1608012618181609404e711709160a0d2a170a4a7fb2",
+  "fieldsSig": {
+    "names": [
+      "fuzzFactory",
+      "index1",
+      "index2",
+      "configIndex",
+      "clmmFactoryUser0",
+      "tickLower",
+      "tickUpper",
+      "iterations"
+    ],
+    "types": [
+      "FuzzingTestFactory",
+      "U256",
+      "U256",
+      "U256",
+      "ByteVec",
+      "I256",
+      "I256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

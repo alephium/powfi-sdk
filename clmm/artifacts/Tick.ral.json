@@ -1,0 +1,184 @@
+{
+  "version": "v4.5.3",
+  "name": "Tick",
+  "bytecode": "0807405140a340f5410b4165417341950100030601402ad344ba8eddb4ce00451343217ba000170316033f16011f1704160405291343237b16043d170516051600321343227b1605a10016024c04a0011601204a03a00116011fa10116050c2f0201000405034032d3cfc5e9a41600ce01294c05a002a003a004024a40280c170416040f314c1e16047a0f314d0d2a7816047a0f314d0e2ac33616047a0f314d0d2a7916040d2a17044a7fde1601160216030201000405034032d36efb0f181600ce01264c05a002a003a004024a40280c170416040f314c1e16047a0f314d0d2a7816047a0f314d0e2ac33616047a0f314d0d2a7916040d2a17044a7fde16011602160302010200000008d354806679b4ce00451343217bce02b001000506014035d336cb1526b4ce00451343217b16034c03160417004a02160417010c170516050f314c1a16057a0f314d7816057a0f314d0e2ac33616057a0f314d7916050d2a17054a22160016011602a104a103a102a00102010000000103d3602bc55da00102010003030011d366ed4ca8b3ce007a494d470d132162411343247b160016011602bb",
+  "codeHash": "fe95103803effab0296f23f7731f44cbc9922a4da82111a1333b825b99caa65c",
+  "fieldsSig": {
+    "names": [
+      "parent",
+      "tick",
+      "firstOwner",
+      "liquidityGross",
+      "liquidityNet",
+      "feeGrowthsOutside"
+    ],
+    "types": [
+      "Address",
+      "I256",
+      "Address",
+      "U256",
+      "I256",
+      "[U256;3]"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "update",
+      "paramNames": [
+        "maxLiquidity",
+        "liquidityDelta",
+        "upper"
+      ],
+      "paramTypes": [
+        "U256",
+        "I256",
+        "Bool"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "feeGrowthBelow",
+      "paramNames": [
+        "tickCurrent",
+        "globalGrowths"
+      ],
+      "paramTypes": [
+        "I256",
+        "[U256;3]"
+      ],
+      "paramIsMutable": [
+        false,
+        true
+      ],
+      "returnTypes": [
+        "[U256;3]"
+      ]
+    },
+    {
+      "name": "feeGrowthAbove",
+      "paramNames": [
+        "tickCurrent",
+        "globalGrowths"
+      ],
+      "paramTypes": [
+        "I256",
+        "[U256;3]"
+      ],
+      "paramIsMutable": [
+        false,
+        true
+      ],
+      "returnTypes": [
+        "[U256;3]"
+      ]
+    },
+    {
+      "name": "clear",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "cross",
+      "paramNames": [
+        "globalGrowths",
+        "zeroForOne",
+        "feeGrowthGlobalX128"
+      ],
+      "paramTypes": [
+        "[U256;3]",
+        "Bool",
+        "U256"
+      ],
+      "paramIsMutable": [
+        true,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "getLiquidityNet",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newBytecode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "TickError",
+      "fields": [
+        {
+          "name": "NotParent",
+          "value": {
+            "type": "U256",
+            "value": "801"
+          }
+        },
+        {
+          "name": "LiquidityGrossOverflow",
+          "value": {
+            "type": "U256",
+            "value": "802"
+          }
+        },
+        {
+          "name": "LiquidityGrossUnderflow",
+          "value": {
+            "type": "U256",
+            "value": "803"
+          }
+        },
+        {
+          "name": "UnauthorizedUpgrade",
+          "value": {
+            "type": "U256",
+            "value": "804"
+          }
+        }
+      ]
+    }
+  ]
+}

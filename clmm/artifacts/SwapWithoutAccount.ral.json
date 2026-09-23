@@ -1,0 +1,43 @@
+{
+  "version": "v4.5.3",
+  "name": "SwapWithoutAccount",
+  "bytecodeTemplate": "010103000600403fb41700{4}05264c041600{1}a54a02{4}3d1701{4}05264c02{1}4a01{2}17021600{1}1601a3160016001602{3}{4}{5}{6}13070e{0}012b17041703{3}{4}05281c17051605197a4b04181603{4}241341f57b16057a4b04181604{4}241341f57b",
+  "fieldsSig": {
+    "names": [
+      "pool",
+      "tokenIn",
+      "tokenOut",
+      "zeroForOne",
+      "amountSpecified",
+      "sqrtPriceLimitX96",
+      "data"
+    ],
+    "types": [
+      "Pool",
+      "ByteVec",
+      "ByteVec",
+      "Bool",
+      "I256",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

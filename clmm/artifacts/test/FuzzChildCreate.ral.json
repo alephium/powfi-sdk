@@ -1,0 +1,25 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzChildCreate",
+  "bytecodeTemplate": "0101030002001eb417001600{0}13c40de0b6b3a7640000a30c0d{0}01001701160016010da3040c0e0c16010100160016010da316010d0c{0}0101",
+  "fieldsSig": {
+    "names": [
+      "fuzz"
+    ],
+    "types": [
+      "FuzzParent"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

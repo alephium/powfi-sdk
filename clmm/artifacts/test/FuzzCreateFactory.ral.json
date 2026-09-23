@@ -1,0 +1,25 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzCreateFactory",
+  "bytecodeTemplate": "0101030004001cb4170016000ca20c0d{0}01041701160117020c0d360e2d1703160016021603a3160216030e0c{0}0107",
+  "fieldsSig": {
+    "names": [
+      "fuzz"
+    ],
+    "types": [
+      "FuzzFactory"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

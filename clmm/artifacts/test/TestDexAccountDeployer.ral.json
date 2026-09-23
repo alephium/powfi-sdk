@@ -1,0 +1,61 @@
+{
+  "version": "v4.5.3",
+  "name": "TestDexAccountDeployer",
+  "bytecode": "00024021404c01000204010ed3050cbe3b1600130164130064170317021600160116021603c102010006080114d3ec00d39c160016011602160316041305640d13016417071706160347160516061607c102",
+  "codeHash": "0cbb1fe07db02de9bc2ea89533880d498de4050fd667f175de61d8796e7ca1f4",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "deployPool",
+      "paramNames": [
+        "path",
+        "template"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "TestDexAccountPool"
+      ]
+    },
+    {
+      "name": "deployAcc",
+      "paramNames": [
+        "root",
+        "parents",
+        "payer",
+        "ref",
+        "template"
+      ],
+      "paramTypes": [
+        "Address",
+        "[ByteVec;2]",
+        "Address",
+        "Address",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "DexAccount"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

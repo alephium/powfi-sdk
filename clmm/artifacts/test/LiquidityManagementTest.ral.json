@@ -1,0 +1,391 @@
+{
+  "version": "v4.5.3",
+  "name": "LiquidityManagementTest",
+  "bytecode": "010e409a40c840ec413e416c424e4271427b429042a642bc42d746564a5201030b16044051d39b20ce13ce00160116024416030009170b160516060e0f160b012f170e170d170c160c160d160e160716080003170f160b160416051606000b171016001610a5171116001601a5171216001602a5171316007a7a16011612a316021613a316101611a31600160416051606160f110e160b01261715171416141609347a4c04181615160a341343527b160f16141615160b0201000304010dd3b8a5f4fb1600160113c9010000000000000000000000000005170316021603160116002b000502010003030108d364be47fc160213c901000000000000000000000000160116002b00050201000507014027d345f12d7a16001601324c061601160216030001024a1c16001602314c13160016021603000117051601160016040002170616051606314c0216054a011606024a0516011602160400020201000304010ed374e08b3b160213c9010000000000000000000000002c160116002b160100051703160316002d020000030901408d160016010c0d3687170316001601371704160316043616031604314c020d4a010c36170516050c2f4c04160416022d02160216053313415f7b160016011602871706160516061604334c020d4a010c361705160416063617040c1602361602381707160216072d1702160416072d17040c16073616072d0d351707160416051607373917040f1602370e3a170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816041608370200000304011216001601160200051703160016011602870c334c0416030d2a0216030200000101010316004002000003040109160016020007cc17031601160344020000030401091600160116020008170316001603cc02010003030108d37afb14100d1600160116021304640201000405010ad35b19984c160116021603000a170416001604cc020000010301413816000c3f264c061600057c203d4a0216003d1701160112800d89e83d321340ca7b16010d380c304c0213ccfffcb933bd6fad37aa2d162d1a5940014a0113cd0100000000000000000000000000000000170216010e380c304c06160213ccfff97272373d413259a46990580e213a2c1340803c4a0116021702160110380c304c06160213ccfff2e50f5f656932ef12357cf3c7fdcc2c1340803c4a011602170216011308380c304c06160213ccffe5caca7e10e4e61c3624eaa0941cd02c1340803c4a011602170216011310380c304c06160213ccffcb9843d60f6159c9db58835c9266442c1340803c4a011602170216011320380c304c06160213ccff973b41fa98c081472e6896dfb254c02c1340803c4a01160217021601134040380c304c06160213ccff2ea16466c96a3843ec78b326b528612c1340803c4a01160217021601134080380c304c06160213ccfe5dee046a99a2a811c461f1969c30532c1340803c4a01160217021601134100380c304c06160213ccfcbe86c7900a88aedcffc83b479aa3a42c1340803c4a01160217021601134200380c304c06160213ccf987a7253ac413176f2b074cf7815e542c1340803c4a01160217021601134400380c304c06160213ccf3392b0822b70005940c7a398e4b70f32c1340803c4a01160217021601134800380c304c06160213cce7159475a2c29b7443b29c7fa6e889d92c1340803c4a01160217021601135000380c304c06160213ccd097f3bdfd2022b8845ad8f792aa58252c1340803c4a01160217021601136000380c304c06160213cca9f746462d870fdf8a65dc1f90e061e52c1340803c4a011602170216011380004000380c304c06160213cc70d869a156d2a1b890bb3df62baf32f72c1340803c4a011602170216011380008000380c304c06160213cc31be135f97d08fd981231505542fcfa62c1340803c4a011602170216011380010000380c304c06160213cc09aa508b5b7a84e1c677de54f3e99bc92c1340803c4a011602170216011380020000380c304c06160213cb5d6af8dedb81196699c329225ee6042c1340803c4a011602170216011380040000380c304c06160213ca2216e584f5fa1ea926041bedfe982c1340803c4a011602170216011380080000380c304c06160213c8048a170391f7dc42444e8fa22c1340803c4a0116021702160005284c060c0d3616022d4a0116021702160213c1010000000091020100010b0141f2d3c6eb44f3160013c101000276a3347a4c0418160013d0fffd8963efd1fc6a506488495d951d5263988d26311340c97b160013203b1701160117020c1703160213cd01000000000000000000000000000000000d2b334c08160313408039170316021340803c1702160213c50100000000000000000d2b334c08160313404039170316021340403c1702160213c101000000000d2b334c0816031320391703160213203c17021602138000ffff334c0816031310391703160213103c170216021340ff334c0816031308391703160213083c17021602130f334c081603103917031602103c170216020f334c0816030e39170316020e3c170216020d334c0416030d3917031603134080344c071601160313407f2b3c17024a06160113407f16032b3b17021603134080314c0e0c0d3613407f2b16032a0c0d361340403c384a0316031340802b1340403b17040c1705160216022c13407f3c170216021340803c170516041605133f3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133e3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133d3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133c3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133b3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133a3b391704160216053c1702160216022c13407f3c170216021340803c17051604160513393b391704160216053c1702160216022c13407f3c170216021340803c17051604160513383b391704160216053c1702160216022c13407f3c170216021340803c17051604160513373b391704160216053c1702160216022c13407f3c170216021340803c17051604160513363b391704160216053c1702160216022c13407f3c170216021340803c17051604160513353b391704160216053c1702160216022c13407f3c170216021340803c17051604160513343b391704160216053c1702160216022c13407f3c170216021340803c17051604160513333b391704160216053c1702160216022c13407f3c170216021340803c17051604160513323b391704160413c63627a301d71055774c85371706160613dcfffffffffffffffffffffffffffffffffd709b7e5480fba5a50fed5e62ffc556351340803c1707160613ccdb2df09e81959a81455e260799a0632f351340803c170816071380800000314c0316073f4a0616071380ffffff383f128100000020170916081380800000314c0316083f4a0616081380ffffff383f128100000020170a1609160a244c031609024a0a160a000c1600324c03160a024a02160902",
+  "codeHash": "36d762e3250737333685cc9a43c5ae218a0b700fab410162ac118ad2e2f4bb37",
+  "fieldsSig": {
+    "names": [
+      "parent"
+    ],
+    "types": [
+      "PoolFactory"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "addLiquidity",
+      "paramNames": [
+        "payer",
+        "p"
+      ],
+      "paramTypes": [
+        "Address",
+        "ModifyLiquidityParams"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256",
+        "U256",
+        "U256",
+        "Pool"
+      ]
+    },
+    {
+      "name": "getLiquidityForAmount0",
+      "paramNames": [
+        "sqrtRatioAX96",
+        "sqrtRatioBX96",
+        "amount0"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getLiquidityForAmount1",
+      "paramNames": [
+        "sqrtRatioAX96",
+        "sqrtRatioBX96",
+        "amount1"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getLiquidityForAmounts",
+      "paramNames": [
+        "sqrtRatioX96",
+        "sqrtRatioAX96",
+        "sqrtRatioBX96",
+        "amount0",
+        "amount1"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getAmount0ForLiquidity",
+      "paramNames": [
+        "sqrtRatioAX96",
+        "sqrtRatioBX96",
+        "liquidity"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "mulDivRoundingUp",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "configPath",
+      "paramNames": [
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "poolPath",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "poolContractId",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "positionPath",
+      "paramNames": [
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "positionContractId",
+      "paramNames": [
+        "pool",
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Pool",
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getSqrtRatioAtTick",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getTickAtSqrtRatio",
+      "paramNames": [
+        "sqrtPriceX96"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "LiquidityManagementError",
+      "fields": [
+        {
+          "name": "MintSlippage",
+          "value": {
+            "type": "U256",
+            "value": "850"
+          }
+        },
+        {
+          "name": "BurnSlippage",
+          "value": {
+            "type": "U256",
+            "value": "851"
+          }
+        },
+        {
+          "name": "BurnNotAllowed",
+          "value": {
+            "type": "U256",
+            "value": "852"
+          }
+        }
+      ]
+    },
+    {
+      "name": "FullMathError",
+      "fields": [
+        {
+          "name": "MulDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "351"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PathPrefixes",
+      "fields": [
+        {
+          "name": "Tick",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "Position",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "Word",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        }
+      ]
+    },
+    {
+      "name": "TickMathError",
+      "fields": [
+        {
+          "name": "SqrtPriceX96OutOfBounds",
+          "value": {
+            "type": "U256",
+            "value": "201"
+          }
+        },
+        {
+          "name": "TickOutOfBounds",
+          "value": {
+            "type": "U256",
+            "value": "202"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "version": "v4.5.3",
+  "name": "ALPHLock",
+  "bytecode": "000110010702020004d3be84972d16001601a9",
+  "codeHash": "a7dda646ad0375bb0c3b3ce49e98e70d00ebfbd31902b7217a26ff90eb06f9d1",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "burn",
+      "paramNames": [
+        "payer",
+        "amount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

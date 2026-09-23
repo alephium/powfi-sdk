@@ -1,0 +1,46 @@
+{
+  "version": "v4.5.3",
+  "name": "FakeCpmmFactory",
+  "bytecode": "060119010000000109d3ebcd002ece03a100ce02a101ce00ce014402",
+  "codeHash": "ddf01053935cc7e70027a3d11ece9a3d456f9d7e51e453628ff2b7cabe61d0dc",
+  "fieldsSig": {
+    "names": [
+      "pairTemplateId",
+      "dexAccount0",
+      "owner",
+      "pairSize",
+      "feeCollector",
+      "refRate"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "Address",
+      "U256",
+      "Address",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "doNothing",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

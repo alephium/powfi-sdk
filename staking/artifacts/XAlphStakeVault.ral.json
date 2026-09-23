@@ -1,0 +1,650 @@
+{
+  "version": "v4.5.3",
+  "name": "XAlphStakeVault",
+  "bytecode": "05194028407340af40cc40fc411a41284136414f41a341c341cd41db42234241431743f7449844ab44cc455a45a945c745e445fd010002030112d3545eacd4160116000005311342277b160113202c170216001602160213202a620201000204014028d3083a358916004313202e0c2f1342267b16014313202f1342287b1600000517020c170316031602314c0e1600160300001601414c0316033f0216030d2a17034a2e0b0201000203011fd3694941c216004313202e0c2f1342267b16014313202f1342287b160016010001170216020b244c031600024a05160016023d00040201000202010dd354ad273416004313202e0c2f1342267b160016014402010002030118d34b2e25b7160116000005311342277b160113202c170216000c1602621600160213202a16004362440201000101010ed30041471116004313202e0c2f1342267b16004313202d02010000000103d3676c3c33140002010000000103d393f264e8a0000200000101000c16004313202f136afb7b1600a10005a000b45f0000020601402e16014313202f136afa7b160117021600431703160313202e0c2f136af97b0c170416041603314c1016001604160413202a62170516051602000a1702160413202a17044a2c160271a000712f02000002020110160071160171314c051600160144000b4a041601160044000b0200000101010316004f02010000000103d3b299f80ace000201000102021ed3f87904e4140a5f5f6d61705f5f305f5f16004744cbc5194c040c0006024a110c0d0d140a5f5f6d61705f5f305f5f16004744cb1701160101010d0d0d1601010102010001010108d32b875d11140a5f5f6d61705f5f305f5f16004744cbc50201010108004063d3d63c543cb4170116014813412d7b16000c331341307b1601ce001600ac140a5f5f6d61705f5f305f5f16014744cbc54c403b0c0d0d140a5f5f6d61705f5f305f5f16014744cb1707160701010d0d0d1607010117031702160216002a0c0e0c140a5f5f6d61705f5f305f5f16014744cb0102a00116002aa1011603000517040c170516051604314c0f1603160500001706160116000e0c1606d4926b380b16050d2a17054a2d4a0dca140a5f5f6d61705f5f305f5f16014744b116000006d20102a00116002aa10106160116005f0102010900406bd310bd129fb4170116014813412d7b140a5f5f6d61705f5f305f5f16014744cbc513412e7b16000c331341317b0c0d0d140a5f5f6d61705f5f305f5f16014744cb1708160801010d0d0d1608010117031702160216003413412f7b160216002b170416040c2f4c0aca0d0c140a5f5f6d61705f5f305f5f16014744cb01034a0a16040c0e0c140a5f5f6d61705f5f305f5f16014744cb0102a00116002ba1011603000517050c170616061605314c0f1603160600001707160116000e0c1607d465b06cae16060d2a17064a2d1601ce001600ab07160116005f01000206004049d3c5f91cb4b4170216024813412d7b1601160000181341357b140a5f5f6d61705f5f305f5f16024744cbc513412e7b0c0d0d140a5f5f6d61705f5f305f5f16024744cb1705160501010d0d0d160501011704170316040005ce01311341327b1604160000010b241341337b1604160000030d0e0c140a5f5f6d61705f5f305f5f16024744cb01020a160216005f160216030e0c1600d4926b380b010001010007d3b6398887b41600030014181801000104000ed36ccecd8fb41701160116000400141703170208160116001602600000030602404016004813412d7b140a5f5f6d61705f5f305f5f16004744cbc513412e7b0c0d0d140a5f5f6d61705f5f305f5f16004744cb1705160501010d0d0d16050101170417031604160100010b251341347b1604160100020d0e0c140a5f5f6d61705f5f305f5f16004744cb01021206160016015f16024c06160016030e0c1601d465b06cae160316040201000101011fd3e5725392140a5f5f6d61705f5f305f5f16004744cbc5197a4b0418a0010c2f4c020c020c0d0d140a5f5f6d61705f5f305f5f16004744cb010113c40de0b6b3a76400002ca0012d0201000101000cd3e5bf78dcb4a0024513412c7b1207a00016005f1600000801000101000cd34f58efe6b4a0024513412c7b09a00216005f1600a102010002030109d3af1ed9dd1601b9170216001602000b000902",
+  "codeHash": "a7c00d91d6f42f84f002b37812151763c31db4acc6b175cfcfb04561fbc04f72",
+  "fieldsSig": {
+    "names": [
+      "stakeTokenId",
+      "maxConnectedDapps",
+      "merkleRoot",
+      "totalStakedAmount",
+      "owner"
+    ],
+    "types": [
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "U256",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "UpdateRoot",
+      "fieldNames": [
+        "newMerkleRoot",
+        "updatedBy"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "Address"
+      ]
+    },
+    {
+      "name": "Staked",
+      "fieldNames": [
+        "staker",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "Unstaked",
+      "fieldNames": [
+        "staker",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "ForceDisconnectedFromDapp",
+      "fieldNames": [
+        "staker",
+        "contractId",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "ByteVec",
+        "U256"
+      ]
+    },
+    {
+      "name": "OwnerUpdated",
+      "fieldNames": [
+        "previousOwner",
+        "newOwner"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "DappConnected",
+      "fieldNames": [
+        "staker",
+        "contractId"
+      ],
+      "fieldTypes": [
+        "Address",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "DappDisconnected",
+      "fieldNames": [
+        "staker",
+        "contractId"
+      ],
+      "fieldTypes": [
+        "Address",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "DappTemplatesWhitelistMerkleRootUpdated",
+      "fieldNames": [
+        "previousMerkleRoot",
+        "newMerkleRoot"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "get",
+      "paramNames": [
+        "array",
+        "index"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "find",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "remove",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "push",
+      "paramNames": [
+        "array",
+        "value"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "removeAt",
+      "paramNames": [
+        "array",
+        "index"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "size",
+      "paramNames": [
+        "array"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "empty",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getMerkleRoot",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "updateRoot",
+      "paramNames": [
+        "newMerkleRoot"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "verify",
+      "paramNames": [
+        "proof",
+        "dataHash"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "hashPair",
+      "paramNames": [
+        "a",
+        "b"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "hash",
+      "paramNames": [
+        "dataToHash"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getStakeTokenId",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "getUserStakingInfo",
+      "paramNames": [
+        "user"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "UserStakingInfo"
+      ]
+    },
+    {
+      "name": "isStaking",
+      "paramNames": [
+        "user"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "stake",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "unstake",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "connectToDapp",
+      "paramNames": [
+        "contractId",
+        "merkleProof"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "disconnectFromDapp",
+      "paramNames": [
+        "contractId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "disconnectFromDappWithoutUnstaking",
+      "paramNames": [
+        "contractId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "disconnectConnectedDapp",
+      "paramNames": [
+        "caller",
+        "contractId",
+        "notifyDapp"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec",
+        "Bool"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "UserStakingInfo"
+      ]
+    },
+    {
+      "name": "getWeight",
+      "paramNames": [
+        "user"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "updateDappTemplatesWhitelistMerkleRoot",
+      "paramNames": [
+        "newMerkleRoot"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "updateOwner",
+      "paramNames": [
+        "newOwner"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "verifyDappTemplatesWhiteListed",
+      "paramNames": [
+        "proof",
+        "contractId"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    }
+  ],
+  "constants": [
+    {
+      "name": "IntByteLength",
+      "value": {
+        "type": "U256",
+        "value": "32"
+      }
+    },
+    {
+      "name": "WEIGHT_SCALING_FACTOR",
+      "value": {
+        "type": "U256",
+        "value": "1000000000000000000"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "ErrorCode",
+      "fields": [
+        {
+          "name": "InvalidArrayLength",
+          "value": {
+            "type": "U256",
+            "value": "550"
+          }
+        },
+        {
+          "name": "IndexOutOfBound",
+          "value": {
+            "type": "U256",
+            "value": "551"
+          }
+        },
+        {
+          "name": "InvalidByteVecLength",
+          "value": {
+            "type": "U256",
+            "value": "552"
+          }
+        }
+      ]
+    },
+    {
+      "name": "MerkleProofErrorCodes",
+      "fields": [
+        {
+          "name": "InvalidProofSize",
+          "value": {
+            "type": "U256",
+            "value": "11001"
+          }
+        },
+        {
+          "name": "InvalidDataHash",
+          "value": {
+            "type": "U256",
+            "value": "11002"
+          }
+        },
+        {
+          "name": "InvalidMerkleRoot",
+          "value": {
+            "type": "U256",
+            "value": "11003"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "NotOwner",
+          "value": {
+            "type": "U256",
+            "value": "300"
+          }
+        },
+        {
+          "name": "AssetAddressCallerOnly",
+          "value": {
+            "type": "U256",
+            "value": "301"
+          }
+        },
+        {
+          "name": "NoStakingInfo",
+          "value": {
+            "type": "U256",
+            "value": "302"
+          }
+        },
+        {
+          "name": "InsufficientStakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "303"
+          }
+        },
+        {
+          "name": "InvalidStakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "304"
+          }
+        },
+        {
+          "name": "InvalidUnstakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "305"
+          }
+        },
+        {
+          "name": "MaxConnectedDappsReached",
+          "value": {
+            "type": "U256",
+            "value": "306"
+          }
+        },
+        {
+          "name": "DappAlreadyConnected",
+          "value": {
+            "type": "U256",
+            "value": "307"
+          }
+        },
+        {
+          "name": "DappNotConnected",
+          "value": {
+            "type": "U256",
+            "value": "308"
+          }
+        },
+        {
+          "name": "DappNotAllowed",
+          "value": {
+            "type": "U256",
+            "value": "309"
+          }
+        }
+      ]
+    }
+  ],
+  "mapsSig": {
+    "names": [
+      "userStakingInfo"
+    ],
+    "types": [
+      "Map[Address,UserStakingInfo]"
+    ]
+  }
+}

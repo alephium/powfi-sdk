@@ -1,0 +1,37 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzSwapAllPools",
+  "bytecodeTemplate": "0101030017004099b41700{2}1701{3}1702031703{2}71{3}71334c06{3}1701{2}1702041703{1}170416041601160244cc17051605c54c4042160517060c0e1606d47de99ed117081707160717091608170a1603194c04160817091607170a1343e5{4}2c170b160b160a2c160b1343e816092c2a2d170c{4}170d0c170e0c170f160c17101603194c080c170d{4}170e160c170f0c17101600{2}{4}a316001600160d160e160f161013060c1606d42570119d{0}17110c171213c101000276a417131603194c0213d0fffd8963efd1fc6a506488495d951d5263988d25171316121306314c40291611161240cc171416111601160244161444cc17151615c54c14161517161600{2}{4}a316001600{3}1603{4}3f1613140013070e1616012b181816120d2a17124a7fd3",
+  "fieldsSig": {
+    "names": [
+      "clmmFactoryId",
+      "cpmmFactoryId",
+      "tokenInId",
+      "tokenOutId",
+      "amountInPerPool"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

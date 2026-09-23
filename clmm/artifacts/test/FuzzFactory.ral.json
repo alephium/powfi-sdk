@@ -1,0 +1,338 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzFactory",
+  "bytecode": "0b0e437f477b479147ac4857487049c949da4a674a7f4abe4bab4bdd4bfa0000010301413816000c3f264c061600057c203d4a0216003d1701160112800d89e83d321340ca7b16010d380c304c0213ccfffcb933bd6fad37aa2d162d1a5940014a0113cd0100000000000000000000000000000000170216010e380c304c06160213ccfff97272373d413259a46990580e213a2c1340803c4a0116021702160110380c304c06160213ccfff2e50f5f656932ef12357cf3c7fdcc2c1340803c4a011602170216011308380c304c06160213ccffe5caca7e10e4e61c3624eaa0941cd02c1340803c4a011602170216011310380c304c06160213ccffcb9843d60f6159c9db58835c9266442c1340803c4a011602170216011320380c304c06160213ccff973b41fa98c081472e6896dfb254c02c1340803c4a01160217021601134040380c304c06160213ccff2ea16466c96a3843ec78b326b528612c1340803c4a01160217021601134080380c304c06160213ccfe5dee046a99a2a811c461f1969c30532c1340803c4a01160217021601134100380c304c06160213ccfcbe86c7900a88aedcffc83b479aa3a42c1340803c4a01160217021601134200380c304c06160213ccf987a7253ac413176f2b074cf7815e542c1340803c4a01160217021601134400380c304c06160213ccf3392b0822b70005940c7a398e4b70f32c1340803c4a01160217021601134800380c304c06160213cce7159475a2c29b7443b29c7fa6e889d92c1340803c4a01160217021601135000380c304c06160213ccd097f3bdfd2022b8845ad8f792aa58252c1340803c4a01160217021601136000380c304c06160213cca9f746462d870fdf8a65dc1f90e061e52c1340803c4a011602170216011380004000380c304c06160213cc70d869a156d2a1b890bb3df62baf32f72c1340803c4a011602170216011380008000380c304c06160213cc31be135f97d08fd981231505542fcfa62c1340803c4a011602170216011380010000380c304c06160213cc09aa508b5b7a84e1c677de54f3e99bc92c1340803c4a011602170216011380020000380c304c06160213cb5d6af8dedb81196699c329225ee6042c1340803c4a011602170216011380040000380c304c06160213ca2216e584f5fa1ea926041bedfe982c1340803c4a011602170216011380080000380c304c06160213c8048a170391f7dc42444e8fa22c1340803c4a0116021702160005284c060c0d3616022d4a0116021702160213c1010000000091020100010b0141f2d3c6eb44f3160013c101000276a3347a4c0418160013d0fffd8963efd1fc6a506488495d951d5263988d26311340c97b160013203b1701160117020c1703160213cd01000000000000000000000000000000000d2b334c08160313408039170316021340803c1702160213c50100000000000000000d2b334c08160313404039170316021340403c1702160213c101000000000d2b334c0816031320391703160213203c17021602138000ffff334c0816031310391703160213103c170216021340ff334c0816031308391703160213083c17021602130f334c081603103917031602103c170216020f334c0816030e39170316020e3c170216020d334c0416030d3917031603134080344c071601160313407f2b3c17024a06160113407f16032b3b17021603134080314c0e0c0d3613407f2b16032a0c0d361340403c384a0316031340802b1340403b17040c1705160216022c13407f3c170216021340803c170516041605133f3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133e3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133d3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133c3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133b3b391704160216053c1702160216022c13407f3c170216021340803c170516041605133a3b391704160216053c1702160216022c13407f3c170216021340803c17051604160513393b391704160216053c1702160216022c13407f3c170216021340803c17051604160513383b391704160216053c1702160216022c13407f3c170216021340803c17051604160513373b391704160216053c1702160216022c13407f3c170216021340803c17051604160513363b391704160216053c1702160216022c13407f3c170216021340803c17051604160513353b391704160216053c1702160216022c13407f3c170216021340803c17051604160513343b391704160216053c1702160216022c13407f3c170216021340803c17051604160513333b391704160216053c1702160216022c13407f3c170216021340803c17051604160513323b391704160413c63627a301d71055774c85371706160613dcfffffffffffffffffffffffffffffffffd709b7e5480fba5a50fed5e62ffc556351340803c1707160613ccdb2df09e81959a81455e260799a0632f351340803c170816071380800000314c0316073f4a0616071380ffffff383f128100000020170916081380800000314c0316083f4a0616081380ffffff383f128100000020170a1609160a244c031609024a0a160a00001600324c03160a024a02160902010003030108d37afb14100d1600160116021304640201000405010ad35b19984c1601160216030002170416001604cc020103000601405ed3c8fb42d8b41700a000661701a0000d2aa100b21702ce01ce02ce03ce04ce05ce06130664160216020c1602130464170417031601ce00160316040c0d361600c91705120a1341f4134044b1100d160501051812403c134bb8134040b1100d16050105181240c8136710134055b1100d160501051806134064134064b1100d1605010518061340640cb1100d1605010518120a1341f41340aab1100d160501051816050200000202020c160071160171314c0316001601021601160002010301140040b1d38e7d9de512800d89e812bff27618201243e8203d1701b41702160013c9011231238173971928379182732c13c22371823782222a6b160247444e711703160066cb170416041705b117060c1707160711314c408d16071600304c4084160766cb1708160416080005170a17090c170b160b1306314c407516036b4e7117031603170c160c16012e170d160d3f16010e2d3f20170e160c16012d170c160c0f2e170f160c0f2d170c160e0000160f2a0d2b17101609160a160b1610100d160501061856171116111343e8133c2c133c2c13182c2a171213c53635c9adc5dea000001713160216091613a3160b1609160a160216090c16111612161313090c160501071602160a1613a3160b1609160a1602160a0d16111612161313090c16050107160216061613a3160b1609160a160216060e16111612161313090c16050107160b0d2a170b4a7f8716070d2a17074a7f6f010702020005d3eb052c5ab416001601ac0102020c00403fd30c795c9eb41702160066cb1703160166cb17041603160400051706170513d80fffffffffffffffffffffffffffffffffffffffffffffffffffffff0e2c17070c17081608134080314c4025a001681709a0010d2aa101130064160205050c0c130564170b170ab27a16051607a316061607a31609ce07160a160bc11816080d2a17084a7fd701000303010ad3cc2fc47bb416021601440e0d160001000201000309034020d301f0bc22160066cb1703160166cb1704160316040005170617051603160240cc170716031605160644160744cc170816087716051606020103010e004081d3740e2a46b1170156170216020d2a17030d17040c1705160511314c4070b1160566cc1706160617070c1708160811314c405e16051608304c4055b1160866cc170916067116097131170a160a4c0216064a011609170b160a4c0216094a011606170c0c170d160d1306314c40381600160b1604a3160d160b160c1600160b0c16021603160413090c160701071600160c1604a3160d160b160c1600160c0d16021603160413090c16070107160016011604a3160d160b160c160016010e16021603160413090c16070107160d0d2a170d4a7fc416080d2a17084a7f9e16050d2a17054a7f8c010304080018d3370f99c3b417041602170516041600160113036413006417071706160416030da31605ce0816061607c11801000103000cd32a2f4d1716001701b11601cc170216000d0c16020102",
+  "codeHash": "31af250ff9cfd8c0a98a646b2469ab4d18255293f7211a93b5f00907c6e31b1b",
+  "fieldsSig": {
+    "names": [
+      "poolFactoryTemplate",
+      "poolTemplate",
+      "positionTemplate",
+      "tickTemplate",
+      "wordTemplate",
+      "poolConfigTemplate",
+      "dexAccountRoot",
+      "fuzzPositionTemplate",
+      "fuzzPoolTemplate",
+      "nextIndex",
+      "nextPosition"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "getSqrtRatioAtTick",
+      "paramNames": [
+        "tick"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getTickAtSqrtRatio",
+      "paramNames": [
+        "sqrtPriceX96"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "I256"
+      ]
+    },
+    {
+      "name": "positionPath",
+      "paramNames": [
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "positionContractId",
+      "paramNames": [
+        "pool",
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Pool",
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "create",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "PoolFactory"
+      ]
+    },
+    {
+      "name": "sortTokens",
+      "paramNames": [
+        "t0",
+        "t1"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "createPools",
+      "paramNames": [
+        "index"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "deposit",
+      "paramNames": [
+        "t",
+        "amount"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createPositions",
+      "paramNames": [
+        "index",
+        "index2"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "collectProtocolFeesFromPool",
+      "paramNames": [
+        "clmmFactory",
+        "poolPath",
+        "token"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "getPoolAddress",
+      "paramNames": [
+        "index",
+        "index2",
+        "configIndex"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Address",
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "closeRewards",
+      "paramNames": [
+        "payer"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createFuzzPool",
+      "paramNames": [
+        "tickLower",
+        "tickUpper",
+        "pool",
+        "posId"
+      ],
+      "paramTypes": [
+        "I256",
+        "I256",
+        "Pool",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "destroyFuzzPool",
+      "paramNames": [
+        "pool"
+      ],
+      "paramTypes": [
+        "Pool"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "TickMathError",
+      "fields": [
+        {
+          "name": "SqrtPriceX96OutOfBounds",
+          "value": {
+            "type": "U256",
+            "value": "201"
+          }
+        },
+        {
+          "name": "TickOutOfBounds",
+          "value": {
+            "type": "U256",
+            "value": "202"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PathPrefixes",
+      "fields": [
+        {
+          "name": "Tick",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "Position",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "Word",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        }
+      ]
+    }
+  ]
+}

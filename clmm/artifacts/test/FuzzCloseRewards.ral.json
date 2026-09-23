@@ -1,0 +1,25 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzCloseRewards",
+  "bytecodeTemplate": "0101030005004026b417001343e817010c1702160211314c0e{0}160266cc1703160016031601a316020d2a17024a2e{0}1704160016041601a3160013c3038d7ea4c68000a216000d0c{0}010b",
+  "fieldsSig": {
+    "names": [
+      "fuzz"
+    ],
+    "types": [
+      "FuzzFactory"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

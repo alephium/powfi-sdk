@@ -1,0 +1,178 @@
+{
+  "version": "v4.5.3",
+  "name": "DexAccountRoot",
+  "bytecode": "05074029408d40aa40d340f0410a4129010001010013d3565ba487b4a000451341e17ba002431320301341e57b0716005ea0011600a102a10101000106004037d365b302f9a0014313202f7a4c0518a0024313202f1341e37bb41701160149191341e07b160047cb17021602c54c06a0000d0d160201014a01a0001703b2a001a00216011603130564a00313016417051704160147ce0016041605c11801000101000cd34f58efe6b4a000451341e17b05a00016005f1600a100010001010013d38baa7a03b4a000451341e17ba001431320301341e57b0616005e1600a002a102a10101000101000cd38ee4396fb4a000451341e17b08a00316005f1600a10301000303000ad366ed4ca8b4a000451341e17b160016011602bb01000404000dd3b0c5d314b4a000451341e17b1600160216030f0c16010102",
+  "codeHash": "91147a10aa362e845648421f32a2e5a680bed1128eea82c164e8075d550d7258",
+  "fieldsSig": {
+    "names": [
+      "templateId",
+      "owner",
+      "parents",
+      "minSwapCount"
+    ],
+    "types": [
+      "ByteVec",
+      "Address",
+      "[ByteVec;2]",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "OwnerUpdated",
+      "fieldNames": [
+        "previousOwner",
+        "newOwner"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "ClmmParentSet",
+      "fieldNames": [
+        "clmmParent"
+      ],
+      "fieldTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "CpmmParentSet",
+      "fieldNames": [
+        "cpmmParent"
+      ],
+      "fieldTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "MinSwapCountUpdated",
+      "fieldNames": [
+        "previousMinSwapCount",
+        "newMinSwapCount"
+      ],
+      "fieldTypes": [
+        "U256",
+        "U256"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "setCpmmParent",
+      "paramNames": [
+        "cpmmParent"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "createAccount",
+      "paramNames": [
+        "ref"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "updateOwner",
+      "paramNames": [
+        "newOwner"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setClmmParent",
+      "paramNames": [
+        "clmmParent"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "updateMinSwapCount",
+      "paramNames": [
+        "newMinSwapCount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newCode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgradeDexAccount",
+      "paramNames": [
+        "newCode",
+        "dexAccount",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "DexAccount",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

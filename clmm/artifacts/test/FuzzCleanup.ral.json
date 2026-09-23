@@ -1,0 +1,28 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzCleanup",
+  "bytecodeTemplate": "010103000c00405e0c1700160011314c4058{0}160066cc1701160117020c1703160311314c404616001603304c403d{0}160366cc170416017116047131170516054c0216014a011604170616054c0216044a01160117070c170816081306314c40201602160840cc17091606160744160944170a{1}0c2f4c0216064a011607170b1602160a160b0f0d{0}01091816080d2a17084a7fdc16030d2a17034a7fb616000d2a17004a7fa4",
+  "fieldsSig": {
+    "names": [
+      "fuzz",
+      "iter"
+    ],
+    "types": [
+      "FuzzFactory",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

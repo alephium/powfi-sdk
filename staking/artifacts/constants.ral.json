@@ -1,0 +1,58 @@
+{
+  "enums": [
+    {
+      "name": "RewardFeeErrorCodes",
+      "fields": [
+        {
+          "name": "InvalidCaller",
+          "value": {
+            "type": "U256",
+            "value": "18"
+          }
+        },
+        {
+          "name": "UnauthorizedFeeCollection",
+          "value": {
+            "type": "U256",
+            "value": "19"
+          }
+        },
+        {
+          "name": "BurnRateTooHigh",
+          "value": {
+            "type": "U256",
+            "value": "21"
+          }
+        },
+        {
+          "name": "InvalidVaultForSwap",
+          "value": {
+            "type": "U256",
+            "value": "22"
+          }
+        },
+        {
+          "name": "CannotEnableAlph",
+          "value": {
+            "type": "U256",
+            "value": "23"
+          }
+        },
+        {
+          "name": "TreasuryRateTooHigh",
+          "value": {
+            "type": "U256",
+            "value": "24"
+          }
+        },
+        {
+          "name": "InvalidAddress",
+          "value": {
+            "type": "U256",
+            "value": "25"
+          }
+        }
+      ]
+    }
+  ]
+}

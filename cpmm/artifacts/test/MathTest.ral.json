@@ -1,0 +1,49 @@
+{
+  "version": "v4.5.1",
+  "name": "MathTest",
+  "bytecode": "000217405b010002020109d38c844efd16000d1340703b2c16012d0201000103014026d36ae1998016000f334c191600170116000e2d0d2a170216021601314c0b16021701160016022d16022a0e2d17024a3116010216000c304c020d020c02",
+  "codeHash": "2aac75d4c8e75c1d0fbb6c3b567e73bedd6319f400aa30f783dfeae8b0b0c319",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "uqdiv",
+      "paramNames": [
+        "a",
+        "b"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "sqrt",
+      "paramNames": [
+        "y"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

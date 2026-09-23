@@ -16,10 +16,10 @@ export default defineConfig({
     }
   },
   resolve: {
-    alias: {
-      cpmm: path.resolve(__dirname, '../cpmm'),
-      clmm: path.resolve(__dirname, '../clmm'),
-      staking: path.resolve(__dirname, '../staking')
-    }
+    // Mirrors the `paths` in tsconfig.json: contract artifacts live in ./clmm, ./cpmm and ./staking
+    alias: [
+      { find: /^(clmm|cpmm|staking)$/, replacement: path.resolve(__dirname, '$1/artifacts/ts/index.ts') },
+      { find: /^(clmm|cpmm|staking)\//, replacement: path.resolve(__dirname, '$1') + '/' }
+    ]
   }
 })

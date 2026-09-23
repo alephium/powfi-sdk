@@ -1,0 +1,341 @@
+[
+  {
+    "name": "Slot0",
+    "fieldNames": [
+      "sqrtPriceX96",
+      "tick",
+      "feeProtocol"
+    ],
+    "fieldTypes": [
+      "U256",
+      "I256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "SwapParams",
+    "fieldNames": [
+      "payer",
+      "recipient",
+      "token",
+      "payToken",
+      "toPay",
+      "withdrawToken",
+      "toWithdraw",
+      "data"
+    ],
+    "fieldTypes": [
+      "Address",
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "ByteVec",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ModifyPositionParams",
+    "fieldNames": [
+      "owner",
+      "tickLower",
+      "tickUpper",
+      "liquidityDelta"
+    ],
+    "fieldTypes": [
+      "Address",
+      "I256",
+      "I256",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "SwapCache",
+    "fieldNames": [
+      "liquidityStart",
+      "feeProtocol"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  {
+    "name": "SwapState",
+    "fieldNames": [
+      "amountSpecifiedRemaining",
+      "amountCalculated",
+      "sqrtPriceX96",
+      "tick",
+      "feeGrowthGlobalX128",
+      "liquidity",
+      "protocolFee"
+    ],
+    "fieldTypes": [
+      "I256",
+      "I256",
+      "U256",
+      "I256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "StepComputations",
+    "fieldNames": [
+      "sqrtPriceStartX96",
+      "tickNext",
+      "initialized",
+      "sqrtPriceNextX96",
+      "amountIn",
+      "amountOut",
+      "feeAmount"
+    ],
+    "fieldTypes": [
+      "U256",
+      "I256",
+      "Bool",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "Reward",
+    "fieldNames": [
+      "nextOpenTime",
+      "endTime",
+      "amount"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true
+    ]
+  },
+  {
+    "name": "ProtocolFees",
+    "fieldNames": [
+      "token0",
+      "token1"
+    ],
+    "fieldTypes": [
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      true,
+      true
+    ]
+  },
+  {
+    "name": "PositionInfo",
+    "fieldNames": [
+      "amount0",
+      "amount1",
+      "fees",
+      "avgValue",
+      "avgFees",
+      "avgTime"
+    ],
+    "fieldTypes": [
+      "I256",
+      "I256",
+      "[U256;3]",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "Config",
+    "fieldNames": [
+      "tickSpacing",
+      "fee",
+      "feeProtocol",
+      "rewardToken"
+    ],
+    "fieldTypes": [
+      "I256",
+      "U256",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "DecreaseLiquidityParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "recipient",
+      "tickLower",
+      "tickUpper",
+      "amount0Min",
+      "amount1Min"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "CollectParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "recipient",
+      "tickLower",
+      "tickUpper",
+      "amount0Max",
+      "amount1Max"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  {
+    "name": "ModifyLiquidityParams",
+    "fieldNames": [
+      "token0",
+      "token1",
+      "configIndex",
+      "owner",
+      "tickLower",
+      "tickUpper",
+      "amount0Desired",
+      "amount1Desired",
+      "amount0Min",
+      "amount1Min"
+    ],
+    "fieldTypes": [
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address",
+      "I256",
+      "I256",
+      "U256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+]

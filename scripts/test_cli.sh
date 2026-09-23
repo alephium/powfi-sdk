@@ -2,7 +2,7 @@
 set -e
 
 # Configuration
-CLI="npx ts-node src/cli.ts"
+CLI="bun src/cli.ts"
 INDEX=0
 
 echo "--- Initial Staking Deposit ---"

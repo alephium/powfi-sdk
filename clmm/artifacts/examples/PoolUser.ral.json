@@ -1,0 +1,93 @@
+{
+  "version": "v4.5.3",
+  "name": "PoolUser",
+  "bytecode": "090141b5010309140940c6d320a3f05716000c304c0aa000a001a002a003a004a005a006a007a00802b21301640c130164170a170914010016051609160a13c41bc16d674ec800001601c9a10014010116051609160a13c41bc16d674ec800001601c9a10114010216051609160a13c41bc16d674ec800001601c9a102160216031604160516071608130664b2b20cb2130464170c170b1401031606160b160cc1a108060c0c1400100da0080105170d061341f40c1400100da0080105170e06134bb80c1400100da0080105170f061367100c1400100da00801051710a00071a00171334c06a0001711a001a1001611a101a00171a00271334c06a0011712a002a1011612a102a00071a00171334c06a0001713a001a1001613a101cda000160d13c901000000000000000000000000100da0080106a103a000a001160e13c901000000000000000000000000100da0080106a104a000a002160f13c901000000000000000000000000100da0080106a105a001a002161013c901000000000000000000000000100da0080106a106a000a001160f13c101000276a30e2a100da0080106a107a000a001a002a003a004a005a006a007a00802",
+  "codeHash": "e912466541e9b5a8b132fe5fd1f6aaad9a35b7acd1d358be13b4ad2d012d90c7",
+  "fieldsSig": {
+    "names": [
+      "token0",
+      "token1",
+      "token2",
+      "pool0",
+      "pool1",
+      "pool2",
+      "pool3",
+      "pool4",
+      "factory"
+    ],
+    "types": [
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "Pool",
+      "Pool",
+      "Pool",
+      "Pool",
+      "Pool",
+      "PoolFactory"
+    ],
+    "isMutable": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "deploy",
+      "paramNames": [
+        "counter",
+        "payer",
+        "pool_",
+        "position_",
+        "tick_",
+        "word_",
+        "factory_",
+        "config_",
+        "dexAccount_"
+      ],
+      "paramTypes": [
+        "U256",
+        "Address",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "Pool",
+        "Pool",
+        "Pool",
+        "Pool",
+        "Pool",
+        "PoolFactory"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

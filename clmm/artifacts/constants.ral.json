@@ -1,0 +1,158 @@
+{
+  "constants": [
+    {
+      "name": "MIN_TICK",
+      "value": {
+        "type": "I256",
+        "value": "-887272"
+      }
+    },
+    {
+      "name": "MAX_TICK",
+      "value": {
+        "type": "I256",
+        "value": "887272"
+      }
+    },
+    {
+      "name": "MIN_SQRT_RATIO",
+      "value": {
+        "type": "U256",
+        "value": "4295128739"
+      }
+    },
+    {
+      "name": "MAX_SQRT_RATIO",
+      "value": {
+        "type": "U256",
+        "value": "1461446703485210103287273052203988822378723970342"
+      }
+    },
+    {
+      "name": "Q128",
+      "value": {
+        "type": "U256",
+        "value": "340282366920938463463374607431768211456"
+      }
+    },
+    {
+      "name": "U128_MAX",
+      "value": {
+        "type": "U256",
+        "value": "340282366920938463463374607431768211455"
+      }
+    },
+    {
+      "name": "Q64",
+      "value": {
+        "type": "U256",
+        "value": "18446744073709551616"
+      }
+    },
+    {
+      "name": "Q32",
+      "value": {
+        "type": "U256",
+        "value": "4294967296"
+      }
+    },
+    {
+      "name": "Q96",
+      "value": {
+        "type": "U256",
+        "value": "79228162514264337593543950336"
+      }
+    },
+    {
+      "name": "Q160",
+      "value": {
+        "type": "U256",
+        "value": "1461501637330902918203684832716283019655932542976"
+      }
+    },
+    {
+      "name": "MAX_REWARDS",
+      "value": {
+        "type": "U256",
+        "value": "3"
+      }
+    },
+    {
+      "name": "FUZZ_FACTORIES",
+      "value": {
+        "type": "U256",
+        "value": "5"
+      }
+    },
+    {
+      "name": "FUZZ_SUPPLY",
+      "value": {
+        "type": "U256",
+        "value": "1684996666696914987166688442938726917102321526408785780068975640575"
+      }
+    },
+    {
+      "name": "FUZZ_CONFIGS",
+      "value": {
+        "type": "U256",
+        "value": "6"
+      }
+    },
+    {
+      "name": "FUZZ_POSITIONS_STEP",
+      "value": {
+        "type": "U256",
+        "value": "128"
+      }
+    },
+    {
+      "name": "FUZZ_POSITIONS",
+      "value": {
+        "type": "U256",
+        "value": "512"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "DexAccountErrorCodes",
+      "fields": [
+        {
+          "name": "DexUserIsContract",
+          "value": {
+            "type": "U256",
+            "value": "480"
+          }
+        },
+        {
+          "name": "InvalidOwner",
+          "value": {
+            "type": "U256",
+            "value": "481"
+          }
+        },
+        {
+          "name": "ParentsNotSet",
+          "value": {
+            "type": "U256",
+            "value": "483"
+          }
+        },
+        {
+          "name": "InvalidCaller",
+          "value": {
+            "type": "U256",
+            "value": "484"
+          }
+        },
+        {
+          "name": "ParentAlreadySet",
+          "value": {
+            "type": "U256",
+            "value": "485"
+          }
+        }
+      ]
+    }
+  ]
+}

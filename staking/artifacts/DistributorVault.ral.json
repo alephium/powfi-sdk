@@ -1,0 +1,178 @@
+{
+  "version": "v4.5.3",
+  "name": "DistributorVault",
+  "bytecode": "030940ea4109411e414f417e41af41c041ea420b0000030901409216020c3013415e7b160016010c0d3687170316001601371704160316043616031604314c020d4a010c36170516050c2f4c04160416022d02160216053313415f7b160016011602871706160516061604334c020d4a010c361705160416063617040c1602361602381707160216072d1702160416072d17040c16073616072d0d351707160416051607373917040f1602370e3a170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816041608370201020202010ed3c0de370fb4ce024513127b1600ce0116010f0dce00010e02010001010008d3caa32a2cb4ce024513127b1600ba010202040018d30f1e6f86b4ce024513127bb2170216021600a51703160216001603a31602160116001603100cce000104010201030017d3f7a59c4cb4ce024513127bb2170116011600a51702160116001602a31601160016020f0cce000105010202040018d3d3c8be46b4ce024513127bb217021602ce01a517031602ce011603a31602160016011603100cce000106010701010005d38794a45fb4ce011600ac010201040014d374fb3d89b21600a51701ce001600cc1702b21703160316001601a316010d0c16020106010200020010d3d6702ffcb2a4d12b1700b2170116011600a216000d0cce000101",
+  "codeHash": "02b0e02be493540486cacddcccf8fa73d47e5b19fdfe29a5dbe0002f10af2849",
+  "fieldsSig": {
+    "names": [
+      "collector",
+      "token",
+      "owner"
+    ],
+    "types": [
+      "RewardFeeCollector",
+      "ByteVec",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "collectProtocolFees",
+      "paramNames": [
+        "protocolFeeCollector",
+        "data"
+      ],
+      "paramTypes": [
+        "IProtocolFeeCollector",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newCode"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swapFeesOnCLMM",
+      "paramNames": [
+        "tokenId",
+        "configIndex"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "swapFeesOnCPMM",
+      "paramNames": [
+        "tokenId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "burnFeesOnCPMM",
+      "paramNames": [
+        "token0",
+        "token1"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "donate",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "transfer",
+      "paramNames": [
+        "tokenId"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "transferALPH",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "FullMathError",
+      "fields": [
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "350"
+          }
+        },
+        {
+          "name": "MulDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "351"
+          }
+        }
+      ]
+    }
+  ]
+}

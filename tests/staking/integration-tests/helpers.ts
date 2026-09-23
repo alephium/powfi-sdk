@@ -24,7 +24,7 @@ import {
   type XAlphStakeVaultInstance,
   type AlphUnstakeVaultInstance
 } from 'staking/artifacts/ts'
-import { buildMerkleWhitelist, type MerkleWhitelist } from 'staking/src/merkle-whitelist'
+import { buildMerkleWhitelist, type MerkleWhitelist } from './merkle-whitelist'
 import { Powfi } from '../../../src/powfi'
 import type { StakingConfig } from '../../../src/staking/types'
 

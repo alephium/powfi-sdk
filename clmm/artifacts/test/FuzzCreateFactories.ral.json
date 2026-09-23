@@ -1,0 +1,28 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzCreateFactories",
+  "bytecodeTemplate": "0101030002004044{1}0d0c{0}0106{0}1404636c6d6d{1}4044cc170016001701120a1341f40c1400100d160101051812403c134bb80c1400100d16010105181240c81367100c1400100d1601010518061340640c1400100d1601010518061340641340441400100d1601010518120a1341f41340aa1400100d1601010518",
+  "fieldsSig": {
+    "names": [
+      "fuzzFactory",
+      "index"
+    ],
+    "types": [
+      "FuzzingTestFactory",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

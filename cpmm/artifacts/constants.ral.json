@@ -1,0 +1,30 @@
+{
+  "enums": [
+    {
+      "name": "DexAccountErrorCodes",
+      "fields": [
+        {
+          "name": "DexUserIsContract",
+          "value": {
+            "type": "U256",
+            "value": "480"
+          }
+        },
+        {
+          "name": "InvalidOwner",
+          "value": {
+            "type": "U256",
+            "value": "481"
+          }
+        },
+        {
+          "name": "ParentsNotSet",
+          "value": {
+            "type": "U256",
+            "value": "483"
+          }
+        }
+      ]
+    }
+  ]
+}

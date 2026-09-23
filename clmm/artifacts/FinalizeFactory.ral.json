@@ -1,0 +1,25 @@
+{
+  "version": "v4.5.3",
+  "name": "FinalizeFactory",
+  "bytecodeTemplate": "01010300000005150000000000000000000000000000000000000000000000000000000000000000000d0c{0}010a",
+  "fieldsSig": {
+    "names": [
+      "factory"
+    ],
+    "types": [
+      "PoolFactory"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

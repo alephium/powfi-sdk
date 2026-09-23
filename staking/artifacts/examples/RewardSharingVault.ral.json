@@ -1,0 +1,253 @@
+{
+  "version": "v4.5.3",
+  "name": "RewardSharingVault",
+  "bytecode": "040740b74152423c4277428942c0431e01000208004054d3926b380bb417021602ce00774513287b140a5f5f6d61705f5f305f5f16004744cbc54c40270c0d0d140a5f5f6d61705f5f305f5f16004744cb01011703160116032a16000d0ece00010d1707170616062f132b7b16000005160316012a0c0e0c140a5f5f6d61705f5f305f5f16004744cb01024a15160116000d0ece00010d1705170416042f132b7bca140a5f5f6d61705f5f305f5f16004744b11601a001d20102a00016012aa10005160016015f01000205004046d365b06caeb417021602ce00774513287b140a5f5f6d61705f5f305f5f16004744cbc513297b0c0d0d140a5f5f6d61705f5f305f5f16004744cb010117031601160332132c7b160316012b17041600000516040c2f4c0aca0d0c140a5f5f6d61705f5f305f5f16004744cb01034a0a16040c0e0c140a5f5f6d61705f5f305f5f16004744cb0102a00016012ba10006160016015f0000030901409216020c3013415e7b160016010c0d3687170316001601371704160316043616031604314c020d4a010c36170516050c2f4c04160416022d02160216053313415f7b160016011602871706160516061604334c020d4a010c361705160416063617040c1602361602381707160216072d1702160416072d17040c16073616072d0d351707160416051607373917040f1602370e3a170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e16021608373637170816080e160216083736371708160416083702010101030019d3fe1110a1a0000c33132a7bb417011601ce011600ac160013c40de0b6b3a7640000a00000021702a00116022aa10107160116005f010300010005d3a28b71d5b417001600000500020102001916000006170116010c334c081600ce011601ab08160016015fa0010d0e0c140a5f5f6d61705f5f305f5f16004744cb010201000105014024d31191a066140a5f5f6d61705f5f305f5f16004744cbc513297b0c0d0d140a5f5f6d61705f5f305f5f16004744cb1704160401010d0d0d1604010117021701a00116022b17031601160313c40de0b6b3a7640000000202",
+  "codeHash": "8beaa8b570543344d4352cf8534bbc7df4591b4ecda97cfc3c30bc28dca5adb9",
+  "fieldsSig": {
+    "names": [
+      "stakeVault",
+      "rewardTokenId",
+      "totalAmountStaked",
+      "rewardPerTokenCumulative"
+    ],
+    "types": [
+      "XAlphStakeVault",
+      "ByteVec",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "Staked",
+      "fieldNames": [
+        "staker",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "Unstaked",
+      "fieldNames": [
+        "staker",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "RewardDeposited",
+      "fieldNames": [
+        "depositor",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    },
+    {
+      "name": "RewardClaimed",
+      "fieldNames": [
+        "staker",
+        "amount"
+      ],
+      "fieldTypes": [
+        "Address",
+        "U256"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "onStake",
+      "paramNames": [
+        "user",
+        "newStakedAmount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "onUnstake",
+      "paramNames": [
+        "user",
+        "unstakedAmount"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "mulDiv",
+      "paramNames": [
+        "a",
+        "b",
+        "denominator"
+      ],
+      "paramTypes": [
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        true
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "depositReward",
+      "paramNames": [
+        "amount"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "claimPendingRewards",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    },
+    {
+      "name": "claimUserPendingRewards",
+      "paramNames": [
+        "user"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "getUserPendingRewards",
+      "paramNames": [
+        "user"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [
+    {
+      "name": "SCALING_FACTOR",
+      "value": {
+        "type": "U256",
+        "value": "1000000000000000000"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "FullMathError",
+      "fields": [
+        {
+          "name": "DivByZero",
+          "value": {
+            "type": "U256",
+            "value": "350"
+          }
+        },
+        {
+          "name": "MulDivOverflow",
+          "value": {
+            "type": "U256",
+            "value": "351"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "StakeVaultCallerOnly",
+          "value": {
+            "type": "U256",
+            "value": "40"
+          }
+        },
+        {
+          "name": "NoUserRewardSharingInfo",
+          "value": {
+            "type": "U256",
+            "value": "41"
+          }
+        },
+        {
+          "name": "TotalStakedAmountIsZero",
+          "value": {
+            "type": "U256",
+            "value": "42"
+          }
+        },
+        {
+          "name": "InvalidStakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "43"
+          }
+        },
+        {
+          "name": "InvalidUnstakedAmount",
+          "value": {
+            "type": "U256",
+            "value": "44"
+          }
+        }
+      ]
+    }
+  ],
+  "mapsSig": {
+    "names": [
+      "userRewardSharingInfo"
+    ],
+    "types": [
+      "Map[Address,UserRewardSharingInfo]"
+    ]
+  }
+}

@@ -20,7 +20,7 @@ async function main() {
   const command = args[0]
 
   if (!command) {
-    console.log('Usage: npx ts-node src/cli.ts <module> <action> [args]')
+    console.log('Usage: bun src/cli.ts <module> <action> [args]')
     console.log('Modules:')
     console.log('  clmm')
     console.log('  cpmm')
@@ -273,7 +273,7 @@ async function main() {
     const actionArgs = args.slice(5)
 
     if (!symbolA || !symbolB || !configIndexStr || !action) {
-      console.log('Usage: npx ts-node src/cli.ts clmm <symbolA> <symbolB> <index> <action> [args]')
+      console.log('Usage: bun src/cli.ts clmm <symbolA> <symbolB> <index> <action> [args]')
       console.log('Global Actions:')
       console.log('  clmm set-fee-collector')
       console.log('  clmm migrate-factory')
@@ -1122,7 +1122,7 @@ async function main() {
     const actionArgs = args.slice(4)
 
     if (!symbolA || !symbolB || !action) {
-      console.log('Usage: npx ts-node src/cli.ts cpmm <symbolA> <symbolB> <action> [args]')
+      console.log('Usage: bun src/cli.ts cpmm <symbolA> <symbolB> <action> [args]')
       console.log('Global Actions:')
       console.log('  cpmm set-fee-collector')
       console.log('Pool Actions:')
@@ -1589,7 +1589,7 @@ async function main() {
     const actionArgs = args.slice(2)
 
     if (!action) {
-      console.log('Usage: npx ts-node src/cli.ts stake <action> [args...]')
+      console.log('Usage: bun src/cli.ts stake <action> [args...]')
       console.log('Actions:')
       console.log('  deposit <amountALPH>       # Stake ALPH to get xALPH')
       console.log('  donate <amountALPH>        # Donate ALPH as reward to all xALPH holders')
@@ -1776,7 +1776,7 @@ async function main() {
     const action = args[1]
 
     if (!action) {
-      console.log('Usage: npx ts-node src/cli.ts collector <action> [args...]')
+      console.log('Usage: bun src/cli.ts collector <action> [args...]')
       console.log('Available actions:')
       console.log('  info [symbol] # Show collector stats or specific vault info')
       console.log('  rr <%>     # Set reward rate (percent per year)')
@@ -2000,7 +2000,7 @@ async function main() {
   } else if (command === 'ref') {
     const action = args[1]
     if (!action) {
-      console.log('Usage: npx ts-node src/cli.ts ref <action> [args]')
+      console.log('Usage: bun src/cli.ts ref <action> [args]')
       console.log('Actions:')
       console.log('  create [referrer] # Create a new referral account')
       console.log('  info [address]    # Show referral account info/stats')

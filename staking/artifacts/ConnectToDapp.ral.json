@@ -1,0 +1,31 @@
+{
+  "version": "v4.5.3",
+  "name": "ConnectToDapp",
+  "bytecodeTemplate": "010103000200402513c3038d7ea4c680001700b4170116011600a21600{2}770e0d{2}010e181601{2}1600a316000d0c{0}010f{1}b94f0d0c{0}0116{1}14000e0c{0}0111",
+  "fieldsSig": {
+    "names": [
+      "vault",
+      "contractId",
+      "xAlph"
+    ],
+    "types": [
+      "XAlphStakeVault",
+      "ByteVec",
+      "XAlphToken"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

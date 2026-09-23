@@ -19,7 +19,7 @@ For SDK consumers:
 npm install @alephium/powfi-sdk
 ```
 
-For monorepo development:
+For development:
 
 ```bash
 bun install
@@ -62,8 +62,6 @@ const powfi = Powfi.load({ networkId: 'testnet', signer })
 
 ## Development Commands
 
-Run inside `packages/sdk`:
-
 ```bash
 bun run build
 bun run test
@@ -72,26 +70,22 @@ bun run lint
 bun run format:check
 ```
 
-## Artifact Packaging
-
-`bun run build` runs `copy-artifacts` before bundling. It copies:
-
-- `../clmm/artifacts` and `../clmm/deployments`
-- `../cpmm/artifacts` and `../cpmm/deployments`
-- `../staking/artifacts` and `../staking/deployments`
-
-into this package so the published SDK includes contract bindings and deployment metadata.
-
-If contracts changed, rebuild contract artifacts first:
+Integration tests expect a local Alephium devnet at `127.0.0.1:22973`:
 
 ```bash
-bun run compile
-bun run build:sdk
+docker compose -f docker/docker-compose.yml up -d
 ```
 
-## Related Packages
+## Contract Artifacts
 
-- [Monorepo README](../../README.md)
-- [CLMM package](../clmm/README.md)
-- [CPMM package](../cpmm/README.md)
-- [Staking package](../staking/README.md)
+`clmm/`, `cpmm/` and `staking/` hold the generated contract bindings (`artifacts/`) and deployment metadata (`deployments/`) for the Powfi contracts. They are committed here and bundled into the published SDK.
+
+After the contracts change, maintainers with access to the contracts repository refresh them from its compiled packages:
+
+```bash
+CONTRACTS_DIR=<path-to-contracts-repo>/packages bun run copy-artifacts
+```
+
+## License
+
+[LGPL-3.0-only](./LICENSE)

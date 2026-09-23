@@ -1,0 +1,52 @@
+{
+  "version": "v4.5.3",
+  "name": "CreateLiquidPool",
+  "bytecodeTemplate": "0101030002001eb41700{1}{2}{3}{4}100d{0}0106170116007a{1}{8}a3{2}{9}a316001600{5}{6}{7}110e160101261818",
+  "fieldsSig": {
+    "names": [
+      "factory",
+      "token0",
+      "token1",
+      "configIndex",
+      "sqrtPriceX96",
+      "tickLower",
+      "tickUpper",
+      "liquidity",
+      "amount0",
+      "amount1"
+    ],
+    "types": [
+      "PoolFactory",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "U256",
+      "I256",
+      "I256",
+      "U256",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

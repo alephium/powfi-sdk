@@ -1,0 +1,40 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzClmmSwap",
+  "bytecodeTemplate": "0101030010004078b41700{0}1404636c6d6d{1}4044cc1701{0}1404636c6d6d{2}4044cc1702160171160271334c06160117031602170116031702{4}17041604{3}40cc17051601160244160544170616041606cc170716071708587117090c170a160a{5}314c404016090e2e0c2f170b13c4016345785d8a0000160913c41bc16d674ec800002e2a170c160b4c0216014a011602170d160b4c0413c101000276a30d2a4a0313d0fffd8963efd1fc6a506488495d951d5263988d260d2b170e1600160da5170f160f160c334c121600160d160ca316001600160d160b160c3f160e140013070e1608012b18181609404e711709160a0d2a170a4a7fbc",
+  "fieldsSig": {
+    "names": [
+      "fuzzFactory",
+      "index1",
+      "index2",
+      "configIndex",
+      "clmmFactoryUser0",
+      "iterations"
+    ],
+    "types": [
+      "FuzzingTestFactory",
+      "U256",
+      "U256",
+      "U256",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

@@ -1,0 +1,455 @@
+{
+  "version": "v4.5.3",
+  "name": "PoolFactory",
+  "bytecode": "0a0d4035403f4054406a40d5418e427242b042cd42ee430b4325435001000205011bd3fc123a23b4a001451342bf7b16010c1320621702160113201601436217031603cb1704160016020e0d160401340200000101010316004002000003040109160016020001cc17031601160344020000030401091600160116020002170316001603cc020000010401403a12bff276187a7a16003a7a05294b033a224a023a90160021170112800d89e87a7a16003a7a05294b033a904a023a22160021170216021601207a7a16003a7a05294b033a904a023a223d0d2a170313ccffffffffffffffffffffffffffffffff16032d020100040a014067d3c939838eb4a000451342c37b160005281342c07ba002138000ffff321342c17b160213102e1704160213102d17051602134100311342c27b16040c2f7a4b0a18160410347a4c04181604130a321342c27b16050c2f7a4b0a18160510347a4c04181605130a321342c27b160113800f4240311342c47b160016011602160313046413006417071706a0021708a002000117091609ce0416061607c118a0020d2aa1020516085e0716011600160860160802010004402001407ad30b76af44160071160171311342bd7b16020001cb17040c1016040100170817071706170516050004170916030d0dce000105170a1603160a1607170d170c170b0c0c0c0c0c0c0c0c0c171a171917181717171617151714171317120c0c0c171d171c171b0c0c171f171eb1ce01ce05ce02ce0316021600160116081606160516091406414c50480002130d640c160b160c160d0c16121613161416151616161716181619161a161b161c161d161e161f131364170f170eb116001601441602000217101610ce00160e160fc11711061611160016011602611611020103090a001fd3132dd93d1603b2461342c77bb4a000451342be7bb11601160244160000031709160316041608a316031605160616071608110c1609013301000101000cd36b6bcd1bb4a000451342c57b0aa00116005f1600a10101000102000ed31b2c73fcb417011601a000451342c67b08a00016005f1600a10001000101000cd3c950f2f8b4a003451342c67b09a00316005f1600a10301000303000ad366ed4ca8b4a003451342c67b160016011602bb010006070014d3bee0f01cb4a003451342c67bb116011602441603000317061600160416050f0c16060137",
+  "codeHash": "7734c53d998f09a3a2fffc2df3fba189e6162afeff3c0f65e1f2950f6ed84796",
+  "fieldsSig": {
+    "names": [
+      "owner",
+      "feeCollector",
+      "poolTemplate",
+      "positionTemplate",
+      "tickTemplate",
+      "wordTemplate",
+      "poolConfigTemplate",
+      "dexAccountRoot",
+      "nextConfigIndex",
+      "upgrader"
+    ],
+    "types": [
+      "Address",
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "Address"
+    ],
+    "isMutable": [
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "ConfigCreated",
+      "fieldNames": [
+        "index"
+      ],
+      "fieldTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "PoolCreated",
+      "fieldNames": [
+        "id",
+        "token0",
+        "token1",
+        "configIndex"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ]
+    },
+    {
+      "name": "FeeTierEnabled",
+      "fieldNames": [
+        "fee",
+        "tickSpacing",
+        "index"
+      ],
+      "fieldTypes": [
+        "U256",
+        "I256",
+        "U256"
+      ]
+    },
+    {
+      "name": "OwnerUpdated",
+      "fieldNames": [
+        "previousOwner",
+        "newOwner"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "UpgraderUpdated",
+      "fieldNames": [
+        "previousUpgrader",
+        "newUpgrader"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "FeeCollectorUpdated",
+      "fieldNames": [
+        "previousFeeCollector",
+        "newFeeCollector"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "collectProtocolFees",
+      "paramNames": [
+        "recipient",
+        "data"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "configPath",
+      "paramNames": [
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "U256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "poolPath",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "poolContractId",
+      "paramNames": [
+        "factory",
+        "tokens",
+        "configIndex_"
+      ],
+      "paramTypes": [
+        "PoolFactory",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "tickSpacingToMaxLiquidityPerTick",
+      "paramNames": [
+        "tickSpacing"
+      ],
+      "paramTypes": [
+        "I256"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "createConfig",
+      "paramNames": [
+        "config"
+      ],
+      "paramTypes": [
+        "Config"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "create",
+      "paramNames": [
+        "token0",
+        "token1",
+        "configIndex",
+        "sqrtPriceX96"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Pool"
+      ]
+    },
+    {
+      "name": "setRewardParams",
+      "paramNames": [
+        "configIndex",
+        "token0",
+        "token1",
+        "payer",
+        "tokenId",
+        "index",
+        "openTime",
+        "endTime",
+        "amount"
+      ],
+      "paramTypes": [
+        "U256",
+        "ByteVec",
+        "ByteVec",
+        "Address",
+        "ByteVec",
+        "U256",
+        "U256",
+        "U256",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "setFeeCollector",
+      "paramNames": [
+        "newFeeCollector"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "transferOwnership",
+      "paramNames": [
+        "newOwner"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "changeUpgrader",
+      "paramNames": [
+        "newUpgrader"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newBytecode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgradePool",
+      "paramNames": [
+        "newBytecode",
+        "token0",
+        "token1",
+        "configIndex",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "FactoryError",
+      "fields": [
+        {
+          "name": "InvalidTokenOrder",
+          "value": {
+            "type": "U256",
+            "value": "701"
+          }
+        },
+        {
+          "name": "UnauthorizedRewardSender",
+          "value": {
+            "type": "U256",
+            "value": "702"
+          }
+        },
+        {
+          "name": "UnauthorizedFeeCollector",
+          "value": {
+            "type": "U256",
+            "value": "703"
+          }
+        },
+        {
+          "name": "InvalidTickSpacing",
+          "value": {
+            "type": "U256",
+            "value": "704"
+          }
+        },
+        {
+          "name": "ConfigIndexTooLarge",
+          "value": {
+            "type": "U256",
+            "value": "705"
+          }
+        },
+        {
+          "name": "ProtocolFeeTooLarge",
+          "value": {
+            "type": "U256",
+            "value": "706"
+          }
+        },
+        {
+          "name": "InvalidConfigCreator",
+          "value": {
+            "type": "U256",
+            "value": "707"
+          }
+        },
+        {
+          "name": "FeeTooLarge",
+          "value": {
+            "type": "U256",
+            "value": "708"
+          }
+        },
+        {
+          "name": "UnauthorizedFeeCollectorSetter",
+          "value": {
+            "type": "U256",
+            "value": "709"
+          }
+        },
+        {
+          "name": "UnauthorizedUpgrade",
+          "value": {
+            "type": "U256",
+            "value": "710"
+          }
+        },
+        {
+          "name": "InvalidAddress",
+          "value": {
+            "type": "U256",
+            "value": "711"
+          }
+        }
+      ]
+    }
+  ]
+}

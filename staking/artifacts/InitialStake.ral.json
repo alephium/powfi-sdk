@@ -1,0 +1,28 @@
+{
+  "version": "v4.4.0",
+  "name": "InitialStake",
+  "bytecodeTemplate": "01010300010010b4{1}a2{1}{0}770e0d{0}010e1700{1}16002f1341f87b",
+  "fieldsSig": {
+    "names": [
+      "xalph",
+      "amount"
+    ],
+    "types": [
+      "XAlphToken",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

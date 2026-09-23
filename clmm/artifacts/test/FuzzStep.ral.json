@@ -1,0 +1,31 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzStep",
+  "bytecodeTemplate": "010103001300409c{1}13062c1342002c110d2b2c1700b41701{2}13c3787878273233932c{1}2a6b160147444e7117020c1703160311314c407e{1}1603304c4075{0}{1}66cc1704{0}160366cc170516047116057131170616064c0216044a011605170716064c0216054a01160417080c170916091306314c405316026b4e7117021602170a1604160940cc170b16041607160844160b44cc170c160c170d16001342002a170e1600160a1342002e2a170f160a1342002d170a{0}160f68cc171016017a160713d80fffffffffffffffffffffffffffffffffffffffffffffffffffffffa3160813d80fffffffffffffffffffffffffffffffffffffffffffffffffffffffa3{1}160a160d16071608110e161001041712171116110c2f4c0c160116120da31601160f16120d100c16100105160e170016090d2a17094a7fa916030d2a17034a7f7e",
+  "fieldsSig": {
+    "names": [
+      "fuzz",
+      "index",
+      "iter"
+    ],
+    "types": [
+      "FuzzFactory",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

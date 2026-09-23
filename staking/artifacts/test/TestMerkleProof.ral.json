@@ -1,0 +1,134 @@
+{
+  "version": "v4.4.0",
+  "name": "TestMerkleProof",
+  "bytecode": "01050e4027407b409b40a5010000000103d393f264e8a0000200000101000c16004313202f136afb7b1600a10005a000b45f0000020601402e16014313202f136afa7b160117021600431703160313202e0c2f136af97b0c170416041603314c1016001604160413202a6217051605160200031702160413202a17044a2c160271a000712f02000002020110160071160171314c05160016014400044a04160116004400040200000101010316004f02",
+  "codeHash": "a6d0eadb4c4fbe25c0155c0a2e31ba6cc7a993cd27b3f708c6af418af44a7c57",
+  "fieldsSig": {
+    "names": [
+      "merkleRoot"
+    ],
+    "types": [
+      "ByteVec"
+    ],
+    "isMutable": [
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "UpdateRoot",
+      "fieldNames": [
+        "newMerkleRoot",
+        "updatedBy"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "Address"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "getMerkleRoot",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "updateRoot",
+      "paramNames": [
+        "newMerkleRoot"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "verify",
+      "paramNames": [
+        "proof",
+        "dataHash"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "Bool"
+      ]
+    },
+    {
+      "name": "hashPair",
+      "paramNames": [
+        "a",
+        "b"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "hash",
+      "paramNames": [
+        "dataToHash"
+      ],
+      "paramTypes": [
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "MerkleProofErrorCodes",
+      "fields": [
+        {
+          "name": "InvalidProofSize",
+          "value": {
+            "type": "U256",
+            "value": "11001"
+          }
+        },
+        {
+          "name": "InvalidDataHash",
+          "value": {
+            "type": "U256",
+            "value": "11002"
+          }
+        },
+        {
+          "name": "InvalidMerkleRoot",
+          "value": {
+            "type": "U256",
+            "value": "11003"
+          }
+        }
+      ]
+    }
+  ]
+}

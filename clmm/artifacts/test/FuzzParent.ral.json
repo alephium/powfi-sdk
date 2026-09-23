@@ -1,0 +1,70 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzParent",
+  "bytecode": "0104403b404b406a408d010300050119d3c8fb42d8b1170013006413006417021701b417031603160013c40de0b6b3a7640000a31400ce00160116020d1603c91704160402010701010005d3cdc56d1cb416000dac01020203000ed36f6311621400cb1702b216020da3160016010e0c16020100010200030210d3f229f7a21400cb17000c0d160001021701b21600a517021601160202",
+  "codeHash": "bdd965bc7b59474a4d9f902f0cceaddaadfc2bd2b9a323e49987a7df8df1db45",
+  "fieldsSig": {
+    "names": [
+      "id"
+    ],
+    "types": [
+      "ByteVec"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "create",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "FuzzChild"
+      ]
+    },
+    {
+      "name": "deposit",
+      "paramNames": [
+        "child"
+      ],
+      "paramTypes": [
+        "FuzzChild"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "collect",
+      "paramNames": [
+        "force",
+        "amount"
+      ],
+      "paramTypes": [
+        "Bool",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "get",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256",
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

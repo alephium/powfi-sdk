@@ -1,0 +1,361 @@
+{
+  "version": "v4.5.3",
+  "name": "TokenPairFactory",
+  "bytecode": "07071c403d40c340e340ff4118414201000101000cd351d8ec12b4ce024513107b07a00116005f1600a1010000020402101600711702160171170316021603314c03160016010216011600020103040900404bd3fd02709216001602a50c337a4c061816001603a50c33130f7b1602160342130b7bce03131e3213137b16021603000117051704b116041605ce01ce031406414c504800011306640c0c0c0c0c0c0c0c1308641707170616001601a21604160544ce00160616070d1340ff3bc21708a0000d2aa10005160416051608a0006101000203010fd3fc123a23b4a0014513107b1601cb170216000d0d160201110201000101000cd3c950f2f8b4a0024513107b06a00216005f1600a10201000303000ad366ed4ca8b4a0024513107b160016011602bb010005070014d30fc1c551b4ce024513107b1601160244cb1705160517061600160316040f0c16060112",
+  "codeHash": "46a7b182d068fac9c7a4a1afeeff698a0e778518575d3ffba7c72f53efd42d72",
+  "fieldsSig": {
+    "names": [
+      "pairTemplateId",
+      "dexRoot",
+      "owner",
+      "pairSize",
+      "feeCollector",
+      "refRate",
+      "upgrader"
+    ],
+    "types": [
+      "ByteVec",
+      "IDexAccount",
+      "Address",
+      "U256",
+      "Address",
+      "U256",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      true
+    ]
+  },
+  "eventsSig": [
+    {
+      "name": "PairCreated",
+      "fieldNames": [
+        "token0",
+        "token1",
+        "pair",
+        "currentPairSize"
+      ],
+      "fieldTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "U256"
+      ]
+    },
+    {
+      "name": "UpgraderUpdated",
+      "fieldNames": [
+        "previousUpgrader",
+        "newUpgrader"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    },
+    {
+      "name": "FeeCollectorUpdated",
+      "fieldNames": [
+        "previousFeeCollector",
+        "newFeeCollector"
+      ],
+      "fieldTypes": [
+        "Address",
+        "Address"
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "name": "updateFeeCollector",
+      "paramNames": [
+        "newFeeCollector"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "sortTokens",
+      "paramNames": [
+        "tokenA",
+        "tokenB"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec",
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "createPair",
+      "paramNames": [
+        "payer",
+        "alphAmount",
+        "tokenAId",
+        "tokenBId"
+      ],
+      "paramTypes": [
+        "Address",
+        "U256",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "collectProtocolFees",
+      "paramNames": [
+        "recipient",
+        "data"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": [
+        "U256"
+      ]
+    },
+    {
+      "name": "changeUpgrader",
+      "paramNames": [
+        "newUpgrader"
+      ],
+      "paramTypes": [
+        "Address"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgrade",
+      "paramNames": [
+        "newBytecode",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "upgradeTokenPair",
+      "paramNames": [
+        "newBytecode",
+        "token0Id",
+        "token1Id",
+        "immFields",
+        "mutFields"
+      ],
+      "paramTypes": [
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec",
+        "ByteVec"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [
+    {
+      "name": "MAX_REF_RATE",
+      "value": {
+        "type": "U256",
+        "value": "30"
+      }
+    }
+  ],
+  "enums": [
+    {
+      "name": "ErrorCodes",
+      "fields": [
+        {
+          "name": "ReserveOverflow",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "InsufficientInitLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityMinted",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        },
+        {
+          "name": "InsufficientLiquidityBurned",
+          "value": {
+            "type": "U256",
+            "value": "3"
+          }
+        },
+        {
+          "name": "InvalidToAddress",
+          "value": {
+            "type": "U256",
+            "value": "4"
+          }
+        },
+        {
+          "name": "InsufficientLiquidity",
+          "value": {
+            "type": "U256",
+            "value": "5"
+          }
+        },
+        {
+          "name": "InvalidTokenInId",
+          "value": {
+            "type": "U256",
+            "value": "6"
+          }
+        },
+        {
+          "name": "InvalidCalleeId",
+          "value": {
+            "type": "U256",
+            "value": "7"
+          }
+        },
+        {
+          "name": "InvalidK",
+          "value": {
+            "type": "U256",
+            "value": "8"
+          }
+        },
+        {
+          "name": "InsufficientOutputAmount",
+          "value": {
+            "type": "U256",
+            "value": "9"
+          }
+        },
+        {
+          "name": "InsufficientInputAmount",
+          "value": {
+            "type": "U256",
+            "value": "10"
+          }
+        },
+        {
+          "name": "IdenticalTokenIds",
+          "value": {
+            "type": "U256",
+            "value": "11"
+          }
+        },
+        {
+          "name": "Expired",
+          "value": {
+            "type": "U256",
+            "value": "12"
+          }
+        },
+        {
+          "name": "InsufficientToken0Amount",
+          "value": {
+            "type": "U256",
+            "value": "13"
+          }
+        },
+        {
+          "name": "InsufficientToken1Amount",
+          "value": {
+            "type": "U256",
+            "value": "14"
+          }
+        },
+        {
+          "name": "TokenNotExist",
+          "value": {
+            "type": "U256",
+            "value": "15"
+          }
+        },
+        {
+          "name": "InvalidCaller",
+          "value": {
+            "type": "U256",
+            "value": "16"
+          }
+        },
+        {
+          "name": "FeeCollectorNotEnabled",
+          "value": {
+            "type": "U256",
+            "value": "17"
+          }
+        },
+        {
+          "name": "InvalidAccount",
+          "value": {
+            "type": "U256",
+            "value": "18"
+          }
+        },
+        {
+          "name": "InvalidRefRate",
+          "value": {
+            "type": "U256",
+            "value": "19"
+          }
+        }
+      ]
+    }
+  ]
+}

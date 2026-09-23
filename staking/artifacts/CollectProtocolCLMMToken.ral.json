@@ -1,0 +1,40 @@
+{
+  "version": "v4.5.3",
+  "name": "CollectProtocolCLMMToken",
+  "bytecodeTemplate": "0101030004004030{1}{4}40cc1700{2}{3}441600441701{5}1601441702{5}cd424c16{0}{5}cc17031603c5194c06{5}0d0d{0}011018{1}16020e0d16030101184a07{1}16020e0d{0}010f18",
+  "fieldsSig": {
+    "names": [
+      "collector",
+      "factory",
+      "token0",
+      "token1",
+      "configIndex",
+      "tokenId"
+    ],
+    "types": [
+      "RewardFeeCollector",
+      "IProtocolFeeCollector",
+      "ByteVec",
+      "ByteVec",
+      "U256",
+      "ByteVec"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

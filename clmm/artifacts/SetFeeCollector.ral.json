@@ -1,0 +1,28 @@
+{
+  "version": "v4.5.3",
+  "name": "SetFeeCollector",
+  "bytecodeTemplate": "01010300000005{1}0d0c{0}0108",
+  "fieldsSig": {
+    "names": [
+      "factory",
+      "newFeeCollector"
+    ],
+    "types": [
+      "PoolFactory",
+      "Address"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

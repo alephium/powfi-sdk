@@ -1,0 +1,28 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzPoolClose",
+  "bytecodeTemplate": "010103000b00404c{0}{1}66cc1700160017010c1702160211314c403f{1}1602304c4036{0}160266cc170316007116037131170416044c0216004a011603170516044c0216034a01160017060c170716071306314c191601160740cc170816011605160644160844cc17091609170a160a0d0c{0}010d16070d2a17074a2316020d2a17024a7fbd",
+  "fieldsSig": {
+    "names": [
+      "fuzz",
+      "index"
+    ],
+    "types": [
+      "FuzzFactory",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

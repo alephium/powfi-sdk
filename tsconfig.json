@@ -1,13 +1,29 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "declaration": true,
     "lib": ["ES2022", "DOM"],
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./lib",
     "rootDir": "./",
     "noImplicitAny": true,
-    "types": ["vitest/globals", "node"]
+    "types": ["vitest/globals", "node"],
+    "paths": {
+      "clmm": ["./clmm/artifacts/ts/index.ts"],
+      "clmm/*": ["./clmm/*"],
+      "cpmm": ["./cpmm/artifacts/ts/index.ts"],
+      "cpmm/*": ["./cpmm/*"],
+      "staking": ["./staking/artifacts/ts/index.ts"],
+      "staking/*": ["./staking/*"]
+    }
   },
   "include": ["src/**/*", "cpmm/**/*", "staking/**/*", "tests/**/*", "vitest.config.ts"],
   "exclude": ["node_modules", "lib", "dist"]

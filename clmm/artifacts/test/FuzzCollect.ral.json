@@ -1,0 +1,31 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzCollect",
+  "bytecodeTemplate": "010103000e004063{1}13062c1342002c110d2b2c17000c1701160111314c4053{1}1601304c404a{0}{1}66cc1702{0}160166cc170316027116037131170416044c0216024a011603170516044c0216034a01160217060c170716071306314c40281602160740cc170816021605160644160844cc17091609170a16001342002a170b1600{2}2a170c{0}160c68cc170d160a0d0c160d0106160b170016070d2a17074a7fd416010d2a17014a7fa9",
+  "fieldsSig": {
+    "names": [
+      "fuzz",
+      "index",
+      "iter"
+    ],
+    "types": [
+      "FuzzFactory",
+      "U256",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "functions": [
+    {
+      "name": "main",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": []
+    }
+  ]
+}

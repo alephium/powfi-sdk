@@ -1,0 +1,55 @@
+{
+  "version": "v4.5.3",
+  "name": "FakeClmmFactory",
+  "bytecode": "09014024010000000111d3ebcd002ece00a1000ca101ce01ce0244ce0344ce0444ce0544ce064402",
+  "codeHash": "7d3c5ae61ed0619017b7eb22687a55b43ee6fc28da9955ee0cbef241e2a40717",
+  "fieldsSig": {
+    "names": [
+      "owner",
+      "feeCollector",
+      "poolTemplate",
+      "positionTemplate",
+      "tickTemplate",
+      "wordTemplate",
+      "poolConfigTemplate",
+      "dexAccountRoot",
+      "nextConfigIndex"
+    ],
+    "types": [
+      "Address",
+      "Address",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "ByteVec",
+      "U256"
+    ],
+    "isMutable": [
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "doNothing",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

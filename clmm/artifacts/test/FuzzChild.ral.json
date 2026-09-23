@@ -1,0 +1,57 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzChild",
+  "bytecode": "0003194042405101030203000ad36f631162b417021602b10da3160016010001010102040014d30673d7c6d6170216010c334c06d51703160216031601ab16004c0516021602b10daa010200000105d3f36cd8e4b2b1a502",
+  "codeHash": "bae59690e7014ecfc251734667b18f1af735776bd16c18db6e886cd8ebcb1330",
+  "fieldsSig": {
+    "names": [],
+    "types": [],
+    "isMutable": []
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "collect",
+      "paramNames": [
+        "force",
+        "amount"
+      ],
+      "paramTypes": [
+        "Bool",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "withdraw",
+      "paramNames": [
+        "force",
+        "amount"
+      ],
+      "paramTypes": [
+        "Bool",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false
+      ],
+      "returnTypes": []
+    },
+    {
+      "name": "get",
+      "paramNames": [],
+      "paramTypes": [],
+      "paramIsMutable": [],
+      "returnTypes": [
+        "U256"
+      ]
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

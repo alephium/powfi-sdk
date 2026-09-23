@@ -1,0 +1,47 @@
+{
+  "version": "v4.5.1",
+  "name": "DummyDexRoot",
+  "bytecode": "01011a01030505000ad3bd4815281600ce0016011602aa160318160418",
+  "codeHash": "f60e4ce3b0ffb478ac5899342c89967582a32b112dc417b4443cd0bda7da3e7a",
+  "fieldsSig": {
+    "names": [
+      "owner"
+    ],
+    "types": [
+      "Address"
+    ],
+    "isMutable": [
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "deposit",
+      "paramNames": [
+        "payer",
+        "tokenId",
+        "amount",
+        "path",
+        "at"
+      ],
+      "paramTypes": [
+        "Address",
+        "ByteVec",
+        "U256",
+        "ByteVec",
+        "U256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": []
+}

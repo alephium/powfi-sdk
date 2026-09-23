@@ -1,0 +1,113 @@
+{
+  "version": "v4.5.3",
+  "name": "FuzzPool",
+  "bytecode": "03031640314088010003030108d37afb14100d1600160116021304640201000405010ad35b19984c1601160216030000170416001604cc0201020103004031d3780b20d4b217011600ce00ce01ce0200011702160116020da31601ce00ce01ce021343e8110e160001271818160116020da316011601ce00ce01ce020c0d360c0d360c0d3613080f16000128181818",
+  "codeHash": "e4b9a2d187385e4f677836f9356e290234c300898bac3d67a96b05542655028c",
+  "fieldsSig": {
+    "names": [
+      "owner",
+      "tLower",
+      "tUpper"
+    ],
+    "types": [
+      "Address",
+      "I256",
+      "I256"
+    ],
+    "isMutable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "eventsSig": [],
+  "functions": [
+    {
+      "name": "positionPath",
+      "paramNames": [
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "positionContractId",
+      "paramNames": [
+        "pool",
+        "o",
+        "tickLower",
+        "tickUpper"
+      ],
+      "paramTypes": [
+        "Pool",
+        "Address",
+        "I256",
+        "I256"
+      ],
+      "paramIsMutable": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "returnTypes": [
+        "ByteVec"
+      ]
+    },
+    {
+      "name": "burnAndCollect",
+      "paramNames": [
+        "pool"
+      ],
+      "paramTypes": [
+        "Pool"
+      ],
+      "paramIsMutable": [
+        false
+      ],
+      "returnTypes": []
+    }
+  ],
+  "constants": [],
+  "enums": [
+    {
+      "name": "PathPrefixes",
+      "fields": [
+        {
+          "name": "Tick",
+          "value": {
+            "type": "U256",
+            "value": "0"
+          }
+        },
+        {
+          "name": "Position",
+          "value": {
+            "type": "U256",
+            "value": "1"
+          }
+        },
+        {
+          "name": "Word",
+          "value": {
+            "type": "U256",
+            "value": "2"
+          }
+        }
+      ]
+    }
+  ]
+}

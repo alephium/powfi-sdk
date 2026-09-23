@@ -19,9 +19,8 @@
     "staking"
   ],
   "scripts": {
-    "prebuild": "bun run copy-artifacts",
     "build": "bunx tsup",
-    "copy-artifacts": "rm -rf clmm cpmm staking && mkdir -p clmm cpmm staking && cp -r ../clmm/artifacts clmm/ && cp -r ../clmm/deployments clmm/ && cp -r ../cpmm/artifacts cpmm/ && cp -r ../cpmm/deployments cpmm/ && cp -r ../staking/artifacts staking/ && cp -r ../staking/deployments staking/",
+    "copy-artifacts": "set -e; test -d \"${CONTRACTS_DIR:?set CONTRACTS_DIR to the contracts packages directory}/clmm/artifacts\"; for p in clmm cpmm staking; do rm -rf $p; mkdir -p $p/deployments; cp -R \"$CONTRACTS_DIR/$p/artifacts\" $p/; cp \"$CONTRACTS_DIR/$p/deployments\"/.deployments.*.json $p/deployments/; done",
     "dev": "bunx tsup src --watch --format cjs,esm --dts --sourcemap --no-splitting -d lib",
     "test": "bunx vitest run",
     "test:watch": "bunx vitest",
@@ -29,7 +28,7 @@
     "lint": "bunx eslint --max-warnings=0 . --ext .ts",
     "format": "bunx prettier --write .",
     "typecheck": "bunx tsc --noEmit",
-    "clean": "rm -rf lib clmm cpmm staking",
+    "clean": "rm -rf lib",
     "prepublishOnly": "bun run build",
     "lint:fix": "bun run lint -- --fix",
     "format:check": "bunx prettier --check ."
@@ -49,12 +48,11 @@
   "license": "LGPL-3.0-only",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alephium/powfi.git",
-    "directory": "packages/sdk"
+    "url": "https://github.com/alephium/powfi-sdk.git"
   },
-  "homepage": "https://github.com/alephium/powfi/blob/main/README.md",
+  "homepage": "https://github.com/alephium/powfi-sdk#readme",
   "bugs": {
-    "url": "https://github.com/alephium/powfi/issues"
+    "url": "https://github.com/alephium/powfi-sdk/issues"
   },
   "dependencies": {
     "@alephium/token-list": "0.0.20",
@@ -68,13 +66,11 @@
     "@types/node": "20",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
-    "clmm": "workspace:*",
-    "cpmm": "workspace:*",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "keccak256": "^1.0.6",
     "prettier": "^3.2.5",
-    "staking": "workspace:*",
     "tsup": "^8.0.1",
     "vitest": "^4.1.4",
     "typescript": "^5.9.3"
