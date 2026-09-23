@@ -30,6 +30,8 @@ jobs:
           dist_tag=$([[ $tag =~ ^[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]] && echo beta || echo $dist_tag)
           dist_tag=$([[ $tag =~ ^[0-9]+\.[0-9]+\.[0-9]+-test\.[0-9]+$ ]] && echo test || echo $dist_tag)
           [ -z "$dist_tag" ] && echo "Distribution tag is not set to latest nor to rc or beta or test" && exit 1
+          version=$(node -p "require('./package.json').version")
+          [ "$tag" != "$version" ] && echo "Tag v$tag does not match package.json version $version" && exit 1
           echo "DIST_TAG=$dist_tag" >> $GITHUB_OUTPUT
         shell: bash
 
@@ -71,5 +73,5 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@5be0e66d93ac7ed76da52eca8bb058f665c3a5fe # v2.4.2
         with:
-          generate_release_notes: ${{ !contains(needs.get_dist_tag.outputs.DIST_TAG, '-') }}
-          prerelease: ${{ contains(needs.get_dist_tag.outputs.DIST_TAG, '-') }}
+          generate_release_notes: ${{ !contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
