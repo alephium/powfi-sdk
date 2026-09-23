@@ -305,7 +305,7 @@ export class CpmmModule extends ModuleBase {
       // x_new = sqrt(k / targetP)
       const x_new = k.div(targetP).sqrt()
       const dx_virtual = x_new.minus(reserve0)
-      amountIn = BigInt(dx_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toString())
+      amountIn = BigInt(dx_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toFixed())
       tokenInId = state.token0Info.id
       tokenOutId = state.token1Info.id
     } else {
@@ -314,7 +314,7 @@ export class CpmmModule extends ModuleBase {
       // y_new = sqrt(k * targetP)
       const y_new = k.times(targetP).sqrt()
       const dy_virtual = y_new.minus(reserve1)
-      amountIn = BigInt(dy_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toString())
+      amountIn = BigInt(dy_virtual.div(0.997).integerValue(BigNumber.ROUND_CEIL).toFixed())
       tokenInId = state.token1Info.id
       tokenOutId = state.token0Info.id
     }

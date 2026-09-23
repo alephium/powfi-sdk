@@ -4,7 +4,10 @@ import { InsufficientLiquidityError } from '../../src/common/error'
 import { MathUtil } from '../../src/common/math'
 import type { TokenInfo } from '@alephium/token-list'
 import type { CpmmConfig, CpmmPoolContractState } from '../../src/cpmm/types'
+import type { ExecuteScriptResult } from '@alephium/web3'
 import { ONE_ALPH } from '@alephium/web3'
+import { PrivateKeyWallet } from '@alephium/web3-wallet'
+import { SwapMinOut } from 'cpmm/artifacts/ts'
 import type { Powfi } from '../../src/powfi'
 
 describe('CpmmModule functions', () => {
@@ -236,24 +239,54 @@ describe('CpmmModule functions', () => {
     })
   })
 
-  describe('computeClaimableAmounts', () => {
-    class TestCpmmModule extends CpmmModule {
-      getCpmmConfig(): CpmmConfig {
-        return { groupIndex: 0, factoryId: 'factory', routerId: 'router' }
-      }
-
-      constructor(
-        scope: Powfi,
-        private mockState: CpmmPoolContractState
-      ) {
-        super(scope)
-      }
-
-      async getPoolState(_tokenA: string, _tokenB: string): Promise<CpmmPoolContractState> {
-        return Promise.resolve(this.mockState)
-      }
+  class TestCpmmModule extends CpmmModule {
+    getCpmmConfig(): CpmmConfig {
+      return { groupIndex: 0, factoryId: 'factory', routerId: 'router' }
     }
 
+    constructor(
+      scope: Powfi,
+      private mockState: CpmmPoolContractState
+    ) {
+      super(scope)
+    }
+
+    async getPoolState(_tokenA: string, _tokenB: string): Promise<CpmmPoolContractState> {
+      return Promise.resolve(this.mockState)
+    }
+  }
+
+  describe('swapTo', () => {
+    // A 1M/2M pool: moving its price to 1 or 3 needs ~4e23 base units, far above the 1e21 where
+    // bignumber.js switches toString() to exponential notation.
+    it.each([
+      [1, 'token0'],
+      [3, 'token1']
+    ])('moves the price to %d by selling %s, even for inputs above 1e21 base units', async (targetPrice, sold) => {
+      const state = createPoolState({ reserve0: ONE_ALPH * 1_000_000n, reserve1: ONE_ALPH * 2_000_000n })
+      const execute = vi.spyOn(SwapMinOut, 'execute').mockResolvedValue({} as ExecuteScriptResult)
+      const scope = { network: { id: 'testnet' }, signer: {} } as unknown as Powfi
+
+      await new TestCpmmModule(scope, state).swapTo({
+        tokenA: state.token0Info.id,
+        tokenB: state.token1Info.id,
+        targetPrice,
+        sender: PrivateKeyWallet.Random(0).address
+      })
+
+      const { tokenInId, amountIn } = execute.mock.calls[0][0].initialFields
+      expect(tokenInId).toBe(sold)
+      expect(amountIn).toBeGreaterThan(10n ** 21n)
+      const amountOut = CpmmModule.getAmountOut(state, tokenInId, amountIn)
+      const [reserve0, reserve1] =
+        sold === 'token0'
+          ? [state.reserve0 + amountIn, state.reserve1 - amountOut]
+          : [state.reserve0 - amountOut, state.reserve1 + amountIn]
+      expect(Math.abs(Number(reserve1) / Number(reserve0) / targetPrice - 1)).toBeLessThan(0.005)
+    })
+  })
+
+  describe('computeClaimableAmounts', () => {
     it('fetches pool state and computes claimable tokens', async () => {
       const reserve0 = ONE_ALPH * 500n
       const reserve1 = ONE_ALPH * 1000n
