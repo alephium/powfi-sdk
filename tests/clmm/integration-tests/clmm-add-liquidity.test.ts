@@ -5,16 +5,13 @@ import {
   ALPH_TOKEN_ID,
   DUST_AMOUNT,
   MINIMAL_CONTRACT_DEPOSIT,
-  NodeProvider,
   addressFromContractId
 } from '@alephium/web3'
 import { getSigners } from '@alephium/web3-test'
 import { ClmmLiquidityUtils } from '../../../src/clmm/liquidity'
 import { TickUtils } from '../../../src/clmm/tick'
 import { UNLIMITED_AMOUNT } from '../../../src'
-import { Powfi } from '../../../src/powfi'
 import { Fixture } from './helpers'
-import { PrivateKeyWallet } from '@alephium/web3-wallet'
 import { Position } from 'clmm'
 
 web3.setCurrentNodeProvider('http://127.0.0.1:22973', undefined, fetch)
@@ -242,79 +239,6 @@ describe('CLMM Add Liquidity', () => {
     expect(balancesAfter.token0Balance - balancesBefore.token0Balance).toBe(amount0)
     expect(balancesAfter.token1Balance - balancesBefore.token1Balance).toBe(amount1)
     expect(positionState.fields.liquidity).toBeGreaterThan(0n)
-  })
-
-  test.skip('testnet add liquidity', async () => {
-    const nodeProvider = new NodeProvider('https://node.testnet.alephium.org')
-    web3.setCurrentNodeProvider(nodeProvider)
-    const signer = new PrivateKeyWallet({
-      privateKey: process.env.TESTNET_PRIVATE_KEY!,
-      keyType: 'gl-secp256k1'
-    })
-
-    const amount0 = 195_144_381_020_422_385_005n
-    const amount1 = 20_000_000n
-    const slippage = 0n
-
-    const tickLower = -300148n
-    const tickUpper = -299148n
-    const configIndex = 1n
-
-    const token0 = ALPH_TOKEN_ID
-    const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203'
-    const powfi = new Powfi({
-      signer,
-      networkId: 'testnet'
-    })
-    const result = await powfi.clmm.addLiquidity({
-      token0,
-      token1,
-      configIndex: configIndex,
-      owner: signer.address,
-      tickLower,
-      tickUpper,
-      slippage,
-      amount0,
-      amount1,
-      existingPosition: true
-    })
-    console.log(result)
-  })
-
-  test.skip('testnet remove liquidity', async () => {
-    const nodeProvider = new NodeProvider('https://node.testnet.alephium.org')
-    web3.setCurrentNodeProvider(nodeProvider)
-    const signer = new PrivateKeyWallet({
-      privateKey: process.env.TESTNET_PRIVATE_KEY!,
-      keyType: 'gl-secp256k1'
-    })
-
-    const tickLower = -300148n
-    const tickUpper = -299148n
-    const configIndex = 1n
-
-    const token0 = ALPH_TOKEN_ID
-    const token1 = '1b14c35ca6f3036b686fde224ce0245ecb34cd9da66ec5e5cf6dae985b9ec203'
-    const powfi = new Powfi({
-      signer,
-      networkId: 'testnet'
-    })
-    const poolId = powfi.clmm.getPoolId(token0, token1, configIndex)
-    const positionId = powfi.clmm.getPositionId(poolId, signer.address, tickLower, tickUpper)
-    const position = await Position.at(addressFromContractId(positionId)).fetchState()
-    const result = await powfi.clmm.removeLiquidity({
-      token0,
-      token1,
-      configIndex: configIndex,
-      owner: signer.address,
-      tickLower,
-      tickUpper,
-      liquidity: position.fields.liquidity,
-      base: 'token1',
-      baseAmount: 0n,
-      otherAmountMax: 0n
-    })
-    console.log(result)
   })
 
   test('testing failing case', async () => {

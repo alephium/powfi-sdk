@@ -12,32 +12,18 @@ describe('getUserStakeVaultInfo with groupless address', () => {
     fixture = await Fixture.create()
   })
 
-  test('should return correct staking info for staker using grouped address', async () => {
-    const staker = await getSigner(1_000n * ONE_ALPH)
-    await testStake(staker)
-  }, 120000)
-
-  test('should return correct staking info for staker using groupless address', async () => {
-    const staker = await getSigner(1_000n * ONE_ALPH, 1, 'gl-secp256k1')
-    await testStake(staker)
-  }, 120000)
-
-  test('should return correct staking info for staker using grouped address', async () => {
+  test('stakes, unstakes and claims for a staker using a grouped address', async () => {
     const staker = await getSigner(1_000n * ONE_ALPH)
     await testUnstake(staker)
   }, 120000)
 
-  test('should return correct staking info for staker using groupless address', async () => {
+  test('stakes, unstakes and claims for a staker using a groupless address', async () => {
     const staker = await getSigner(1_000n * ONE_ALPH, 1, 'gl-secp256k1')
     await testUnstake(staker)
   }, 120000)
-
-  const testStake = async (staker: SignerProvider) => {
-    await fixture.stakeAlph(staker, 200n * ONE_ALPH)
-  }
 
   const testUnstake = async (staker: SignerProvider) => {
-    await testStake(staker)
+    await fixture.stakeAlph(staker, 200n * ONE_ALPH)
 
     const stakerAddr = (await staker.getSelectedAccount()).address
 

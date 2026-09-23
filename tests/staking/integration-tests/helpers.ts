@@ -1,52 +1,24 @@
-import type { SignerProvider, SignExecuteScriptTxResult } from '@alephium/web3'
-import {
-  ONE_ALPH,
-  web3,
-  addressFromContractId,
-  stringToHex,
-  binToHex,
-  addressToBytes,
-  codec,
-  subContractId,
-  groupOfAddress,
-  MINIMAL_CONTRACT_DEPOSIT
-} from '@alephium/web3'
+import type { SignerProvider } from '@alephium/web3'
+import { ONE_ALPH, web3, stringToHex, MINIMAL_CONTRACT_DEPOSIT } from '@alephium/web3'
 import { getSigners } from '@alephium/web3-test'
 import {
   XAlphToken,
-  XAlphStakeVault,
   AlphUnstakeVault,
-  RewardSharingVault,
   RewardFeeCollector,
   DistributorVault,
   ALPHLock,
-  type XAlphTokenInstance,
-  type XAlphStakeVaultInstance,
-  type AlphUnstakeVaultInstance
+  type XAlphTokenInstance
 } from 'staking/artifacts/ts'
-import { buildMerkleWhitelist, type MerkleWhitelist } from './merkle-whitelist'
 import { Powfi } from '../../../src/powfi'
 import type { StakingConfig } from '../../../src/staking/types'
 
 export const UNSTAKE_DURATION = 10n * 1000n // 10 seconds for testing
 export const MAX_ACTIVE_UNSTAKE_REQUESTS = 5n
-export const MAX_CONNECTED_DAPPS = 2n
 export const MAX_U256 = (1n << 256n) - 1n
-export const WEIGHT_SCALING_FACTOR = 10n ** 18n
 
 export interface Balances {
   alph: bigint
   xalph: bigint
-}
-
-export interface StakingState {
-  totalDepositedAlph: bigint
-  totalXAlphSupply: bigint
-  lastUnstakeVaultIndex: bigint
-}
-
-export interface StakeVaultState {
-  totalStakedAmount: bigint
 }
 
 export interface UnstakeVaultState {
@@ -65,10 +37,6 @@ export async function getBalances(address: string, xAlphTokenId: string): Promis
   }
 }
 
-export function gasFee(txResult: SignExecuteScriptTxResult): bigint {
-  return BigInt(txResult.gasAmount) * BigInt(txResult.gasPrice)
-}
-
 export function timeout(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -78,9 +46,7 @@ export class Fixture {
 
   constructor(
     readonly xAlphTokenContract: XAlphTokenInstance,
-    readonly stakeVaultContract: XAlphStakeVaultInstance,
     readonly deployer: SignerProvider,
-    readonly whitelist: MerkleWhitelist,
     powfi: Powfi
   ) {
     this.powfi = powfi
@@ -88,10 +54,6 @@ export class Fixture {
 
   get xAlphTokenId(): string {
     return this.xAlphTokenContract.contractId
-  }
-
-  get stakeVaultId(): string {
-    return this.stakeVaultContract.contractId
   }
 
   static async create(unstakeDuration: bigint = UNSTAKE_DURATION): Promise<Fixture> {
@@ -122,24 +84,6 @@ export class Fixture {
           lastUnstakeVaultIndex: 0n
         },
         issueTokenAmount: MAX_U256
-      })
-    ).contractInstance
-
-    const rewardSharingTemplate = (await RewardSharingVault.deployTemplate(deployer)).contractInstance
-    const templateState = await rewardSharingTemplate.fetchState()
-    const codeHash = templateState.codeHash
-
-    const whitelist = await buildMerkleWhitelist([codeHash])
-
-    const stakeVaultContract = (
-      await XAlphStakeVault.deploy(deployer, {
-        initialFields: {
-          stakeTokenId: xAlphTokenContract.contractId,
-          maxConnectedDapps: MAX_CONNECTED_DAPPS,
-          merkleRoot: whitelist.root,
-          totalStakedAmount: 0n,
-          owner: deployerAddress
-        }
       })
     ).contractInstance
 
@@ -176,7 +120,7 @@ export class Fixture {
     }
     powfi.staking.setConfig(stakingConfig)
 
-    return new Fixture(xAlphTokenContract, stakeVaultContract, deployer, whitelist, powfi)
+    return new Fixture(xAlphTokenContract, deployer, powfi)
   }
 
   async stakeAlph(signer: SignerProvider, amount: bigint) {
@@ -194,20 +138,6 @@ export class Fixture {
     return this.powfi.staking.claimUnstaked(vaultIndex, amount)
   }
 
-  async cancelUnstake(signer: SignerProvider, vaultIndex: bigint) {
-    this.powfi.signer = signer
-    return this.powfi.staking.cancelUnstake(vaultIndex)
-  }
-
-  async getXAlphTokenState(): Promise<StakingState> {
-    const state = await this.powfi.staking.getXAlphTokenState()
-    return {
-      totalDepositedAlph: state.fields.totalDepositedAlph,
-      totalXAlphSupply: state.fields.totalXAlphSupply,
-      lastUnstakeVaultIndex: state.fields.lastUnstakeVaultIndex
-    }
-  }
-
   async getActiveUnstakeVaultIndexes(signer: SignerProvider): Promise<bigint[]> {
     const account = await signer.getSelectedAccount()
     return this.powfi.staking.getActiveUnstakeVaultIndexes(account.address)
@@ -216,21 +146,6 @@ export class Fixture {
   async getClaimableAmount(signer: SignerProvider, vaultIndex: bigint): Promise<bigint> {
     const account = await signer.getSelectedAccount()
     return this.powfi.staking.getClaimableAmount(account.address, vaultIndex)
-  }
-
-  getUnstakeVaultAddress(userAddress: string, vaultIndex: bigint): string {
-    const userHex = binToHex(addressToBytes(userAddress))
-    const indexHex = binToHex(codec.u256Codec.encode(vaultIndex))
-    const contractId = subContractId(
-      this.xAlphTokenContract.contractId,
-      `${userHex}${indexHex}`,
-      groupOfAddress(this.xAlphTokenContract.address)
-    )
-    return addressFromContractId(contractId)
-  }
-
-  getUnstakeVault(userAddress: string, vaultIndex: bigint): AlphUnstakeVaultInstance {
-    return this.powfi.staking.getAlphUnstakeVault(userAddress, vaultIndex)
   }
 
   async getUnstakeVaultState(userAddress: string, vaultIndex: bigint): Promise<UnstakeVaultState> {
