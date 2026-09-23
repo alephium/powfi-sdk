@@ -381,6 +381,13 @@ export class StakingModule extends ModuleBase {
     })
   }
 
+  async setTreasury(newTreasury: string): Promise<RewardFeeCollectorTypes.SignExecuteMethodResult<'setTreasury'>> {
+    return this.getRewardFeeCollector(this.config.feeCollectorId).transact.setTreasury({
+      signer: this.scope.signer,
+      args: { newTreasury }
+    })
+  }
+
   getVault(token: string): DistributorVaultInstance {
     const vaultId = this.getDistributorVaultId(token)
     return DistributorVault.at(addressFromContractId(vaultId))

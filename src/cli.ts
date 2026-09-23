@@ -1781,6 +1781,8 @@ async function main() {
       console.log('  info [symbol] # Show collector stats or specific vault info')
       console.log('  rr <%>     # Set reward rate (percent per year)')
       console.log('  br <%>     # Set burn rate (percent of rewards to burn)')
+      console.log('  tr <%>     # Set treasury rate (percent of rewards to treasury, taken before burn)')
+      console.log('  treasury <address> # Set treasury address')
       console.log('  distribute # Manually trigger reward distribution')
       console.log('  enable <symbol> # Enable token for collection')
       console.log('  vault-upgrade <symbol> # Upgrade distributor vault for token')
@@ -1849,25 +1851,45 @@ async function main() {
       } catch (error) {
         console.error('Failed to fetch collector info:', error)
       }
-    } else if (action === 'rr' || action === 'br') {
+    } else if (action === 'rr' || action === 'br' || action === 'tr') {
       const pctStr = args[2]
       if (!pctStr) {
         console.log(`Usage: collector ${action} <percent>`)
         return
       }
 
+      const label = action === 'rr' ? 'Reward' : action === 'br' ? 'Burn' : 'Treasury'
       try {
         const pct = new Decimal(pctStr)
         const newRate = BigInt(pct.mul(100).floor().toFixed(0))
 
         const result =
-          action === 'rr' ? await powfi.staking.setRewardRate(newRate) : await powfi.staking.setBurnRate(newRate)
+          action === 'rr'
+            ? await powfi.staking.setRewardRate(newRate)
+            : action === 'br'
+              ? await powfi.staking.setBurnRate(newRate)
+              : await powfi.staking.setTreasuryRate(newRate)
 
-        console.log(`${action === 'rr' ? 'Reward' : 'Burn'} rate set to ${pctStr}% (TX: ${result.txId})`)
+        console.log(`${label} rate set to ${pctStr}% (TX: ${result.txId})`)
         await waitForTx(result.txId)
         console.log('Update confirmed.')
       } catch (error) {
-        console.error(`Failed to set ${action === 'rr' ? 'reward' : 'burn'} rate:`, error)
+        console.error(`Failed to set ${label.toLowerCase()} rate:`, error)
+      }
+    } else if (action === 'treasury') {
+      const address = args[2]
+      if (!address) {
+        console.log('Usage: collector treasury <address>')
+        return
+      }
+
+      try {
+        const result = await powfi.staking.setTreasury(address)
+        console.log(`Treasury address set to ${address} (TX: ${result.txId})`)
+        await waitForTx(result.txId)
+        console.log('Update confirmed.')
+      } catch (error) {
+        console.error('Failed to set treasury address:', error)
       }
     } else if (action === 'distribute') {
       try {
