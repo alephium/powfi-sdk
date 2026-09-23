@@ -230,13 +230,8 @@ export class ClmmModule extends ModuleBase {
   /** Derives the pool contract ID for a token pair and fee tier. Tokens are sorted internally. */
   getPoolId(tokenA: string, tokenB: string, configIndex: bigint): string {
     const [token0, token1] = sortTokens(tokenA, tokenB)
-    const group = this.config.groupIndex
-    const factoryId = this.config.factoryId
-    const rawIndex = codec.u256Codec.encode(configIndex)
-    const configPath = binToHex(rawIndex)
-    const configId = subContractId(factoryId, configPath, group)
-    const path = token0 + token1 + configId
-    return subContractId(factoryId, path, group)
+    const path = token0 + token1 + this.getPoolConfigId(configIndex)
+    return subContractId(this.config.factoryId, path, this.config.groupIndex)
   }
 
   /** Derives a position's contract ID from the pool, owner address, and tick range. */

@@ -58,7 +58,6 @@ export class CpmmModule extends ModuleBase {
     super({ scope, moduleName: 'CpmmModule' })
 
     this.config = this.getCpmmConfig()
-    this.scope = scope
   }
 
   /** Overrides the CPMM deployment configuration. */

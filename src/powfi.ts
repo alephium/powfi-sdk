@@ -31,7 +31,6 @@ export class Powfi {
 
   private _nodeProvider: NodeProvider
   private _explorerProvider: ExplorerProvider
-  private _tokenListUrl: string
   private _signer?: SignerProvider
   private _account?: Account
   private _network: Network
@@ -48,7 +47,6 @@ export class Powfi {
     this._network = networkConfig
     this._nodeProvider = new NodeProvider(this._network.nodeUrl, this._network.nodeApiKey)
     this._explorerProvider = new ExplorerProvider(this._network.explorerApiUrl)
-    this._tokenListUrl = this._network.tokenListUrl
     this._signer = params.signer
 
     // Initialize modules
@@ -107,17 +105,11 @@ export class Powfi {
   }
 
   get tokenListUrl(): string {
-    return this._tokenListUrl
+    return this._network.tokenListUrl
   }
 
   /** Set this instance's node and explorer providers as the global `web3` defaults. */
   public setCurrentProviders(): void {
-    if (!this._nodeProvider) {
-      throw new Error('Node provider not set')
-    }
-    if (!this._explorerProvider) {
-      throw new Error('Explorer provider not set')
-    }
     web3.setCurrentNodeProvider(this._nodeProvider)
     web3.setCurrentExplorerProvider(this._explorerProvider)
   }

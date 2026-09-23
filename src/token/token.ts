@@ -17,13 +17,9 @@ export class TokenModule extends ModuleBase {
   private cache?: TokenCache
   private readonly cacheTimeMs: number
 
-  constructor(
-    scope: Powfi,
-    private readonly cacheTimeDays: number = 1
-  ) {
+  constructor(scope: Powfi, cacheTimeDays: number = 1) {
     super({ scope, moduleName: 'TokenModule' })
 
-    this.scope = scope
     this.cacheTimeMs = cacheTimeDays * 24 * 60 * 60 * 1000
   }
 

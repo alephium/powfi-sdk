@@ -13,7 +13,7 @@ import type { ClmmPoolContractState, ClmmSimulateSwapQuote } from './clmm/types'
 import type { CpmmPoolContractState } from './cpmm/types'
 import type { TokenInfo } from '@alephium/token-list'
 import { TokenPair, TokenPairFactory } from 'cpmm'
-import { DistributorVault, RewardFeeCollector } from 'staking'
+import { RewardFeeCollector } from 'staking'
 
 async function main() {
   const args = process.argv.slice(2)
@@ -299,7 +299,7 @@ async function main() {
     console.log(`Fetching token info for ${symbolA} and ${symbolB}...`)
     const [tokenA, tokenB] = await Promise.all([getTokenInfo(symbolA), getTokenInfo(symbolB)])
 
-    const [id0, id1] = sortTokens(tokenA.id, tokenB.id)
+    const [id0] = sortTokens(tokenA.id, tokenB.id)
     const isReversed = id0 !== tokenA.id
     const t0Info = isReversed ? tokenB : tokenA
     const t1Info = isReversed ? tokenA : tokenB
@@ -1734,10 +1734,7 @@ async function main() {
     } else if (action === 'ext') {
       const signerAccount = await powfi.signer.getSelectedAccount()
 
-      const [tokensResult, balanceInfo] = await Promise.all([
-        powfi.token.getTokens().catch(() => [] as any[]),
-        powfi.nodeProvider.addresses.getAddressesAddressBalance(signerAccount.address)
-      ])
+      const balanceInfo = await powfi.nodeProvider.addresses.getAddressesAddressBalance(signerAccount.address)
 
       console.log(`Extended Balances for ${signerAccount.address} (Balance > 1):`)
 
