@@ -40,7 +40,8 @@ export class TickUtils {
       ratio = U256_MAX / ratio
     }
 
-    return ratio >> 32n
+    // Round up like the contract's `ratio \ Q32`, so the SDK and the pool agree on where each tick starts.
+    return (ratio >> 32n) + (ratio % (1n << 32n) === 0n ? 0n : 1n)
   }
 
   /** Converts a Q96 sqrt price to the corresponding tick index. */

@@ -90,7 +90,7 @@ export class ClmmLiquidityUtils {
     amount0: bigint,
     amount1: bigint
   ): bigint {
-    if (sqrtRatioX96 < sqrtRatioAX96) {
+    if (sqrtRatioX96 <= sqrtRatioAX96) {
       return this.getLiquidityFromToken0(sqrtRatioAX96, sqrtRatioBX96, amount0)
     } else if (sqrtRatioX96 < sqrtRatioBX96) {
       const liquidity0 = this.getLiquidityFromToken0(sqrtRatioX96, sqrtRatioBX96, amount0)
