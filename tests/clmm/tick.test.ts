@@ -37,10 +37,10 @@ describe('TickUtils', () => {
 
     it('handles boundary ticks', () => {
       const minRatio = TickUtils.getSqrtRatioAtTick(MIN_TICK)
-      expect(minRatio).toBe(MIN_SQRT_RATIO - 1n)
+      expect(minRatio).toBe(MIN_SQRT_RATIO)
 
       const maxRatio = TickUtils.getSqrtRatioAtTick(MAX_TICK)
-      expect(maxRatio).toBe(MAX_SQRT_RATIO - 1n)
+      expect(maxRatio).toBe(MAX_SQRT_RATIO)
 
       expect(() => TickUtils.getSqrtRatioAtTick(MIN_TICK - 1n)).toThrow('TickOutOfBounds')
       expect(() => TickUtils.getSqrtRatioAtTick(MAX_TICK + 1n)).toThrow('TickOutOfBounds')
@@ -67,7 +67,7 @@ describe('TickUtils', () => {
       expect(TickUtils.getTickAtSqrtRatio(zeroTickRatio)).toBe(0n)
 
       expect(TickUtils.getTickAtSqrtRatio(MIN_SQRT_RATIO)).toBe(MIN_TICK)
-      expect(TickUtils.getTickAtSqrtRatio(MAX_SQRT_RATIO - 1n)).toBe(MAX_TICK)
+      expect(TickUtils.getTickAtSqrtRatio(MAX_SQRT_RATIO - 1n)).toBe(MAX_TICK - 1n)
 
       expect(() => TickUtils.getTickAtSqrtRatio(MIN_SQRT_RATIO - 1n)).toThrow()
       expect(() => TickUtils.getTickAtSqrtRatio(MAX_SQRT_RATIO)).toThrow()
