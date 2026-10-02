@@ -86,7 +86,6 @@ export interface ClmmCollectTokensRequest {
   recipient: string
   tickLower: bigint
   tickUpper: bigint
-  liquidity: bigint // != 0 if also remove liquidity
   amount0Max: bigint
   amount1Max: bigint
 }

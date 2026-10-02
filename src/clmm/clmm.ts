@@ -494,7 +494,7 @@ export class ClmmModule extends ModuleBase {
     const { returns } = await pool.view.positionInfo({ args })
     return returns
   }
-  /** Collects accrued fees from a position, optionally removing liquidity in the same transaction. */
+  /** Collects accrued fees from a position. */
   async collectTokens(p: ClmmCollectTokensRequest): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const poolAddress = this.getPoolAddress(p.token0, p.token1, p.configIndex)
     const positionId = PoolUtils.getPositionId(poolAddress, p.owner, p.tickLower, p.tickUpper)
@@ -510,7 +510,7 @@ export class ClmmModule extends ModuleBase {
     const result = await positionManager.transact.collect({
       signer: this.scope.signer,
       args: {
-        liquidity: p.liquidity,
+        liquidity: 0n,
         operator: normalizedOperator,
         p: {
           configIndex: p.configIndex,
