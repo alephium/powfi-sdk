@@ -186,7 +186,8 @@ export class ClmmModule extends ModuleBase {
       const poolAddress = addressFromContractId(poolId)
       const pool = Pool.at(poolAddress)
       const state = await pool.fetchState()
-      const token2Info = await this.scope.token.getTokenById(state.fields.token2)
+      const token2Info =
+        state.fields.token2 !== '' ? await this.scope.token.getTokenById(state.fields.token2) : undefined
 
       const rewardInfos = state.fields.rewardInfos.map((r) => ({
         amount: r.amount,

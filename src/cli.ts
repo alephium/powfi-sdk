@@ -527,15 +527,20 @@ async function main() {
             console.log(`  - ${t0Info.symbol.padEnd(8)}: ${formatAmount(protocolFees.token0, t0Info.decimals)}`)
             console.log(`  - ${t1Info.symbol.padEnd(8)}: ${formatAmount(protocolFees.token1, t1Info.decimals)}`)
           }
+        } catch (error) {
+          console.error(`Failed to fetch pool info. Pool might not exist.`)
+          return
+        }
 
+        try {
           const rewardState = await powfi.clmm.getPoolRewardState(poolId)
           if (rewardState.rewardInfos.some((r) => r.amount > 0n)) {
             console.log(`\nActive Rewards:`)
             const poolTokens = [t0Info, t1Info, rewardState.token2Info]
             for (let i = 0; i < rewardState.rewardInfos.length; i++) {
               const r = rewardState.rewardInfos[i]
-              if (r.amount > 0n) {
-                const token = poolTokens[i]
+              const token = poolTokens[i]
+              if (r.amount > 0n && token) {
                 const now = BigInt(Date.now())
                 const remaining = r.endTime > now ? r.endTime - now : 0n
                 console.log(
@@ -545,7 +550,7 @@ async function main() {
             }
           }
         } catch (error) {
-          console.error(`Failed to fetch pool info. Pool might not exist.`)
+          console.error('Failed to fetch pool rewards:', error)
         }
       } else {
         const priceMinVal = new Decimal(priceMinStr)

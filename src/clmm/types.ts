@@ -137,7 +137,7 @@ export interface ClmmRewardInfo {
 }
 
 export interface ClmmPoolRewardState {
-  token2Info: TokenInfo
+  token2Info?: TokenInfo
   rewardInfos: ClmmRewardInfo[]
 }
 
