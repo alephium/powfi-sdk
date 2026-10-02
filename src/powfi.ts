@@ -54,9 +54,11 @@ export class Powfi {
     this.clmm = new ClmmModule(this)
     this.token = new TokenModule(this)
     this.staking = new StakingModule(this)
+
+    this.setCurrentProviders()
   }
 
-  /** Create a new Powfi SDK instance with the given network and signer configuration. */
+  /** Create a new Powfi SDK instance and register its providers as the global `web3` defaults. */
   static load(config: PowfiLoadParams): Powfi {
     return new Powfi(config)
   }

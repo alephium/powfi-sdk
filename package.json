@@ -55,11 +55,14 @@
   },
   "dependencies": {
     "@alephium/token-list": "0.0.20",
-    "@alephium/web3": "3.0.3",
     "bignumber.js": "^10.0.2",
     "decimal.js": "^10.6.0"
   },
+  "peerDependencies": {
+    "@alephium/web3": "^3.0.3"
+  },
   "devDependencies": {
+    "@alephium/web3": "3.0.3",
     "@alephium/web3-test": "3.0.3",
     "@alephium/web3-wallet": "3.0.3",
     "@types/node": "20",
