@@ -43,7 +43,7 @@ describe('CLMM Managing Positions', () => {
     const beforePool = await getBalances(pool.address, tokenIds)
     const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, 0n)
+    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT)
 
     const afterLp = await getBalances(lpAddr, tokenIds)
     const afterPool = await getBalances(pool.address, tokenIds)
@@ -81,7 +81,7 @@ describe('CLMM Managing Positions', () => {
     const beforePool = await getBalances(pool.address, tokenIds)
     const beforeState = await pool.fetchState()
 
-    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT, 0n)
+    await fixture.collectTokens(lp, configIndex, tickLower, tickUpper, UNLIMITED_AMOUNT, UNLIMITED_AMOUNT)
 
     const afterLp = await getBalances(lpAddr, tokenIds)
     const afterPool = await getBalances(pool.address, tokenIds)

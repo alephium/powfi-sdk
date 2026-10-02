@@ -450,8 +450,7 @@ export class Fixture {
     tickLower: bigint,
     tickUpper: bigint,
     amount0: bigint,
-    amount1: bigint,
-    liquidity: bigint = 0n
+    amount1: bigint
   ): Promise<{ positionId: string; result: SignExecuteScriptTxResult }> {
     const lpAddress = (await lp.getSelectedAccount()).address
     this.powfi.signer = lp
@@ -463,7 +462,6 @@ export class Fixture {
       recipient: lpAddress,
       tickLower,
       tickUpper,
-      liquidity,
       amount0Max: amount0,
       amount1Max: amount1
     })
