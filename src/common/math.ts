@@ -33,6 +33,11 @@ export class MathUtil {
     return x0
   }
 
+  /** Absolute value of a bigint. */
+  static abs(value: bigint): bigint {
+    return value < 0n ? -value : value
+  }
+
   /** Floor division that rounds towards negative infinity (Alephium convention). */
   static alphDiv(a: bigint, b: bigint): bigint {
     const result = a / b

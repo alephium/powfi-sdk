@@ -36,20 +36,22 @@ export class PoolUtils {
     let amountOut = 0n
     let feeAmount = 0n
     let sqrtPriceNextX96 = 0n
+    // Compute the partial-fill price only when the step stops before its target, as the contract does.
+    // If the remaining amount exceeds what this range can absorb, the price moves to the target.
+    // We also avoid computing price for a range with zero liquidity which would divide by zero.
     if (exactIn) {
       amountIn = -ClmmLiquidityUtils.getAmountDelta(sqrtPriceTargetX96, sqrtPriceX96, -liquidity, zeroForOne)
       const amountRemainingLessFee = MathUtil.divFloor(amount * (Pool.consts.MAX_PIPS - feePips), Pool.consts.MAX_PIPS)
-      const sqrtPriceRealTargetX96 = TickUtils.getNextSqrtPrice(
-        sqrtPriceX96,
-        liquidity,
-        amountRemainingLessFee,
-        zeroForOne
-      )
-      sqrtPriceNextX96 = amountRemainingLessFee >= amountIn ? sqrtPriceTargetX96 : sqrtPriceRealTargetX96
+      sqrtPriceNextX96 =
+        amountRemainingLessFee >= amountIn
+          ? sqrtPriceTargetX96
+          : TickUtils.getNextSqrtPrice(sqrtPriceX96, liquidity, amountRemainingLessFee, zeroForOne)
     } else {
       amountOut = ClmmLiquidityUtils.getAmountDelta(sqrtPriceTargetX96, sqrtPriceX96, liquidity, !zeroForOne)
-      const sqrtPriceRealTargetX96 = TickUtils.getNextSqrtPrice(sqrtPriceX96, liquidity, amount, !zeroForOne)
-      sqrtPriceNextX96 = -amount >= amountOut ? sqrtPriceTargetX96 : sqrtPriceRealTargetX96
+      sqrtPriceNextX96 =
+        -amount >= amountOut
+          ? sqrtPriceTargetX96
+          : TickUtils.getNextSqrtPrice(sqrtPriceX96, liquidity, amount, !zeroForOne)
     }
     const max = sqrtPriceTargetX96 == sqrtPriceNextX96
     if (zeroForOne) {

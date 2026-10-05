@@ -70,6 +70,19 @@ describe('PoolUtils', () => {
     expect(amountOut).toBe(expectedAmountOut)
   })
 
+  it.each([
+    { name: 'exact-in zeroForOne', start: 0n, target: -100n, amount: 1000n },
+    { name: 'exact-in zeroForOne=false', start: -100n, target: 0n, amount: 1000n },
+    { name: 'exact-out zeroForOne', start: 0n, target: -100n, amount: -1000n },
+    { name: 'exact-out zeroForOne=false', start: -100n, target: 0n, amount: -1000n }
+  ])('computeSwapStep $name crosses a range with zero liquidity without swapping', ({ start, target, amount }) => {
+    const sqrtTarget = TickUtils.getSqrtRatioAtTick(target)
+
+    const step = PoolUtils.computeSwapStep(TickUtils.getSqrtRatioAtTick(start), sqrtTarget, 0n, amount, 3000n)
+
+    expect(step).toEqual([sqrtTarget, 0n, 0n, 0n])
+  })
+
   it('offlineSwap aggregates computeSwapStep results across rows', () => {
     const baseSqrtPriceX96 = 25359128950929096498230469618n
     const sqrtStart = 25054144837504793118641380156n

@@ -63,6 +63,15 @@ describe('Math Functions', () => {
     })
   })
 
+  describe('abs', () => {
+    it('returns the magnitude of negative, zero and positive values', () => {
+      expect(MathUtil.abs(-5n)).toEqual(5n)
+      expect(MathUtil.abs(0n)).toEqual(0n)
+      expect(MathUtil.abs(5n)).toEqual(5n)
+      expect(MathUtil.abs(-(2n ** 255n))).toEqual(2n ** 255n)
+    })
+  })
+
   describe('div', () => {
     const floorCases: Array<[bigint, bigint, bigint]> = [
       [10n, 3n, 3n],
