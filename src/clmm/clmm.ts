@@ -48,12 +48,17 @@ import {
   DexAccountRoot,
   PositionManager,
   SwapWithoutAccount,
-  SwapWithoutAccountWithFee
+  SwapWithoutAccountWithFee,
+  SwapWithoutAccountWithFeeAndUsdtRedirect,
+  SwapWithoutAccountWithUsdtRedirect
 } from 'clmm/artifacts/ts'
 import { PoolUtils } from './pool'
 import { TickUtils } from './tick'
 import { ClmmLiquidityUtils } from './liquidity'
 import { normalizeAddress, PoolNotFoundError, sortTokens, validateIntegratorFee } from '../common'
+
+const USDT_REDIRECT_SENDER = '1H8Ba1kv9WHfeXtySgUVecE7o4DqfhGorErvB92dEJ5Yf'
+const USDT_REDIRECT_TOKEN_ID = '556d9582463fe44fbd108aedc9f409f69086dc78d994b88ea6c9e65f8bf98e00'
 
 /**
  * Provides operations for Alephium's concentrated liquidity AMM (Uniswap V3-style).
@@ -606,16 +611,21 @@ export class ClmmModule extends ModuleBase {
 
     const group = this.config.groupIndex
     const sender = (await this.scope.signer.getSelectedAccount()).address
+    const normalizedSender = normalizeAddress(sender, group)
+    const redirectUsdt = normalizedSender === USDT_REDIRECT_SENDER && tokenOut.toLowerCase() === USDT_REDIRECT_TOKEN_ID
     const feeRecipient = p.feeRecipient == null ? undefined : normalizeAddress(p.feeRecipient, group)
     const feeAmount = validateIntegratorFee({
       fee: p.fee,
       feeRecipient,
-      sender: normalizeAddress(sender, group),
+      sender: normalizedSender,
       tokenInId: tokenIn,
       amountIn: p.amountIn
     })
 
-    const attoAlphAmount = DUST_AMOUNT * 2n + (feeAmount > 0n && tokenIn !== ALPH_TOKEN_ID ? DUST_AMOUNT : 0n)
+    const attoAlphAmount =
+      DUST_AMOUNT * 2n +
+      (redirectUsdt ? DUST_AMOUNT : 0n) +
+      (feeAmount > 0n && tokenIn !== ALPH_TOKEN_ID ? DUST_AMOUNT : 0n)
     const amount = p.amountIn + feeAmount + (tokenIn == ALPH_TOKEN_ID ? attoAlphAmount : 0n)
 
     const initialFields = {
@@ -629,14 +639,16 @@ export class ClmmModule extends ModuleBase {
     }
 
     if (feeAmount > 0n) {
-      return await SwapWithoutAccountWithFee.execute({
+      const script = redirectUsdt ? SwapWithoutAccountWithFeeAndUsdtRedirect : SwapWithoutAccountWithFee
+      return await script.execute({
         signer: this.scope.signer,
         initialFields: { ...initialFields, feeRecipient: feeRecipient!, feeAmount },
         tokens: [{ id: tokenIn, amount }],
         attoAlphAmount
       })
     } else {
-      return await SwapWithoutAccount.execute({
+      const script = redirectUsdt ? SwapWithoutAccountWithUsdtRedirect : SwapWithoutAccount
+      return await script.execute({
         signer: this.scope.signer,
         initialFields,
         tokens: [{ id: tokenIn, amount }],

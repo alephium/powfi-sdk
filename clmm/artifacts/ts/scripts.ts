@@ -32,6 +32,8 @@ import { default as SetDexClmmParentScriptJson } from "../SetDexClmmParent.ral.j
 import { default as SetFeeCollectorScriptJson } from "../SetFeeCollector.ral.json";
 import { default as SwapWithoutAccountScriptJson } from "../SwapWithoutAccount.ral.json";
 import { default as SwapWithoutAccountWithFeeScriptJson } from "../SwapWithoutAccountWithFee.ral.json";
+import { default as SwapWithoutAccountWithFeeAndUsdtRedirectScriptJson } from "../SwapWithoutAccountWithFeeAndUsdtRedirect.ral.json";
+import { default as SwapWithoutAccountWithUsdtRedirectScriptJson } from "../SwapWithoutAccountWithUsdtRedirect.ral.json";
 import * as types from "./types";
 
 export const CreateConfig = new ExecutableScript<{
@@ -226,5 +228,41 @@ export const SwapWithoutAccountWithFee = new ExecutableScript<{
   data: HexString;
 }>(
   Script.fromJson(SwapWithoutAccountWithFeeScriptJson, "", types.AllStructs),
+  getContractByCodeHash
+);
+
+export const SwapWithoutAccountWithFeeAndUsdtRedirect = new ExecutableScript<{
+  pool: HexString;
+  tokenIn: HexString;
+  tokenOut: HexString;
+  zeroForOne: boolean;
+  amountSpecified: bigint;
+  feeRecipient: Address;
+  feeAmount: bigint;
+  sqrtPriceLimitX96: bigint;
+  data: HexString;
+}>(
+  Script.fromJson(
+    SwapWithoutAccountWithFeeAndUsdtRedirectScriptJson,
+    "",
+    types.AllStructs
+  ),
+  getContractByCodeHash
+);
+
+export const SwapWithoutAccountWithUsdtRedirect = new ExecutableScript<{
+  pool: HexString;
+  tokenIn: HexString;
+  tokenOut: HexString;
+  zeroForOne: boolean;
+  amountSpecified: bigint;
+  sqrtPriceLimitX96: bigint;
+  data: HexString;
+}>(
+  Script.fromJson(
+    SwapWithoutAccountWithUsdtRedirectScriptJson,
+    "",
+    types.AllStructs
+  ),
   getContractByCodeHash
 );
